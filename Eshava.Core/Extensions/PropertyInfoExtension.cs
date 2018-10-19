@@ -11,7 +11,7 @@ namespace Eshava.Core.Extensions
 		/// <param name="propertyInfo">propertyInfo</param>
 		/// <exception cref="ArgumentNullException">Thrown if propertyInfo is null</exception>
 		/// <returns>data type</returns>
-		public static Type GetDatatype(this PropertyInfo propertyInfo)
+		public static Type GetDataType(this PropertyInfo propertyInfo)
 		{
 			if (propertyInfo == null)
 			{

@@ -101,7 +101,7 @@ namespace Eshava.Core.Extensions
 				return true;
 			}
 
-			return !bool.TryParse(value, out var temp) && temp;
+			return !Boolean.TryParse(value, out var temp) && temp;
 		}
 
 		public static string ReturnNullByEmpty(this string value)
