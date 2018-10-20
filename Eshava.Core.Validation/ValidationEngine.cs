@@ -59,7 +59,17 @@ namespace Eshava.Core.Validation
 				}
 				else
 				{
-					results.AddRange(_validationMethods.Select(method => method(validationParameter)).ToList());
+					var validationMethodResult = _validationMethods.Select(method =>
+					{
+						validationParameter.DataType = modelType;
+
+						return method(validationParameter);
+					}).ToList();
+
+					if (validationMethodResult.Any())
+					{
+						results.AddRange(validationMethodResult);
+					}
 				}
 			}
 

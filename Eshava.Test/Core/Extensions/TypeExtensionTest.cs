@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Eshava.Core.Extensions;
 using Eshava.Test.Core.Models;
 using Eshava.Test.Core.Models.Interfaces;
@@ -110,7 +109,7 @@ namespace Eshava.Test.Core.Extensions
 			var result = source.IsDataTypeNullable();
 
 			// Assert
-			result.Should().BeTrue();
+			result.Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -123,7 +122,7 @@ namespace Eshava.Test.Core.Extensions
 			var result = source.IsDataTypeNullable();
 
 			// Assert
-			result.Should().BeTrue();
+			result.Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -136,7 +135,7 @@ namespace Eshava.Test.Core.Extensions
 			var result = source.IsDataTypeNullable();
 
 			// Assert
-			result.Should().BeTrue();
+			result.Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -175,7 +174,7 @@ namespace Eshava.Test.Core.Extensions
 			var result = source.IsDataTypeNullable();
 
 			// Assert
-			result.Should().BeTrue();
+			result.Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -188,7 +187,7 @@ namespace Eshava.Test.Core.Extensions
 			var result = source.IsDataTypeNullable();
 
 			// Assert
-			result.Should().BeTrue();
+			result.Should().BeFalse();
 		}
 
 		[TestMethod, ExpectedException(typeof(ArgumentNullException))]
@@ -262,9 +261,7 @@ namespace Eshava.Test.Core.Extensions
 			// Assert
 			result.Should().BeFalse();
 		}
-
-
-
+		
 		[TestMethod, ExpectedException(typeof(ArgumentNullException))]
 		public void CreateInstanceWithNullInputTest()
 		{

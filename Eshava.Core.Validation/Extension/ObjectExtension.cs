@@ -54,7 +54,7 @@ namespace Eshava.Core.Validation.Extension
 					{
 						if (propertyInfo.CanWrite)
 						{
-							IEnumerable<string> newEnumerable = elements.Cast<string>().Select(s => GetCleanedAndTruncatedString(propertyInfo, s)).ToList();
+							IEnumerable<string> newEnumerable = elements.Cast<string>().Select(s => GetCleanedAndTruncatedString(propertyInfo, s)).Where(s => s != null).ToList();
 							propertyInfo.SetValue(model, newEnumerable);
 						}
 					}

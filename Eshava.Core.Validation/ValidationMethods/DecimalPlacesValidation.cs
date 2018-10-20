@@ -17,9 +17,15 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			if (decimalPlaces.DecimalPlaces >= 0)
+			var decimalPlacesValue = decimalPlaces.DecimalPlaces;
+			if (decimalPlacesValue < 0)
 			{
-				var faktor = Convert.ToInt32(Math.Pow(10, decimalPlaces.DecimalPlaces));
+				decimalPlacesValue = 0;
+			}
+			
+			if (decimalPlacesValue >= 0)
+			{
+				var faktor = Convert.ToInt32(Math.Pow(10, decimalPlacesValue));
 
 				if (dataType == typeof(float) || dataType == typeof(double))
 				{

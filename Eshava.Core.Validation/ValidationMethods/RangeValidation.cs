@@ -76,7 +76,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (valueDouble < min || valueDouble > max)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRange)}->{parameters.PropertyInfo.Name}->Doublevalue" };
+				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRange)}->{parameters.PropertyInfo.Name}->DoubleValue" };
 			}
 
 			return new ValidationCheckResult { IsValid = true };

@@ -22,7 +22,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			var propertyInfoFrom = parameters.DataType.GetProperty(rangeBetween.PropertyNameFrom);
 			if (propertyInfoFrom == null)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->propertyInfoFromIsNull" };
+				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->PropertyInfoFromIsNull" };
 			}
 
 			//Determining the proterty for the end value of the value range
@@ -30,7 +30,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			var propertyInfoTo = parameters.DataType.GetProperty(rangeBetween.PropertyNameTo);
 			if (propertyInfoTo == null)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->propertyInfoToIsNull" };
+				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->PropertyInfoToIsNull" };
 			}
 
 			//Check whether the data types match
@@ -79,7 +79,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->CheckRangeValueDateTimeValue" };
+			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->{propertyInfoFrom.Name}-and-{propertyInfoTo.Name}->CheckRangeValueDateTimeValue" };
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenInteger(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -93,7 +93,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->CheckRangeValueIntegerValue" };
+			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->{propertyInfoFrom.Name}-and-{propertyInfoTo.Name}->CheckRangeValueIntegerValue" };
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenDecimal(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -107,7 +107,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->CheckRangeValueDecimalValue" };
+			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->{propertyInfoFrom.Name}-and-{propertyInfoTo.Name}->CheckRangeValueDecimalValue" };
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenDouble(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -121,7 +121,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->CheckRangeValueDoubleValue" };
+			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->{propertyInfoFrom.Name}-and-{propertyInfoTo.Name}->CheckRangeValueDoubleValue" };
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenFloat(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -135,7 +135,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->CheckRangeValueFloatValue" };
+			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->{propertyInfoFrom.Name}-and-{propertyInfoTo.Name}->CheckRangeValueFloatValue" };
 		}
 	}
 }

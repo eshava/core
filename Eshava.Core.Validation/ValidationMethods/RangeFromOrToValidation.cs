@@ -12,20 +12,19 @@ namespace Eshava.Core.Validation.ValidationMethods
 	{
 		public static ValidationCheckResult CheckRangeFrom(ValidationCheckParameters parameters)
 		{
-			return CheckRangeFromOrTo<RangeFromAttribute>(parameters);
+			return CheckRangeFromOrTo<RangeFromAttribute>(parameters, false);
 		}
 
 		public static ValidationCheckResult CheckRangeTo(ValidationCheckParameters parameters)
 		{
-			return CheckRangeFromOrTo<RangeToAttribute>(parameters);
-
+			return CheckRangeFromOrTo<RangeToAttribute>(parameters, true);
 		}
 
-		private static ValidationCheckResult CheckRangeFromOrTo<T>(ValidationCheckParameters parameters, [CallerMemberName] string memberName = null) where T : AbstractRangeFromOrToAttribute
+		private static ValidationCheckResult CheckRangeFromOrTo<T>(ValidationCheckParameters parameters, bool invertProperties, [CallerMemberName] string memberName = null) where T : AbstractRangeFromOrToAttribute
 		{
 			var propertyInfoTarget = parameters.PropertyInfo;
 			var rangeSource = Attribute.GetCustomAttribute(propertyInfoTarget, typeof(T)) as AbstractRangeFromOrToAttribute;
-			parameters.DataType = parameters.PropertyInfo.GetDataType();
+			var dataType = parameters.PropertyInfo.GetDataType();
 
 			if (rangeSource == null)
 			{
@@ -50,15 +49,23 @@ namespace Eshava.Core.Validation.ValidationMethods
 				var dataTypeFrom = propertyInfoSource.PropertyType.GetDataType();
 
 				//Check whether the data types match
-				if (parameters.DataType != dataTypeFrom)
+				if (dataType != dataTypeFrom)
 				{
-					results.Add(new ValidationCheckResult { ValidationError = $"{memberName}->{propertyInfoTarget.Name}->DataTypesNotEqual" });
+					results.Add(new ValidationCheckResult { ValidationError = $"{memberName}->{propertyInfoTarget.Name}->{propertyInfoSource.Name}->DataTypesNotEqual" });
 
 					continue;
 				}
 
 				parameters.AllowNull = rangeSource.AllowNull;
-				results.Add(BaseRangeValidation.CheckRangeValue(parameters, propertyInfoSource, propertyInfoTarget));
+
+				if (invertProperties)
+				{
+					results.Add(BaseRangeValidation.CheckRangeValue(parameters, propertyInfoTarget, propertyInfoSource));
+				}
+				else
+				{
+					results.Add(BaseRangeValidation.CheckRangeValue(parameters, propertyInfoSource, propertyInfoTarget));
+				}
 			}
 
 			if (results.All(result => result.IsValid))

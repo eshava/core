@@ -66,7 +66,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 		}
 		public static ValidationCheckResult CheckUrl(ValidationCheckParameters parameters)
 		{
-			if (parameters.PropertyInfo.PropertyType == typeof(string))
+			if (parameters.PropertyInfo.PropertyType != typeof(string))
 			{
 				return new ValidationCheckResult { IsValid = true };
 			}
@@ -83,18 +83,18 @@ namespace Eshava.Core.Validation.ValidationMethods
 						return new ValidationCheckResult { ValidationError = $"{nameof(CheckUrl)}->{parameters.PropertyInfo.Name}->NoWellFormedUri" };
 					}
 
-					if (!valueString.StartsWith("http://") || !valueString.StartsWith("https://"))
+					if (!valueString.StartsWith("http://") && !valueString.StartsWith("https://"))
 					{
 						valueString = "http://" + valueString;
 					}
 
-					var IsValid = Uri.TryCreate(valueString, UriKind.Absolute, out var outputUri) &&
+					var isValid = Uri.TryCreate(valueString, UriKind.Absolute, out var outputUri) &&
 								  outputUri.Host.Replace("www.", "").Split('.').Length > 1 &&
 								  outputUri.HostNameType == UriHostNameType.Dns &&
 								  outputUri.Host.Length > outputUri.Host.LastIndexOf(".", StringComparison.Ordinal) + 1 &&
 								  255 >= valueString.Length;
 
-					if (!IsValid)
+					if (!isValid)
 					{
 						return new ValidationCheckResult { ValidationError = $"{nameof(CheckUrl)}->{parameters.PropertyInfo.Name}->NoWellFormedUri" };
 					}

@@ -62,12 +62,7 @@ namespace Eshava.Core.Extensions
 				throw new ArgumentNullException(nameof(type));
 			}
 
-			var isString = type == typeof(string);
-			var isDateTime = type == typeof(DateTime);
-			var hasTypeDefinitionNullable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
-			var hasTypeDefinitionIEnumerable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>);
-
-			return type.IsClass || isString || isDateTime || hasTypeDefinitionNullable || hasTypeDefinitionIEnumerable;
+			return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
 		}
 
 		/// <summary>

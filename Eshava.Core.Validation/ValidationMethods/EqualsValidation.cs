@@ -62,13 +62,13 @@ namespace Eshava.Core.Validation.ValidationMethods
 			{
 				if (Equals(valueString, valueStringEquals) && !Equals(valueString, defaultValue))
 				{
-					return GetErrorResult(parameters, "NotEqualsStringValue");
+					return GetErrorResult(parameters, $"{propertyInfoEquals.Name}->NotEqualsStringValue");
 				}
 			}
 			else if (parameters.NotEquals && Equals(valueString, valueStringEquals) ||
 					 !parameters.NotEquals && !Equals(valueString, valueStringEquals))
 			{
-				return GetErrorResult(parameters, "EqualsOrNotEqualsStringValue");
+				return GetErrorResult(parameters, $"{propertyInfoEquals.Name}->EqualsOrNotEqualsStringValue");
 			}
 
 			return new ValidationCheckResult { IsValid = true };
@@ -80,13 +80,13 @@ namespace Eshava.Core.Validation.ValidationMethods
 			{
 				if (Equals(parameters.PropertyValue, propertyInfoEquals.GetValue(parameters.Model)) && !Equals(parameters.PropertyValue, defaultValue))
 				{
-					return GetErrorResult(parameters, "NotEqualsUnknownDataType");
+					return GetErrorResult(parameters, $"{propertyInfoEquals.Name}->EqualsAndNotEqualToDefault");
 				}
 			}
 			else if (parameters.NotEquals && Equals(parameters.PropertyValue, propertyInfoEquals.GetValue(parameters.Model)) ||
 					 !parameters.NotEquals && !Equals(parameters.PropertyValue, propertyInfoEquals.GetValue(parameters.Model)))
 			{
-				return GetErrorResult(parameters, "EqualsOrNotEqualsUnknownDataType");
+				return GetErrorResult(parameters, $"{propertyInfoEquals.Name}->EqualsOrNotEquals");
 			}
 
 			return new ValidationCheckResult { IsValid = true };
