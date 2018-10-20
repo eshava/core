@@ -5,7 +5,9 @@ VisualStudioVersion = 15.0.28010.2041
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Core", "Eshava.Core\Eshava.Core.csproj", "{CF242659-86E2-479E-B1F0-6F34D1FBE86F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Core.Validation", "Eshava.Core.Validation\Eshava.Core.Validation.csproj", "{354D32B8-16C2-44B7-A8F8-9B53B51E38CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Core.Validation", "Eshava.Core.Validation\Eshava.Core.Validation.csproj", "{354D32B8-16C2-44B7-A8F8-9B53B51E38CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Test", "Eshava.Test\Eshava.Test.csproj", "{DF7E4999-03C7-4508-B76A-DEEFF009E635}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{354D32B8-16C2-44B7-A8F8-9B53B51E38CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{354D32B8-16C2-44B7-A8F8-9B53B51E38CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{354D32B8-16C2-44B7-A8F8-9B53B51E38CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF7E4999-03C7-4508-B76A-DEEFF009E635}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF7E4999-03C7-4508-B76A-DEEFF009E635}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF7E4999-03C7-4508-B76A-DEEFF009E635}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF7E4999-03C7-4508-B76A-DEEFF009E635}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

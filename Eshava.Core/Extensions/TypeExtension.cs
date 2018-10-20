@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Eshava.Core.Extensions
@@ -61,7 +62,12 @@ namespace Eshava.Core.Extensions
 				throw new ArgumentNullException(nameof(type));
 			}
 
-			return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+			var isString = type == typeof(string);
+			var isDateTime = type == typeof(DateTime);
+			var hasTypeDefinitionNullable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+			var hasTypeDefinitionIEnumerable = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>);
+
+			return type.IsClass || isString || isDateTime || hasTypeDefinitionNullable || hasTypeDefinitionIEnumerable;
 		}
 
 		/// <summary>
@@ -92,6 +98,11 @@ namespace Eshava.Core.Extensions
 			if (type == null)
 			{
 				throw new ArgumentNullException(nameof(type));
+			}
+
+			if (interfaceType == null)
+			{
+				throw new ArgumentNullException(nameof(interfaceType));
 			}
 
 			return type.GetInterfaces().Any(t => t == interfaceType);

@@ -6,7 +6,7 @@ namespace Eshava.Core.Extensions
 {
 	public static class ObjectExtension
 	{
-		public static object ReplaceEmptyToNull(this object model)
+		public static object ReplaceEmptyStringsToNull(this object model)
 		{
 			if (model == null)
 			{
@@ -16,7 +16,7 @@ namespace Eshava.Core.Extensions
 			//Go through all properties and check them automatically
 			foreach (var propertyInfo in model.GetType().GetProperties())
 			{
-				if (propertyInfo.CanRead)
+				if (!propertyInfo.CanRead)
 				{
 					continue;
 				}
@@ -32,14 +32,14 @@ namespace Eshava.Core.Extensions
 				else if (propertyInfo.PropertyType.IsClass || propertyInfo.PropertyType.ImplementsIEnumerable())
 				{
 					var subModel = propertyInfo.GetValue(model);
-					model.ReplaceEmptyToNull(subModel, propertyInfo);
+					model.ReplaceEmptyStringsToNull(subModel, propertyInfo);
 				}
 			}
 
 			return model;
 		}
 
-		private static void ReplaceEmptyToNull(this object model, object propertyValue, PropertyInfo propertyInfo)
+		private static void ReplaceEmptyStringsToNull(this object model, object propertyValue, PropertyInfo propertyInfo)
 		{
 			if (propertyValue == null)
 			{
@@ -59,7 +59,7 @@ namespace Eshava.Core.Extensions
 				{
 					if (propertyInfo.CanWrite)
 					{
-						var newValue = elements.Cast<string>().Select(value => value.ReturnNullByEmpty()).ToList();
+						var newValue = elements.Cast<string>().Where(value => value.ReturnNullByEmpty() != null).ToList();
 						propertyInfo.SetValue(model, newValue);
 					}
 				}
@@ -67,13 +67,13 @@ namespace Eshava.Core.Extensions
 				{
 					foreach (var element in elements)
 					{
-						ReplaceEmptyToNull(element);
+						ReplaceEmptyStringsToNull(element);
 					}
 				}
 			}
 			else
 			{
-				ReplaceEmptyToNull(propertyValue);
+				ReplaceEmptyStringsToNull(propertyValue);
 			}
 		}
 	}
