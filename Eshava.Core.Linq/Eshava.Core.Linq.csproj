@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageProjectUrl>https://github.com/eshava/core</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/eshava/core/blob/master/LICENSE</PackageLicenseUrl>
+    <Description>Collection of methods, classes and helpers to simplify recurring standard actions</Description>
+    <Authors>Eshava</Authors>
+    <Company>EshavaEshava</Company>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Eshava.Core\Eshava.Core.csproj" />
+  </ItemGroup>
+
+</Project>
