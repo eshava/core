@@ -9,10 +9,10 @@ namespace Eshava.Core.Linq.Enums
 	{
 		[EnumMember(Value = nameof(None))]
 		None = 0,
-		[EnumMember(Value = nameof(Equals))]
-		Equals = 1,
-		[EnumMember(Value = nameof(NotEquals))]
-		NotEquals = 2,
+		[EnumMember(Value = nameof(Equal))]
+		Equal = 1,
+		[EnumMember(Value = nameof(NotEqual))]
+		NotEqual = 2,
 		[EnumMember(Value = nameof(GreaterThan))]
 		GreaterThan = 3,
 		[EnumMember(Value = nameof(GreaterThanOrEqual))]

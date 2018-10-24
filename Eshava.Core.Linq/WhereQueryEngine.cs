@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -14,24 +15,33 @@ namespace Eshava.Core.Linq
 	public class WhereQueryEngine : IWhereQueryEngine
 	{
 		private static readonly Type _typeString = typeof(string);
-		private static readonly MethodInfo _methodInfoStringContains = _typeString.GetMethod("Contains", new[] { typeof(string) });
+		private static readonly Type _typeObject = typeof(object);
+		private static readonly Type _typeIList = typeof(IList);
+		private static readonly ConstantExpression _constantExpressionStringNull = Expression.Constant(null, _typeString);
+		private static readonly ConstantExpression _constantExpressionObjectNull = Expression.Constant(null, _typeObject);
+		private static readonly MethodInfo _methodInfoStringContains = _typeString.GetMethod("Contains", new[] { _typeString });
+		
 		private static readonly Dictionary<Type, Func<string, Type, CompareOperator, ConstantExpression>> _constantExpressions = new Dictionary<Type, Func<string, Type, CompareOperator, ConstantExpression>>
 		{
 			{ typeof(Guid), GetConstantGuid },
-			{ typeof(Guid?), GetConstantGuid },
 			{ typeof(string), GetConstantString },
 			{ typeof(bool), GetConstantBoolean },
-			{ typeof(bool?), GetConstantBoolean },
 			{ typeof(int), GetConstantInteger },
-			{ typeof(int?), GetConstantInteger },
 			{ typeof(decimal), GetConstantDecimal },
-			{ typeof(decimal?), GetConstantDecimal },
 			{ typeof(double), GetConstantDouble },
-			{ typeof(double?), GetConstantDouble },
 			{ typeof(float), GetConstantFloat },
-			{ typeof(float?), GetConstantFloat },
-			{ typeof(DateTime), GetConstantDateTime },
-			{ typeof(DateTime?), GetConstantDateTime }
+			{ typeof(DateTime), GetConstantDateTime }
+		};
+
+		private static readonly Dictionary<CompareOperator, Func<MemberExpression, ConstantExpression, Expression>> _compareOperatorExpressions = new Dictionary<CompareOperator, Func<MemberExpression, ConstantExpression, Expression>>
+		{
+			{ CompareOperator.Equal, Expression.Equal },
+			{ CompareOperator.NotEqual, Expression.NotEqual },
+			{ CompareOperator.GreaterThan, Expression.GreaterThan },
+			{ CompareOperator.GreaterThanOrEqual, Expression.GreaterThanOrEqual },
+			{ CompareOperator.LessThan, Expression.LessThan },
+			{ CompareOperator.LessThanOrEqual, Expression.LessThanOrEqual },
+			{ CompareOperator.Contains, GetContainsExpression },
 		};
 
 		/// <summary>
@@ -39,7 +49,7 @@ namespace Eshava.Core.Linq
 		/// </summary>
 		/// <remarks>
 		/// Global search term is only supported for string properties in the data type class <see cref="T">T</see>.
-		/// String properties in sub classes or enumerable string properties are not supported
+		/// String properties in sub classes or enumerable string properties are not supported.
 		/// </remarks>
 		/// <typeparam name="T">Class data type</typeparam>
 		/// <param name="queryParameters">queryParameters</param>
@@ -159,9 +169,13 @@ namespace Eshava.Core.Linq
 		{
 			MemberExpression memberExpression = null;
 
-			if (mappingExpression.Body is UnaryExpression expBody)
+			if (mappingExpression.Body is UnaryExpression expBodyMemberExpression && expBodyMemberExpression.Operand is MemberExpression)
 			{
-				memberExpression = expBody.Operand as MemberExpression;
+				memberExpression = (MemberExpression)expBodyMemberExpression.Operand;
+			}
+			else if (mappingExpression.Body is UnaryExpression expBodyBinaryExpression && expBodyBinaryExpression.Operand is BinaryExpression)
+			{
+				throw new NotSupportedException("Logical binary expressions are not supported");
 			}
 			else if (mappingExpression.Body is MemberExpression expression)
 			{
@@ -173,12 +187,18 @@ namespace Eshava.Core.Linq
 				return null;
 			}
 
+			var memberType = memberExpression.Type;
+			if (memberType.ImplementsIEnumerable())
+			{
+				memberType = memberType.GetDataTypeFromIEnumerable();
+			}
+
 			var data = new ExpressionDataContainer
 			{
 				Member = memberExpression,
 				Parameter = mappingExpression.Parameters.First(),
 				Operator = property.Operator,
-				ConstantValue = _constantExpressions[memberExpression.Type](property.SearchTerm, memberExpression.Type, property.Operator)
+				ConstantValue = _constantExpressions[memberType.GetDataType()](property.SearchTerm, memberType, property.Operator)
 			};
 
 			return GetConditionComparableByMemberExpression<T>(data);
@@ -192,12 +212,18 @@ namespace Eshava.Core.Linq
 				return null;
 			}
 
+			var propertyType = propertyInfo.PropertyType;
+			if (propertyInfo.PropertyType.ImplementsIEnumerable())
+			{
+				propertyType = propertyInfo.PropertyType.GetDataTypeFromIEnumerable();
+			}
+
 			var data = new ExpressionDataContainer
 			{
 				PropertyInfo = propertyInfo,
 				Parameter = parameterExpression,
 				Operator = property.Operator,
-				ConstantValue = _constantExpressions[propertyInfo.PropertyType](property.SearchTerm, propertyInfo.PropertyType, property.Operator)
+				ConstantValue = _constantExpressions[propertyType.GetDataType()](property.SearchTerm, propertyType, property.Operator)
 			};
 
 			return GetConditionComparableByProperty<T>(data);
@@ -237,7 +263,7 @@ namespace Eshava.Core.Linq
 
 		private static ConstantExpression GetConstantDecimal(string value, Type dataType, CompareOperator compareOperator)
 		{
-			if (!Decimal.TryParse(value, out var valueDecimal) || compareOperator == CompareOperator.None)
+			if (!Decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var valueDecimal) || compareOperator == CompareOperator.None)
 			{
 				return null;
 			}
@@ -247,7 +273,7 @@ namespace Eshava.Core.Linq
 
 		private static ConstantExpression GetConstantDouble(string value, Type dataType, CompareOperator compareOperator)
 		{
-			if (!Double.TryParse(value, out var valueDouble) || compareOperator == CompareOperator.None)
+			if (!Double.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var valueDouble) || compareOperator == CompareOperator.None)
 			{
 				return null;
 			}
@@ -257,7 +283,7 @@ namespace Eshava.Core.Linq
 
 		private static ConstantExpression GetConstantFloat(string value, Type dataType, CompareOperator compareOperator)
 		{
-			if (!Single.TryParse(value, out var valueFloat) || compareOperator == CompareOperator.None)
+			if (!Single.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var valueFloat) || compareOperator == CompareOperator.None)
 			{
 				return null;
 			}
@@ -267,7 +293,7 @@ namespace Eshava.Core.Linq
 
 		private static ConstantExpression GetConstantInteger(string value, Type dataType, CompareOperator compareOperator)
 		{
-			if (!Int32.TryParse(value, out var valueInt) || compareOperator == CompareOperator.None)
+			if (!Int32.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var valueInt) || compareOperator == CompareOperator.None)
 			{
 				return null;
 			}
@@ -294,42 +320,12 @@ namespace Eshava.Core.Linq
 
 		private Expression<Func<T, bool>> GetConditionComparableByMemberExpression<T>(ExpressionDataContainer data) where T : class
 		{
-			if (data.ConstantValue == null)
+			if (data.ConstantValue == null || !_compareOperatorExpressions.ContainsKey(data.Operator))
 			{
 				return null;
 			}
 
-			Expression expression = null;
-
-			switch (data.Operator)
-			{
-				case CompareOperator.Equals:
-					expression = Expression.Equal(data.Member, data.ConstantValue);
-					break;
-				case CompareOperator.NotEquals:
-					expression = Expression.NotEqual(data.Member, data.ConstantValue);
-					break;
-				case CompareOperator.GreaterThan:
-					expression = Expression.GreaterThan(data.Member, data.ConstantValue);
-					break;
-				case CompareOperator.GreaterThanOrEqual:
-					expression = Expression.GreaterThanOrEqual(data.Member, data.ConstantValue);
-					break;
-				case CompareOperator.LessThan:
-					expression = Expression.LessThan(data.Member, data.ConstantValue);
-					break;
-				case CompareOperator.LessThanOrEqual:
-					expression = Expression.LessThanOrEqual(data.Member, data.ConstantValue);
-					break;
-				case CompareOperator.Contains:
-					expression = Expression.Call(data.Member, _methodInfoStringContains, data.ConstantValue);
-					break;
-			}
-
-			if (expression == null)
-			{
-				return null;
-			}
+			var expression = _compareOperatorExpressions[data.Operator](data.Member, data.ConstantValue);
 
 			return Expression.Lambda<Func<T, bool>>(expression, data.Parameter);
 		}
@@ -367,6 +363,25 @@ namespace Eshava.Core.Linq
 			var previousVisitor = new ReplaceExpressionVisitor(condition.Parameters.First(), parameter);
 
 			return previousVisitor.Visit(condition.Body);
+		}
+		
+		private static Expression GetContainsExpression(MemberExpression member, ConstantExpression constant)
+		{
+			if (member.Type == _typeString)
+			{
+				return Expression.AndAlso(Expression.NotEqual(member, _constantExpressionStringNull), Expression.Call(member, _methodInfoStringContains, constant));
+			}
+
+			if (member.Type.ImplementsIEnumerable() && member.Type.ImplementsInterface(_typeIList))
+			{
+				var genericType = member.Type.GetDataTypeFromIEnumerable();
+				var nullCheckExpression = Expression.NotEqual(member, _constantExpressionObjectNull);
+				var enumerableContainsExpression = Expression.Call(member, member.Type.GetMethod("Contains", new[] { genericType }), constant);
+
+				return Expression.AndAlso(nullCheckExpression, enumerableContainsExpression);
+			}
+
+			throw new NotSupportedException("The data type of the property has to be of type string or must implement 'IList'");
 		}
 	}
 }

@@ -9,5 +9,6 @@ namespace Eshava.Test.Core.Models
 
 		[MaxLength(20)]
 		public string Chi { get; set; }
+		public int? Sigma { get; set; }
 	}
 }

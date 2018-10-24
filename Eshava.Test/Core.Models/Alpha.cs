@@ -97,10 +97,12 @@ namespace Eshava.Test.Core.Models
 		[Required]
 		[Range(0.25, 15.75)]
 		public float Ny { get; set; }
+		public float NyNullable { get; set; }
 
 		[DecimalPlaces(-2)]
 		[Range(-40.0, 70.0)]
 		public double Xi { get; set; }
+		public double XiNullable { get; set; }
 
 		[Range(1, 3)]
 		public Alphabet Omikron { get; set; }
@@ -161,5 +163,8 @@ namespace Eshava.Test.Core.Models
 		public int OmegaIntegerEqualTwo { get; set; }
 		[NotEqualsTo("OmegaIntegerEqualTwo")]
 		public int OmegaIntegerNotEqual { get; set; }
+
+		public bool StigmaOne { get; set; }
+		public bool? StigmaTwo { get; set; }
 	}
 }
