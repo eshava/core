@@ -12,7 +12,7 @@ using Eshava.Core.Linq.Models;
 
 namespace Eshava.Core.Linq
 {
-	public class WhereQueryEngine : IWhereQueryEngine
+	public class WhereQueryEngine : AbstractQueryEngine, IWhereQueryEngine
 	{
 		private static readonly Type _typeString = typeof(string);
 		private static readonly Type _typeObject = typeof(object);
@@ -167,20 +167,7 @@ namespace Eshava.Core.Linq
 
 		private Expression<Func<T, bool>> GetMappingCondition<T>(WhereQueryProperty property, Expression<Func<T, object>> mappingExpression, Type expectedDataType = null) where T : class
 		{
-			MemberExpression memberExpression = null;
-
-			if (mappingExpression.Body is UnaryExpression expBodyMemberExpression && expBodyMemberExpression.Operand is MemberExpression)
-			{
-				memberExpression = (MemberExpression)expBodyMemberExpression.Operand;
-			}
-			else if (mappingExpression.Body is UnaryExpression expBodyBinaryExpression && expBodyBinaryExpression.Operand is BinaryExpression)
-			{
-				throw new NotSupportedException("Logical binary expressions are not supported");
-			}
-			else if (mappingExpression.Body is MemberExpression expression)
-			{
-				memberExpression = expression;
-			}
+			var memberExpression = GetMemberExpression(mappingExpression);
 
 			if (memberExpression == null || (expectedDataType != null && memberExpression.Type != expectedDataType))
 			{

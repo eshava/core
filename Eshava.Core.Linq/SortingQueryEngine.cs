@@ -9,13 +9,13 @@ using Eshava.Core.Linq.Models;
 
 namespace Eshava.Core.Linq
 {
-	public class SortingQueryEngine : ISortingQueryEngine
+	public class SortingQueryEngine : AbstractQueryEngine, ISortingQueryEngine
 	{
 		public OrderByCondition BuildSortCondition<T>(SortOrder sortOrder, Expression<Func<T, object>> expression) where T : class
 		{
-			var member = GetMemberExpression(expression);
+			var member = GetMemberExpressionAndParameter(expression);
 
-			if (member.Expression != null)
+			if (member.Expression != null && sortOrder != SortOrder.None)
 			{
 				return new OrderByCondition { SortOrder = sortOrder, Member = member.Expression, Parameter = member.Parameter };
 			}
@@ -27,7 +27,7 @@ namespace Eshava.Core.Linq
 		{
 			var sortingConditions = new List<OrderByCondition>();
 
-			if (!(queryParameters.SortingQueryProperties?.Any() ?? false))
+			if (!(queryParameters?.SortingQueryProperties?.Any() ?? false))
 			{
 				return sortingConditions;
 			}
@@ -45,7 +45,7 @@ namespace Eshava.Core.Linq
 			{
 				if (mappings.ContainsKey(property.PropertyName))
 				{
-					var members = mappings[property.PropertyName].Select(GetMemberExpression).Where(m => m.Expression != null).ToList();
+					var members = mappings[property.PropertyName].Select(GetMemberExpressionAndParameter).Where(m => m.Expression != null).ToList();
 					members.ForEach(member => sortingConditions.Add(new OrderByCondition { SortOrder = property.SortOrder, Member = member.Expression, Parameter = member.Parameter }));
 				}
 				else
@@ -61,7 +61,7 @@ namespace Eshava.Core.Linq
 			return sortingConditions;
 		}
 
-		public IQueryable<T> ApplySorting<T>(IQueryable<T> query, List<OrderByCondition> conditions) where T : class
+		public IQueryable<T> ApplySorting<T>(IQueryable<T> query, IEnumerable<OrderByCondition> conditions) where T : class
 		{
 			if (conditions?.Any() ?? false)
 			{
@@ -100,7 +100,7 @@ namespace Eshava.Core.Linq
 			return AddOrderThenByDescending(query, condition.Member, condition.Parameter);
 		}
 
-		public IOrderedQueryable<T> AddOrderBy<T>(IQueryable<T> source, MemberExpression expression, ParameterExpression parameter) where T : class
+		private IOrderedQueryable<T> AddOrderBy<T>(IQueryable<T> source, MemberExpression expression, ParameterExpression parameter) where T : class
 		{
 			var dataTypeMappings = new Dictionary<Type, Func<IQueryable<T>, MemberExpression, ParameterExpression, IOrderedQueryable<T>>>
 			{
@@ -124,7 +124,7 @@ namespace Eshava.Core.Linq
 			return dataTypeMappings[expression.Type](source, expression, parameter);
 		}
 
-		public IOrderedQueryable<T> AddOrderByDescending<T>(IQueryable<T> source, MemberExpression expression, ParameterExpression parameter) where T : class
+		private IOrderedQueryable<T> AddOrderByDescending<T>(IQueryable<T> source, MemberExpression expression, ParameterExpression parameter) where T : class
 		{
 			var dataTypeMappings = new Dictionary<Type, Func<IQueryable<T>, MemberExpression, ParameterExpression, IOrderedQueryable<T>>>
 			{
@@ -148,7 +148,7 @@ namespace Eshava.Core.Linq
 			return dataTypeMappings[expression.Type](source, expression, parameter);
 		}
 
-		public IOrderedQueryable<T> AddOrderThenBy<T>(IOrderedQueryable<T> source, MemberExpression expression, ParameterExpression parameter) where T : class
+		private IOrderedQueryable<T> AddOrderThenBy<T>(IOrderedQueryable<T> source, MemberExpression expression, ParameterExpression parameter) where T : class
 		{
 			var dataTypeMappings = new Dictionary<Type, Func<IOrderedQueryable<T>, MemberExpression, ParameterExpression, IOrderedQueryable<T>>>
 			{
@@ -172,7 +172,7 @@ namespace Eshava.Core.Linq
 			return dataTypeMappings[expression.Type](source, expression, parameter);
 		}
 
-		public IOrderedQueryable<T> AddOrderThenByDescending<T>(IOrderedQueryable<T> source, MemberExpression expression, ParameterExpression parameter) where T : class
+		private IOrderedQueryable<T> AddOrderThenByDescending<T>(IOrderedQueryable<T> source, MemberExpression expression, ParameterExpression parameter) where T : class
 		{
 			var dataTypeMappings = new Dictionary<Type, Func<IOrderedQueryable<T>, MemberExpression, ParameterExpression, IOrderedQueryable<T>>>
 			{
@@ -196,20 +196,11 @@ namespace Eshava.Core.Linq
 			return dataTypeMappings[expression.Type](source, expression, parameter);
 		}
 
-		private (MemberExpression Expression, ParameterExpression Parameter) GetMemberExpression<T>(Expression<Func<T, object>> sortingExpression) where T : class
+		private (MemberExpression Expression, ParameterExpression Parameter) GetMemberExpressionAndParameter<T>(Expression<Func<T, object>> sortingExpression) where T : class
 		{
-			MemberExpression memberExp = null;
-
-			if (sortingExpression.Body is UnaryExpression expBody)
-			{
-				memberExp = expBody.Operand as MemberExpression;
-			}
-			else if (sortingExpression.Body is MemberExpression expression)
-			{
-				memberExp = expression;
-			}
-
-			return (memberExp, sortingExpression.Parameters.First());
+			var memberExpression = GetMemberExpression(sortingExpression);
+			
+			return (memberExpression, sortingExpression.Parameters.First());
 		}
 
 		private MemberExpression GetProperySortCondition(string propertyName, IEnumerable<PropertyInfo> propertyInfos, ParameterExpression parameterExpression)
