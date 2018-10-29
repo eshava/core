@@ -14,6 +14,8 @@ namespace Eshava.Core.IO
 	{
 		private const string FILEEXTENSION = ".zip";
 
+		public string Type => "zip";
+
 		public IArchiveEngine CreateArchive(string sourceDirectoryName, string targetArchiveFullFileName, CompressionLevel compressionLevel = CompressionLevel.Fastest, bool includeBaseDirectory = false)
 		{
 			if (!targetArchiveFullFileName?.EndsWith(FILEEXTENSION) ?? false)

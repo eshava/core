@@ -8,6 +8,8 @@ namespace Eshava.Core.IO.Interfaces
 {
 	public interface IArchiveEngine
 	{
+		string Type { get; }
+
 		/// <summary>
 		/// Create an archive at the passed target path
 		/// </summary>
