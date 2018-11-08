@@ -11,6 +11,16 @@ Extension to encapsulate i/o actions
 ## core.linq
 Extension for dynamic creation of filter and sort queries based on IQueryable
 
+## core.security
+Extension to secure data worthy of protection
+
+* Checksum
+	* Fletcher's checksum
+* Cryptography
+	* Rijndael engine (symmetric)
+* Hash
+	* Password engine
+
 ## core.validation
 Extension for validation of objects based on default annotation attributes and additional custom annotation attributes
 

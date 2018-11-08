@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Eshava.Core.IO\Eshava.Core.IO.csproj" />
     <ProjectReference Include="..\Eshava.Core.Linq\Eshava.Core.Linq.csproj" />
+    <ProjectReference Include="..\Eshava.Core.Security\Eshava.Core.Security.csproj" />
     <ProjectReference Include="..\Eshava.Core.Validation\Eshava.Core.Validation.csproj" />
     <ProjectReference Include="..\Eshava.Core\Eshava.Core.csproj" />
   </ItemGroup>
