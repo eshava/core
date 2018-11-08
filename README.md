@@ -6,7 +6,8 @@ Extension to encapsulate i/o actions
 
 * Archive engine
     * Zip archive (System.IO.Compression.ZipFile)
-
+* File system engine
+	
 ## core.linq
 Extension for dynamic creation of filter and sort queries based on IQueryable
 

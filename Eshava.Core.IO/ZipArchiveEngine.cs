@@ -140,11 +140,11 @@ namespace Eshava.Core.IO
 			{
 				if (archiveFile.Exists)
 				{
-					File.Delete(fullArchiveName);
+					System.IO.File.Delete(fullArchiveName);
 				}
 				else if (archiveFile.Directory != null && !archiveFile.Directory.Exists)
 				{
-					Directory.CreateDirectory(archiveFile.Directory.FullName);
+					System.IO.Directory.CreateDirectory(archiveFile.Directory.FullName);
 				}
 			}
 			else if (zipArchiveMode == ZipArchiveMode.Update)

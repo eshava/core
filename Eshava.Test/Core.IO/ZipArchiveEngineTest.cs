@@ -56,7 +56,7 @@ namespace Eshava.Test.Core.IO
 			_classUnderTest.CreateArchive(sourcePath, archiveFullFileName, CompressionLevel.Optimal, false);
 
 			// Assert
-			File.Exists(archiveFullFileName).Should().BeTrue();
+			System.IO.File.Exists(archiveFullFileName).Should().BeTrue();
 
 			var fileList = new List<string>();
 			using (var archive = ZipFile.OpenRead(archiveFullFileName))
@@ -83,7 +83,7 @@ namespace Eshava.Test.Core.IO
 			_classUnderTest.CreateArchive(sourcePath, archiveFullFileName, CompressionLevel.Fastest, true);
 
 			// Assert
-			File.Exists(archiveFullFileName).Should().BeTrue();
+			System.IO.File.Exists(archiveFullFileName).Should().BeTrue();
 
 			var fileList = new List<string>();
 			using (var archive = ZipFile.OpenRead(archiveFullFileName))
@@ -107,14 +107,14 @@ namespace Eshava.Test.Core.IO
 			(var sourcePath, var targetPath) = PrepareTestBed(true, true);
 			var archiveFullFileName = Path.Combine(targetPath, "Archive.zip");
 
-			Directory.CreateDirectory(targetPath);
-			File.Move(Path.Combine(sourcePath, "Archive.zip"), Path.Combine(targetPath, "Archive.zip"));
+			System.IO.Directory.CreateDirectory(targetPath);
+			System.IO.File.Move(Path.Combine(sourcePath, "Archive.zip"), Path.Combine(targetPath, "Archive.zip"));
 
 			// Act
 			_classUnderTest.CreateArchive(targetPath, "Archive", Array.Empty<(string source, string target)>());
 
 			// Assert
-			File.Exists(archiveFullFileName).Should().BeTrue();
+			System.IO.File.Exists(archiveFullFileName).Should().BeTrue();
 
 			using (var archive = ZipFile.OpenRead(archiveFullFileName))
 			{
@@ -141,7 +141,7 @@ namespace Eshava.Test.Core.IO
 			_classUnderTest.CreateArchive(targetPath, "Archive", fullFileNames);
 
 			// Assert
-			File.Exists(archiveFullFileName).Should().BeTrue();
+			System.IO.File.Exists(archiveFullFileName).Should().BeTrue();
 
 			var fileList = new List<string>();
 			using (var archive = ZipFile.OpenRead(archiveFullFileName))
@@ -173,7 +173,7 @@ namespace Eshava.Test.Core.IO
 			_classUnderTest.CreateArchive(targetPath, "Archive", fullFileNames);
 
 			// Assert
-			File.Exists(archiveFullFileName).Should().BeTrue();
+			System.IO.File.Exists(archiveFullFileName).Should().BeTrue();
 
 			var fileList = new List<string>();
 			using (var archive = ZipFile.OpenRead(archiveFullFileName))
@@ -212,7 +212,7 @@ namespace Eshava.Test.Core.IO
 			_classUnderTest.CreateArchive(archiveFullFileName, fullFileNames);
 
 			// Assert
-			File.Exists(archiveFullFileName).Should().BeTrue();
+			System.IO.File.Exists(archiveFullFileName).Should().BeTrue();
 
 			var fileList = new List<string>();
 			using (var archive = ZipFile.OpenRead(archiveFullFileName))
@@ -257,7 +257,7 @@ namespace Eshava.Test.Core.IO
 			_classUnderTest.UpdateArchive(archiveFullFileName, fullFileNames);
 
 			// Assert
-			File.Exists(archiveFullFileName).Should().BeTrue();
+			System.IO.File.Exists(archiveFullFileName).Should().BeTrue();
 
 			var fileList = new List<string>();
 			using (var archive = ZipFile.OpenRead(archiveFullFileName))
@@ -299,8 +299,8 @@ namespace Eshava.Test.Core.IO
 			_classUnderTest.ExtractArchive(archiveFullFileName, targetPath);
 
 			// Assert
-			File.Exists(Path.Combine(targetPath, "Darkwing Duck.txt")).Should().BeTrue();
-			File.Exists(Path.Combine(targetPath, "QuackFu", "Manifest of QuackFu.txt")).Should().BeTrue();
+			System.IO.File.Exists(Path.Combine(targetPath, "Darkwing Duck.txt")).Should().BeTrue();
+			System.IO.File.Exists(Path.Combine(targetPath, "QuackFu", "Manifest of QuackFu.txt")).Should().BeTrue();
 
 			// Avoid mess
 			CleanUpTestBed(sourcePath, targetPath);
@@ -320,19 +320,19 @@ namespace Eshava.Test.Core.IO
 
 			if (copyFiles || copyArchive)
 			{
-				Directory.CreateDirectory(sourceDirectory);
+				System.IO.Directory.CreateDirectory(sourceDirectory);
 			}
 
 			if (copyFiles)
 			{
-				Directory.CreateDirectory(Path.Combine(sourceDirectory, "QuackFu"));
-				File.Copy(Path.Combine(Environment.CurrentDirectory, "Core.IO", "Input", "Darkwing Duck.txt"), Path.Combine(sourceDirectory, "Darkwing Duck.txt"));
-				File.Copy(Path.Combine(Environment.CurrentDirectory, "Core.IO", "Input", "QuackFu", "Manifest of QuackFu.txt"), Path.Combine(sourceDirectory, "QuackFu", "Manifest of QuackFu.txt"));
+				System.IO.Directory.CreateDirectory(Path.Combine(sourceDirectory, "QuackFu"));
+				System.IO.File.Copy(Path.Combine(Environment.CurrentDirectory, "Core.IO", "Input", "Darkwing Duck.txt"), Path.Combine(sourceDirectory, "Darkwing Duck.txt"));
+				System.IO.File.Copy(Path.Combine(Environment.CurrentDirectory, "Core.IO", "Input", "QuackFu", "Manifest of QuackFu.txt"), Path.Combine(sourceDirectory, "QuackFu", "Manifest of QuackFu.txt"));
 			}
 
 			if (copyArchive)
 			{
-				File.Copy(Path.Combine(Environment.CurrentDirectory, "Core.IO", "Input", "Archive.zip"), Path.Combine(sourceDirectory, "Archive.zip"));
+				System.IO.File.Copy(Path.Combine(Environment.CurrentDirectory, "Core.IO", "Input", "Archive.zip"), Path.Combine(sourceDirectory, "Archive.zip"));
 			}
 
 			return (sourceDirectory, targetDirectory);
@@ -373,22 +373,22 @@ namespace Eshava.Test.Core.IO
 
 		private void CleanUpTestBed(string sourceDirectoryPath, string targetDirectoryPath)
 		{
-			if (!sourceDirectoryPath.IsNullOrEmpty() && Directory.Exists(sourceDirectoryPath))
+			if (!sourceDirectoryPath.IsNullOrEmpty() && System.IO.Directory.Exists(sourceDirectoryPath))
 			{
-				Directory.Delete(sourceDirectoryPath, true);
+				System.IO.Directory.Delete(sourceDirectoryPath, true);
 			}
 
-			if (!targetDirectoryPath.IsNullOrEmpty() && Directory.Exists(targetDirectoryPath))
+			if (!targetDirectoryPath.IsNullOrEmpty() && System.IO.Directory.Exists(targetDirectoryPath))
 			{
-				Directory.Delete(targetDirectoryPath, true);
+				System.IO.Directory.Delete(targetDirectoryPath, true);
 			}
 		}
 
 		private void CleanUpTestBed()
 		{
-			foreach (var workspace in _workspaces.Where(Directory.Exists))
+			foreach (var workspace in _workspaces.Where(System.IO.Directory.Exists))
 			{
-				Directory.Delete(workspace, true);
+				System.IO.Directory.Delete(workspace, true);
 			}
 		}
 	}
