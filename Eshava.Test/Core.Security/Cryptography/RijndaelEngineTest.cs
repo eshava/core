@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 using Eshava.Core.Security.Cryptogrphy;
 using Eshava.Core.Security.Cryptogrphy.Models;
 using FluentAssertions;
@@ -46,11 +47,18 @@ namespace Eshava.Test.Core.Security.Cryptography
 		{
 			// Arrange
 			var input = "Darkwing Duck knows QuackFu";
+			var random = new Random();
 
 			// Act
 			(var iv, var key) = _classUnderTest.GenerateKeys(true);
 			var encrypted = _classUnderTest.Encrypt(input);
-			encrypted[0] = 1;
+			
+			encrypted[0] = Convert.ToByte(random.Next(255));
+			encrypted[1] = Convert.ToByte(random.Next(255));
+			encrypted[2] = Convert.ToByte(random.Next(255));
+			encrypted[3] = Convert.ToByte(random.Next(255));
+			encrypted[4] = Convert.ToByte(random.Next(255));
+
 			var decrypted = _classUnderTest.Decrypt(encrypted);
 
 			// Assert
@@ -69,11 +77,17 @@ namespace Eshava.Test.Core.Security.Cryptography
 		{
 			// Arrange
 			var input = "Darkwing Duck knows QuackFu";
+			var random = new Random();
 
 			// Act
 			(var iv, var key) = _classUnderTest.GenerateKeys(true);
 			var encrypted = _classUnderTest.Encrypt(input);
-			_settings.IV[0] = 1;
+			_settings.IV[0] = Convert.ToByte(random.Next(255));
+			_settings.IV[1] = Convert.ToByte(random.Next(255));
+			_settings.IV[2] = Convert.ToByte(random.Next(255));
+			_settings.IV[3] = Convert.ToByte(random.Next(255));
+			_settings.IV[4] = Convert.ToByte(random.Next(255));
+
 			var decrypted = _classUnderTest.Decrypt(encrypted);
 
 			// Assert
@@ -88,11 +102,16 @@ namespace Eshava.Test.Core.Security.Cryptography
 		{
 			// Arrange
 			var input = "Darkwing Duck knows QuackFu";
+			var random = new Random();
 
 			// Act
 			_classUnderTest.GenerateKeys(true);
 			var encrypted = _classUnderTest.Encrypt(input);
-			_settings.Key[1] = 1;
+			_settings.Key[1] = Convert.ToByte(random.Next(255));
+			_settings.Key[2] = Convert.ToByte(random.Next(255));
+			_settings.Key[3] = Convert.ToByte(random.Next(255));
+			_settings.Key[4] = Convert.ToByte(random.Next(255));
+			_settings.Key[5] = Convert.ToByte(random.Next(255));
 			_classUnderTest.Decrypt(encrypted);
 		}
 

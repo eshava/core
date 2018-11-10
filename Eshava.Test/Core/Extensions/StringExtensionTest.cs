@@ -88,25 +88,15 @@ namespace Eshava.Test.Core.Extensions
 		[TestMethod, ExpectedException(typeof(ArgumentNullException))]
 		public void CompressExceptionStringEmptyTest()
 		{
-			// Arrange
-			var uncompressed = "";
-
 			// Act
-			uncompressed.Compress();
-
-			// Assert
+			"".Compress();
 		}
 
 		[TestMethod, ExpectedException(typeof(ArgumentNullException))]
 		public void CompressExceptionStringNullTest()
 		{
-			// Arrange
-			string uncompressed = null;
-
 			// Act
-			uncompressed.Compress();
-
-			// Assert
+			((string)null).Compress();
 		}
 
 		[TestMethod]
@@ -140,11 +130,8 @@ namespace Eshava.Test.Core.Extensions
 		[TestMethod]
 		public void ReturnNullByEmptyWithNullInputTest()
 		{
-			// Arrange
-			string source = null;
-
 			// Act
-			var result = source.ReturnNullByEmpty();
+			var result = ((string)null).ReturnNullByEmpty();
 
 			// Assert
 			result.Should().BeNull();
@@ -163,41 +150,44 @@ namespace Eshava.Test.Core.Extensions
 			result.Should().Be(source);
 		}
 
-		[TestMethod]
-		public void ToBooleanTest()
+		[DataTestMethod]
+		[DataRow(null, false)]
+		[DataRow("", false)]
+		[DataRow("DarkwingDuck", false)]
+		[DataRow("wahr", false)]
+		[DataRow("falsch", false)]
+		[DataRow("True", true)]
+		[DataRow("False", false)]
+		[DataRow("true", true)]
+		[DataRow("false", false)]
+		[DataRow("1", true)]
+		[DataRow("0", false)]
+		[DataRow("-1", false)]
+		[DataRow("56", false)]
+		public void ToBooleanTest(string value, bool expectedValue)
 		{
 			// Act && Assert
-			((string)null).ToBoolean().Should().BeFalse();
-			"".ToBoolean().Should().BeFalse();
-			"DarkwingDuck".ToBoolean().Should().BeFalse();
-			"wahr".ToBoolean().Should().BeFalse();
-			"falsch".ToBoolean().Should().BeFalse();
-			"True".ToBoolean().Should().BeTrue();
-			"False".ToBoolean().Should().BeFalse();
-			"true".ToBoolean().Should().BeTrue();
-			"false".ToBoolean().Should().BeFalse();
-			"1".ToBoolean().Should().BeTrue();
-			"0".ToBoolean().Should().BeFalse();
-			"-1".ToBoolean().Should().BeFalse();
-			"56".ToBoolean().Should().BeFalse();
+			value.ToBoolean().Should().Be(expectedValue);
 		}
 
-		[TestMethod]
-		public void IsNullOrEmptyTest()
+		[DataTestMethod]
+		[DataRow(null, true)]
+		[DataRow("", true)]
+		[DataRow("DarkwingDuck", false)]
+		public void IsNullOrEmptyTest(string value, bool expectedValue)
 		{
 			// Act && Assert
-			((string)null).IsNullOrEmpty().Should().BeTrue();
-			"".IsNullOrEmpty().Should().BeTrue();
-			"DarkwingDuck".IsNullOrEmpty().Should().BeFalse();
+			value.IsNullOrEmpty().Should().Be(expectedValue);
 		}
 
-		[TestMethod]
-		public void SetValidDirectoryPathEndTest()
+		[DataTestMethod]
+		[DataRow("", @"\")]
+		[DataRow(@"C:\DarkwingDuck", @"C:\DarkwingDuck\")]
+		[DataRow(@"C:\DarkwingDuck\", @"C:\DarkwingDuck\")]
+		public void SetValidDirectoryPathEndTest(string value, string expectedValue)
 		{
 			// Act && Assert
-			"".SetValidDirectoryPathEnd().Should().Be("\\");
-			@"C:\DarkwingDuck".SetValidDirectoryPathEnd().Should().Be(@"C:\DarkwingDuck\");
-			@"C:\DarkwingDuck\".SetValidDirectoryPathEnd().Should().Be(@"C:\DarkwingDuck\");
+			value.SetValidDirectoryPathEnd().Should().Be(expectedValue);
 		}
 
 		[TestMethod, ExpectedException(typeof(NullReferenceException))]
@@ -223,11 +213,8 @@ namespace Eshava.Test.Core.Extensions
 		[TestMethod]
 		public void FromBase64WithEmptyStringTest()
 		{
-			// Arrange
-			var base64String = "";
-
 			// Act 
-			var result = base64String.FromBase64();
+			var result = "".FromBase64();
 
 			// Assert
 			result.Length.Should().Be(0);
@@ -236,11 +223,8 @@ namespace Eshava.Test.Core.Extensions
 		[TestMethod]
 		public void FromBase64WithNullStringTest()
 		{
-			// Arrange
-			string base64String = null;
-
 			// Act 
-			var result = base64String.FromBase64();
+			var result = ((string)null).FromBase64();
 
 			// Assert
 			result.Length.Should().Be(0);

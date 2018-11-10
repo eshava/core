@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Eshava.Core.Communication\Eshava.Core.Communication.csproj" />
     <ProjectReference Include="..\Eshava.Core.IO\Eshava.Core.IO.csproj" />
     <ProjectReference Include="..\Eshava.Core.Linq\Eshava.Core.Linq.csproj" />
     <ProjectReference Include="..\Eshava.Core.Security\Eshava.Core.Security.csproj" />

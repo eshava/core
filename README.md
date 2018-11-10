@@ -1,6 +1,16 @@
 # core
 Collection of methods, classes and helpers to simplify recurring standard actions
 
+## core.communication
+Extension to http, ftp and mail functionality
+
+* Ftp
+	* FtpClient based on System.Net.WebRequest
+* Http
+	* HttpClient based on System.Net.Http.HttpClient
+* Mail
+	* MailClient based on System.Net.Mail.SmtpClient
+
 ## core.io
 Extension to encapsulate i/o actions
 
