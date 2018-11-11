@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Security.Cryptography;
+using Eshava.Core.Security.Hash.Interfaces;
 
 namespace Eshava.Core.Security.Hash
 {
-	public sealed class PasswordAlgorithmEngine
+	public sealed class PasswordAlgorithmEngine : IPasswordAlgorithmEngine
 	{
 		private const int SALT_SIZE = 256;
 		private const int HASH_SIZE = 256;
