@@ -1,4 +1,4 @@
-﻿namespace Eshava.Core.Security.Cryptogrphy.Interfaces
+﻿namespace Eshava.Core.Security.Cryptography.Interfaces
 {
 	public interface ISymmetricCryptographyEngine
 	{
