@@ -7,14 +7,12 @@
     <Description>Collection of methods, classes and helpers to simplify recurring standard actions</Description>
     <Authors>Eshava</Authors>
     <Company>Eshava</Company>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Eshava.Core" Version="1.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Eshava.Core\Eshava.Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -8,10 +8,7 @@
     <Copyright></Copyright>
     <PackageLicenseUrl>https://github.com/eshava/core/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/eshava/core</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Eshava.Core\Eshava.Core.csproj" />
-  </ItemGroup>
 
 </Project>
