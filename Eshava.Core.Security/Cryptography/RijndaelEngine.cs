@@ -1,10 +1,10 @@
 ﻿using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using Eshava.Core.Security.Cryptogrphy.Interfaces;
-using Eshava.Core.Security.Cryptogrphy.Models;
+using Eshava.Core.Security.Cryptography.Interfaces;
+using Eshava.Core.Security.Cryptography.Models;
 
-namespace Eshava.Core.Security.Cryptogrphy
+namespace Eshava.Core.Security.Cryptography
 {
 	public class RijndaelEngine : ISymmetricCryptographyEngine
 	{

@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace Eshava.Core.Security.Cryptogrphy.Models
+namespace Eshava.Core.Security.Cryptography.Models
 {
 	public class SymmetricCryptographySettings
 	{

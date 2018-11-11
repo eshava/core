@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
-using Eshava.Core.Security.Cryptogrphy;
-using Eshava.Core.Security.Cryptogrphy.Models;
+using Eshava.Core.Security.Cryptography;
+using Eshava.Core.Security.Cryptography.Models;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
