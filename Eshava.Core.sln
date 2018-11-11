@@ -13,9 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Core.Linq", "Eshava.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Core.IO", "Eshava.Core.IO\Eshava.Core.IO.csproj", "{F0827D6F-4C5D-4506-9ECF-337990F51056}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Core.Security", "Eshava.Core.Security\Eshava.Core.Security.csproj", "{43EF304A-654E-406C-895F-29560C1B9F12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Core.Security", "Eshava.Core.Security\Eshava.Core.Security.csproj", "{43EF304A-654E-406C-895F-29560C1B9F12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Core.Communication", "Eshava.Core.Communication\Eshava.Core.Communication.csproj", "{4BFC7BEA-DA62-4C56-8BBE-C385B3A1790E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Core.Communication", "Eshava.Core.Communication\Eshava.Core.Communication.csproj", "{4BFC7BEA-DA62-4C56-8BBE-C385B3A1790E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

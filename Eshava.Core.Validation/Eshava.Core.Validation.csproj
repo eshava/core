@@ -8,11 +8,13 @@
 		<PackageProjectUrl>https://github.com/eshava/core</PackageProjectUrl>
 		<Description>Collection of methods, classes and helpers to simplify recurring standard actions</Description>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<Version>1.0.0.1</Version>
+		<FileVersion>1.0.0.1</FileVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
 	  <PackageReference Include="Eshava.Core" Version="1.0.0" />
-	  <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
+	  <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
 	</ItemGroup>
 
 </Project>
