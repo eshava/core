@@ -10,8 +10,8 @@
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Eshava.Core\Eshava.Core.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="Eshava.Core" Version="1.0.0" />
+	</ItemGroup>
 
 </Project>
