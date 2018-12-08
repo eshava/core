@@ -199,6 +199,74 @@ namespace Eshava.Test.Core.Linq
 		}
 
 		[TestMethod]
+		public void BuildQueryExpressionsLongPropertyTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new Alpha
+				{
+					Beta = 1,
+					Lambda = 4L,
+					LambdaNullable = 10L
+				},
+				new Alpha
+				{
+					Beta = 2,
+					Lambda = 6L,
+					LambdaNullable = 11L
+				},
+				new Alpha
+				{
+					Beta = 3,
+					Lambda = 6L,
+					LambdaNullable = 8L
+				},
+				new Alpha
+				{
+					Beta = 4,
+					Lambda = 6L,
+					LambdaNullable = 13L
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.GreaterThan,
+						PropertyName = nameof(Alpha.Lambda),
+						SearchTerm = "5"
+					},
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.LessThan,
+						PropertyName = nameof(Alpha.LambdaNullable),
+						SearchTerm = "12"
+					}
+				}
+			};
+
+			Expression<Func<Alpha, bool>> expectedResultLambda = p => p.Lambda > 5L;
+			Expression<Func<Alpha, bool>> expectedResultLambdaNullable = p => p.LambdaNullable < 12L;
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
+
+			// Assert
+			result.Should().HaveCount(2);
+			result.First().Should().BeEquivalentTo(expectedResultLambda);
+			result.Last().Should().BeEquivalentTo(expectedResultLambdaNullable);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Beta.Should().Be(2);
+			resultWhere.Last().Beta.Should().Be(3);
+		}
+
+		[TestMethod]
 		public void BuildQueryExpressionsDecimalPropertyTest()
 		{
 			// Arrange

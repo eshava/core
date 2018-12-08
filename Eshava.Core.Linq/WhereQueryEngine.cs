@@ -27,6 +27,7 @@ namespace Eshava.Core.Linq
 			{ typeof(string), GetConstantString },
 			{ typeof(bool), GetConstantBoolean },
 			{ typeof(int), GetConstantInteger },
+			{ typeof(long), GetConstantLong },
 			{ typeof(decimal), GetConstantDecimal },
 			{ typeof(double), GetConstantDouble },
 			{ typeof(float), GetConstantFloat },
@@ -286,6 +287,16 @@ namespace Eshava.Core.Linq
 			}
 
 			return Expression.Constant(valueInt, dataType);
+		}
+
+		private static ConstantExpression GetConstantLong(string value, Type dataType, CompareOperator compareOperator)
+		{
+			if (!Int64.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var valueLong) || compareOperator == CompareOperator.None)
+			{
+				return null;
+			}
+
+			return Expression.Constant(valueLong, dataType);
 		}
 
 		private static ConstantExpression GetConstantDateTime(string value, Type dataType, CompareOperator compareOperator)
