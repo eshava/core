@@ -8,6 +8,8 @@
     <Authors>Eshava</Authors>
     <Company>Eshava</Company>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Version>1.0.0.1</Version>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
