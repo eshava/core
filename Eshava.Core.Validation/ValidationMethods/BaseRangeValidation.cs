@@ -38,6 +38,11 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return CheckRangeValueInteger(parameters, propertyInfoFrom, propertyInfoTo);
 			}
 
+			if (datatypeFrom == typeof(long))
+			{
+				return CheckRangeValueLong(parameters, propertyInfoFrom, propertyInfoTo);
+			}
+
 			if (datatypeFrom == typeof(DateTime))
 			{
 				return CheckRangeValueDateTime(parameters, propertyInfoFrom, propertyInfoTo);
@@ -104,6 +109,21 @@ namespace Eshava.Core.Validation.ValidationMethods
 			}
 
 			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeValue)}->{propertyInfoFrom.Name}->{propertyInfoTo.Name}->CheckRangeValueIntegerValue" };
+		}
+
+		private static ValidationCheckResult CheckRangeValueLong(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
+		{
+			var valueFromObject = propertyInfoFrom.GetValue(parameters.Model);
+			var valueToObject = propertyInfoTo.GetValue(parameters.Model);
+			var valueFrom = valueFromObject == null ? (long?)null : Convert.ToInt64(valueFromObject);
+			var valueTo = valueToObject == null ? (long?)null : Convert.ToInt64(valueToObject);
+
+			if (CheckRangeValue(valueFrom, valueTo, parameters.AllowNull))
+			{
+				return new ValidationCheckResult { IsValid = true };
+			}
+
+			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeValue)}->{propertyInfoFrom.Name}->{propertyInfoTo.Name}->CheckRangeValueLongValue" };
 		}
 
 		private static ValidationCheckResult CheckRangeValueDateTime(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)

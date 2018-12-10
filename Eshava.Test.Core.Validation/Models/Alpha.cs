@@ -70,7 +70,14 @@ namespace Eshava.Test.Core.Validation.Models
 		[Required]
 		[Unique]
 		public int? LambdaNullable { get; set; }
-		
+
+		[Range(0, 15)]
+		public long LambdaLong { get; set; }
+
+		[Required]
+		[Unique]
+		public long? LambdaLongNullable { get; set; }
+
 		[DecimalPlaces(4)]
 		[Range(-40.5, 70.5)]
 		public decimal My { get; set; }
@@ -141,6 +148,13 @@ namespace Eshava.Test.Core.Validation.Models
 		[RangeBetween("OmegaIntegerFrom", "OmegaIntegerTo")]
 		public int OmegaInteger { get; set; }
 
+		[RangeTo("OmegaLongTo", false)]
+		public long OmegaLongFrom { get; set; }
+		[RangeFrom("OmegaLongFrom", false)]
+		public long OmegaLongTo { get; set; }
+		[RangeBetween("OmegaLongFrom", "OmegaLongTo")]
+		public long OmegaLong { get; set; }
+
 		[RangeTo("OmegaDoubleTo", false)]
 		public double OmegaDoubleFrom { get; set; }
 		[RangeFrom("OmegaDoubleFrom", false)]
@@ -161,6 +175,13 @@ namespace Eshava.Test.Core.Validation.Models
 		public int OmegaIntegerEqualTwo { get; set; }
 		[NotEqualsTo("OmegaIntegerEqualTwo")]
 		public int OmegaIntegerNotEqual { get; set; }
+
+		[EqualsTo("OmegaLongEqualTwo")]
+		public long OmegaLongEqualOne { get; set; }
+		[EqualsTo("OmegaLongEqualOne")]
+		public long OmegaLongEqualTwo { get; set; }
+		[NotEqualsTo("OmegaLongEqualTwo")]
+		public long OmegaLongNotEqual { get; set; }
 
 		public bool StigmaOne { get; set; }
 		public bool? StigmaTwo { get; set; }

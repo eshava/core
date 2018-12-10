@@ -60,6 +60,11 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return CheckRangeBetweenInteger(parameters, propertyInfoFrom, propertyInfoTo);
 			}
 
+			if (dataType == typeof(long))
+			{
+				return CheckRangeBetweenLong(parameters, propertyInfoFrom, propertyInfoTo);
+			}
+
 			if (dataType == typeof(DateTime))
 			{
 				return CheckRangeBetweenDateTime(parameters, propertyInfoFrom, propertyInfoTo);
@@ -94,6 +99,20 @@ namespace Eshava.Core.Validation.ValidationMethods
 			}
 
 			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->{propertyInfoFrom.Name}-and-{propertyInfoTo.Name}->CheckRangeValueIntegerValue" };
+		}
+
+		private static ValidationCheckResult CheckRangeBetweenLong(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
+		{
+			var value = parameters.PropertyValue as long? ?? 0;
+			var valueFrom = propertyInfoFrom.GetValue(parameters.Model) as long?;
+			var valueTo = propertyInfoTo.GetValue(parameters.Model) as long?;
+
+			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
+			{
+				return new ValidationCheckResult { IsValid = true };
+			}
+
+			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->{propertyInfoFrom.Name}-and-{propertyInfoTo.Name}->CheckRangeValueLongValue" };
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenDecimal(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
