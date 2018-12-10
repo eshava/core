@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Eshava.Core.Validation.Extension;
-using Eshava.Test.Core.Models;
+using Eshava.Test.Core.Validation.Models;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

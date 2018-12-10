@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using Eshava.Core.Linq;
 using Eshava.Core.Linq.Enums;
 using Eshava.Core.Linq.Models;
-using Eshava.Test.Core.Models;
+using Eshava.Test.Core.Linq.Models;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -183,6 +183,74 @@ namespace Eshava.Test.Core.Linq
 
 			Expression<Func<Alpha, bool>> expectedResultLambda = p => p.Lambda > 5;
 			Expression<Func<Alpha, bool>> expectedResultLambdaNullable = p => p.LambdaNullable < 12;
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
+
+			// Assert
+			result.Should().HaveCount(2);
+			result.First().Should().BeEquivalentTo(expectedResultLambda);
+			result.Last().Should().BeEquivalentTo(expectedResultLambdaNullable);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Beta.Should().Be(2);
+			resultWhere.Last().Beta.Should().Be(3);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsLongPropertyTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new Alpha
+				{
+					Beta = 1,
+					LambdaLong = 4L,
+					LambdaLongNullable = 10L
+				},
+				new Alpha
+				{
+					Beta = 2,
+					LambdaLong = 6L,
+					LambdaLongNullable = 11L
+				},
+				new Alpha
+				{
+					Beta = 3,
+					LambdaLong = 6L,
+					LambdaLongNullable = 8L
+				},
+				new Alpha
+				{
+					Beta = 4,
+					LambdaLong = 6L,
+					LambdaLongNullable = 13L
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.GreaterThan,
+						PropertyName = nameof(Alpha.LambdaLong),
+						SearchTerm = "5"
+					},
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.LessThan,
+						PropertyName = nameof(Alpha.LambdaLongNullable),
+						SearchTerm = "12"
+					}
+				}
+			};
+
+			Expression<Func<Alpha, bool>> expectedResultLambda = p => p.LambdaLong > 5L;
+			Expression<Func<Alpha, bool>> expectedResultLambdaNullable = p => p.LambdaLongNullable < 12L;
 
 			// Act
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);

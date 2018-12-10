@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Eshava.Core.Validation;
-using Eshava.Test.Core.Models;
+using Eshava.Test.Core.Validation.Models;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -48,12 +48,14 @@ namespace Eshava.Test.Core.Validation
 			expectedError.AppendLine("CheckEqualsToString->NotEquals=True->Delta->EpsilonTwo->EqualsOrNotEqualsStringValue");
 			expectedError.AppendLine("CheckEqualsToString->NotEquals=True->DeltaTwo->EpsilonTwo->NotEqualsStringValue");
 			expectedError.AppendLine("CheckRequired->LambdaNullable->ValueIsNull");
+			expectedError.AppendLine("CheckRequired->LambdaLongNullable->ValueIsNull");
 			expectedError.AppendLine("CheckRange->Ny->FloatValue");
 			expectedError.AppendLine("CheckRange->Omikron->IntegerValue");
 			expectedError.AppendLine("CheckEqualsToObject->NotEquals=True->Pi->Rho->EqualsAndNotEqualToDefault");
 			expectedError.AppendLine("CheckEqualsToObject->NotEquals=True->Rho->Pi->EqualsAndNotEqualToDefault");
 			expectedError.AppendLine("CheckRequired->Sigma->ValueIsNull");
-			expectedError.Append("CheckEqualsToObject->NotEquals=True->OmegaIntegerNotEqual->OmegaIntegerEqualTwo->EqualsOrNotEquals");
+			expectedError.AppendLine("CheckEqualsToObject->NotEquals=True->OmegaIntegerNotEqual->OmegaIntegerEqualTwo->EqualsOrNotEquals");
+			expectedError.Append("CheckEqualsToObject->NotEquals=True->OmegaLongNotEqual->OmegaLongEqualTwo->EqualsOrNotEquals");
 			result.ValidationError.Should().Be(expectedError.ToString());
 		}
 
@@ -68,6 +70,7 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
 				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
 				MyNullableOne = 0m,
 				MyNullableTwo = 2m,
 				MyNullableSix = 1m,
@@ -76,7 +79,8 @@ namespace Eshava.Test.Core.Validation
 				Pi = 2,
 				Rho = 3,
 				Sigma = new List<int> { 1 },
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -104,7 +108,8 @@ namespace Eshava.Test.Core.Validation
 				Rho = 3,
 				Tau = new Omega(),
 				TauIEnumerable = new List<Omega> { new Omega() },
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -116,6 +121,7 @@ namespace Eshava.Test.Core.Validation
 			var expectedError = new StringBuilder();
 			expectedError.AppendLine("CheckRequired->Gamma->StringValueIsNullOrEmpty");
 			expectedError.AppendLine("CheckRequired->LambdaNullable->ValueIsNull");
+			expectedError.AppendLine("CheckRequired->LambdaLongNullable->ValueIsNull");
 			expectedError.AppendLine("CheckRequired->Sigma->ValueIsNull");
 			expectedError.AppendLine("CheckRequired->Psi->ValueIsNull");
 			expectedError.Append("CheckRequired->Psi->ValueIsNull");
@@ -133,6 +139,7 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
 				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -140,7 +147,10 @@ namespace Eshava.Test.Core.Validation
 				Sigma = new List<int> { 1 },
 				OmegaIntegerEqualOne = 1,
 				OmegaIntegerEqualTwo = 2,
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongEqualOne = 1L,
+				OmegaLongEqualTwo = 2L,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -153,7 +163,9 @@ namespace Eshava.Test.Core.Validation
 			expectedError.AppendLine("CheckEqualsToString->NotEquals=False->Gamma->Delta->EqualsOrNotEqualsStringValue");
 			expectedError.AppendLine("CheckEqualsToString->NotEquals=False->Delta->Gamma->EqualsOrNotEqualsStringValue");
 			expectedError.AppendLine("CheckEqualsToObject->NotEquals=False->OmegaIntegerEqualOne->OmegaIntegerEqualTwo->EqualsOrNotEquals");
-			expectedError.Append("CheckEqualsToObject->NotEquals=False->OmegaIntegerEqualTwo->OmegaIntegerEqualOne->EqualsOrNotEquals");
+			expectedError.AppendLine("CheckEqualsToObject->NotEquals=False->OmegaIntegerEqualTwo->OmegaIntegerEqualOne->EqualsOrNotEquals");
+			expectedError.AppendLine("CheckEqualsToObject->NotEquals=False->OmegaLongEqualOne->OmegaLongEqualTwo->EqualsOrNotEquals");
+			expectedError.Append("CheckEqualsToObject->NotEquals=False->OmegaLongEqualTwo->OmegaLongEqualOne->EqualsOrNotEquals");
 			result.ValidationError.Should().Be(expectedError.ToString());
 		}
 
@@ -169,6 +181,7 @@ namespace Eshava.Test.Core.Validation
 				EpsilonTwo = "QuackFu",
 				DeltaTwo = "QuackFu",
 				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Sigma = new List<int> { 1 }
@@ -187,7 +200,8 @@ namespace Eshava.Test.Core.Validation
 			expectedError.AppendLine("CheckEqualsToString->NotEquals=True->DeltaTwo->EpsilonTwo->NotEqualsStringValue");
 			expectedError.AppendLine("CheckEqualsToObject->NotEquals=True->Pi->Rho->EqualsAndNotEqualToDefault");
 			expectedError.AppendLine("CheckEqualsToObject->NotEquals=True->Rho->Pi->EqualsAndNotEqualToDefault");
-			expectedError.Append("CheckEqualsToObject->NotEquals=True->OmegaIntegerNotEqual->OmegaIntegerEqualTwo->EqualsOrNotEquals");
+			expectedError.AppendLine("CheckEqualsToObject->NotEquals=True->OmegaIntegerNotEqual->OmegaIntegerEqualTwo->EqualsOrNotEquals");
+			expectedError.Append("CheckEqualsToObject->NotEquals=True->OmegaLongNotEqual->OmegaLongEqualTwo->EqualsOrNotEquals");
 			result.ValidationError.Should().Be(expectedError.ToString());
 		}
 
@@ -202,12 +216,14 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
 				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 7,
 				Rho = 7,
 				Sigma = new List<int> { 1 },
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -229,6 +245,7 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
 				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -237,7 +254,8 @@ namespace Eshava.Test.Core.Validation
 				Tau = new Omega { Psi = "Darkwing Duck" },
 				TauIEnumerable = new List<Omega> { new Omega { Psi = "Darkwing Duck" } },
 				Ypsilon = new List<string> { "Darkwing", "Duck" },
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -262,6 +280,7 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
 				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -270,7 +289,8 @@ namespace Eshava.Test.Core.Validation
 				Tau = new Omega { Chi = "Launchpad McQuack in action", Psi = "Darkwing Duck" },
 				TauIEnumerable = new List<Omega> { new Omega { Chi = "Launchpad McQuack in action", Psi = "Darkwing Duck" } },
 				Ypsilon = new List<string> { "Darkwing", "Launchpad McQuack in action" },
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -300,13 +320,16 @@ namespace Eshava.Test.Core.Validation
 				EpsilonTwo = "Alpha",
 				Lambda = -1,
 				LambdaNullable = 1,
+				LambdaLong = -1L,
+				LambdaLongNullable = 1L,
 				My = -40.5001m,
 				Ny = 0.24f,
 				Xi = -41,
 				Pi = 2,
 				Rho = 3,
 				Sigma = new List<int> { 1 },
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -317,6 +340,7 @@ namespace Eshava.Test.Core.Validation
 
 			var expectedError = new StringBuilder();
 			expectedError.AppendLine("CheckRange->Lambda->IntegerValue");
+			expectedError.AppendLine("CheckRange->LambdaLong->LongValue");
 			expectedError.AppendLine("CheckRange->My->DecimalValue");
 			expectedError.AppendLine("CheckRange->Ny->FloatValue");
 			expectedError.AppendLine("CheckRange->Xi->DoubleValue");
@@ -336,6 +360,8 @@ namespace Eshava.Test.Core.Validation
 				EpsilonTwo = "Alpha",
 				Lambda = -1,
 				LambdaNullable = 1,
+				LambdaLong = -1L,
+				LambdaLongNullable = 1L,
 				My = 70.5001m,
 				Ny = 15.76f,
 				Xi = 71,
@@ -343,7 +369,8 @@ namespace Eshava.Test.Core.Validation
 				Pi = 2,
 				Rho = 3,
 				Sigma = new List<int> { 1 },
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -354,6 +381,7 @@ namespace Eshava.Test.Core.Validation
 
 			var expectedError = new StringBuilder();
 			expectedError.AppendLine("CheckRange->Lambda->IntegerValue");
+			expectedError.AppendLine("CheckRange->LambdaLong->LongValue");
 			expectedError.AppendLine("CheckRange->My->DecimalValue");
 			expectedError.AppendLine("CheckRange->Ny->FloatValue");
 			expectedError.AppendLine("CheckRange->Xi->DoubleValue");
@@ -372,6 +400,7 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
 				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
 				My = 1.00001m,
 				Ny = 1,
 				Xi = 1.1,
@@ -379,7 +408,8 @@ namespace Eshava.Test.Core.Validation
 				Pi = 2,
 				Rho = 3,
 				Sigma = new List<int> { 1 },
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -405,6 +435,7 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
 				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
 				MyNullableOne = 1,
 				MyNullableTwo = 0,
 				Ny = 1,
@@ -412,7 +443,8 @@ namespace Eshava.Test.Core.Validation
 				Pi = 2,
 				Rho = 3,
 				Sigma = new List<int> { 1 },
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -438,6 +470,7 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
 				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
 				MyNullableThree = 1,
 				MyNullableFour = 0,
 				MyNullableFive = null,
@@ -446,7 +479,8 @@ namespace Eshava.Test.Core.Validation
 				Pi = 2,
 				Rho = 3,
 				Sigma = new List<int> { 1 },
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -468,6 +502,7 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
 				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
 				MyNullableThree = 1,
 				MyNullableFour = null,
 				MyNullableFive = 0,
@@ -476,7 +511,8 @@ namespace Eshava.Test.Core.Validation
 				Pi = 2,
 				Rho = 3,
 				Sigma = new List<int> { 1 },
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -502,6 +538,7 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
 				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
 				MyNullableOne = 0,
 				MyNullableTwo = 2,
 				MyNullableSix = -1,
@@ -516,13 +553,17 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerFrom = 0,
 				OmegaInteger = -1,
 				OmegaIntegerTo = 1,
+				OmegaLongFrom = 0L,
+				OmegaLong = -1L,
+				OmegaLongTo = 1L,
 				OmegaDoubleFrom = 0,
 				OmegaDouble = -1,
 				OmegaDoubleTo = 1,
 				OmegaDateTimeFrom  = DateTime.Today,
 				OmegaDateTime = DateTime.Today.AddDays(-1),
 				OmegaDateTimeTo = DateTime.Today.AddDays(1),
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -535,6 +576,7 @@ namespace Eshava.Test.Core.Validation
 			expectedError.AppendLine("CheckRangeBetween->MyNullableSix->MyNullableOne-and-MyNullableTwo->CheckRangeValueDecimalValue");
 			expectedError.AppendLine("CheckRangeBetween->OmegaFloat->OmegaFloatFrom-and-OmegaFloatTo->CheckRangeValueFloatValue");
 			expectedError.AppendLine("CheckRangeBetween->OmegaInteger->OmegaIntegerFrom-and-OmegaIntegerTo->CheckRangeValueIntegerValue");
+			expectedError.AppendLine("CheckRangeBetween->OmegaLong->OmegaLongFrom-and-OmegaLongTo->CheckRangeValueLongValue");
 			expectedError.AppendLine("CheckRangeBetween->OmegaDouble->OmegaDoubleFrom-and-OmegaDoubleTo->CheckRangeValueDoubleValue");
 			expectedError.Append("CheckRangeBetween->OmegaDateTime->OmegaDateTimeFrom-and-OmegaDateTimeTo->CheckRangeValueDateTimeValue");
 			result.ValidationError.Should().Be(expectedError.ToString());
@@ -551,6 +593,7 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
 				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
 				MyNullableOne = 0,
 				MyNullableTwo = 2,
 				MyNullableSix = 3,
@@ -565,13 +608,17 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerFrom = 0,
 				OmegaInteger = 2,
 				OmegaIntegerTo = 1,
+				OmegaLongFrom = 0L,
+				OmegaLong = 2L,
+				OmegaLongTo = 1L,
 				OmegaDoubleFrom = 0,
 				OmegaDouble = 2,
 				OmegaDoubleTo = 1,
 				OmegaDateTimeFrom = DateTime.Today,
 				OmegaDateTime = DateTime.Today.AddDays(2),
 				OmegaDateTimeTo = DateTime.Today.AddDays(1),
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -584,6 +631,7 @@ namespace Eshava.Test.Core.Validation
 			expectedError.AppendLine("CheckRangeBetween->MyNullableSix->MyNullableOne-and-MyNullableTwo->CheckRangeValueDecimalValue");
 			expectedError.AppendLine("CheckRangeBetween->OmegaFloat->OmegaFloatFrom-and-OmegaFloatTo->CheckRangeValueFloatValue");
 			expectedError.AppendLine("CheckRangeBetween->OmegaInteger->OmegaIntegerFrom-and-OmegaIntegerTo->CheckRangeValueIntegerValue");
+			expectedError.AppendLine("CheckRangeBetween->OmegaLong->OmegaLongFrom-and-OmegaLongTo->CheckRangeValueLongValue");
 			expectedError.AppendLine("CheckRangeBetween->OmegaDouble->OmegaDoubleFrom-and-OmegaDoubleTo->CheckRangeValueDoubleValue");
 			expectedError.Append("CheckRangeBetween->OmegaDateTime->OmegaDateTimeFrom-and-OmegaDateTimeTo->CheckRangeValueDateTimeValue");
 			result.ValidationError.Should().Be(expectedError.ToString());
@@ -609,12 +657,14 @@ namespace Eshava.Test.Core.Validation
 				DeltaUrl = url,
 				EpsilonTwo = "Alpha",
 				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
 				Rho = 3,
 				Sigma = new List<int> { 1 },
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act
@@ -644,12 +694,14 @@ namespace Eshava.Test.Core.Validation
 				DeltaMail = mailAddress,
 				EpsilonTwo = "Alpha",
 				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
 				Rho = 3,
 				Sigma = new List<int> { 1 },
-				OmegaIntegerNotEqual = 1
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L
 			};
 
 			// Act

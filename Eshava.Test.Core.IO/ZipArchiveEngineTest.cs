@@ -326,13 +326,13 @@ namespace Eshava.Test.Core.IO
 			if (copyFiles)
 			{
 				System.IO.Directory.CreateDirectory(Path.Combine(sourceDirectory, "QuackFu"));
-				System.IO.File.Copy(Path.Combine(Environment.CurrentDirectory, "Core.IO", "Input", "Darkwing Duck.txt"), Path.Combine(sourceDirectory, "Darkwing Duck.txt"));
-				System.IO.File.Copy(Path.Combine(Environment.CurrentDirectory, "Core.IO", "Input", "QuackFu", "Manifest of QuackFu.txt"), Path.Combine(sourceDirectory, "QuackFu", "Manifest of QuackFu.txt"));
+				System.IO.File.Copy(Path.Combine(Environment.CurrentDirectory, "Input", "Darkwing Duck.txt"), Path.Combine(sourceDirectory, "Darkwing Duck.txt"));
+				System.IO.File.Copy(Path.Combine(Environment.CurrentDirectory, "Input", "QuackFu", "Manifest of QuackFu.txt"), Path.Combine(sourceDirectory, "QuackFu", "Manifest of QuackFu.txt"));
 			}
 
 			if (copyArchive)
 			{
-				System.IO.File.Copy(Path.Combine(Environment.CurrentDirectory, "Core.IO", "Input", "Archive.zip"), Path.Combine(sourceDirectory, "Archive.zip"));
+				System.IO.File.Copy(Path.Combine(Environment.CurrentDirectory, "Input", "Archive.zip"), Path.Combine(sourceDirectory, "Archive.zip"));
 			}
 
 			return (sourceDirectory, targetDirectory);

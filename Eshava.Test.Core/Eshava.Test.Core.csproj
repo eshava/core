@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netcoreapp2.1</TargetFramework>
+		<Description>Collection of methods, classes and helpers to simplify recurring standard actions</Description>
+		<PackageLicenseUrl>https://github.com/eshava/core/blob/master/LICENSE</PackageLicenseUrl>
+		<PackageProjectUrl>https://github.com/eshava/core</PackageProjectUrl>
+		<Authors>Eshava</Authors>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Eshava.Core\Eshava.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="FakeItEasy" Version="4.9.1" />
+		<PackageReference Include="FluentAssertions" Version="5.4.2" />
+		<PackageReference Include="MSTest.TestFramework" Version="1.3.2" />
+	</ItemGroup>
+
+</Project>

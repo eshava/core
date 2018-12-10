@@ -37,6 +37,11 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return CheckRangeInteger(parameters, range);
 			}
 
+			if (dataType == typeof(long))
+			{
+				return CheckRangeLong(parameters, range);
+			}
+
 			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRange)}->{parameters.PropertyInfo.Name}->DataTypeNotSupported" };
 		}
 
@@ -49,6 +54,20 @@ namespace Eshava.Core.Validation.ValidationMethods
 			if (valueInt < min || valueInt > max)
 			{
 				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRange)}->{parameters.PropertyInfo.Name}->IntegerValue" };
+			}
+
+			return new ValidationCheckResult { IsValid = true };
+		}
+
+		private static ValidationCheckResult CheckRangeLong(ValidationCheckParameters parameters, RangeAttribute range)
+		{
+			var max = Convert.ToInt64(range.Maximum);
+			var min = Convert.ToInt64(range.Minimum);
+			var valueInt = (long)parameters.PropertyValue;
+
+			if (valueInt < min || valueInt > max)
+			{
+				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRange)}->{parameters.PropertyInfo.Name}->LongValue" };
 			}
 
 			return new ValidationCheckResult { IsValid = true };
