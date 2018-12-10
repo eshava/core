@@ -8,8 +8,8 @@
 		<PackageProjectUrl>https://github.com/eshava/core</PackageProjectUrl>
 		<Description>Collection of methods, classes and helpers to simplify recurring standard actions</Description>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-		<Version>1.0.0.1</Version>
-		<FileVersion>1.0.0.1</FileVersion>
+		<Version>1.0.0.2</Version>
+		<FileVersion>1.0.0.2</FileVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
