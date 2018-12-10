@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using Eshava.Core.Linq;
 using Eshava.Core.Linq.Enums;
 using Eshava.Core.Linq.Models;
-using Eshava.Test.Core.Models;
+using Eshava.Test.Core.Linq.Models;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

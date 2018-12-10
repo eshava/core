@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -7,15 +7,6 @@
     <PackageProjectUrl>https://github.com/eshava/core</PackageProjectUrl>
     <Authors>Eshava</Authors>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Eshava.Core.Communication\Eshava.Core.Communication.csproj" />
-    <ProjectReference Include="..\Eshava.Core.IO\Eshava.Core.IO.csproj" />
-    <ProjectReference Include="..\Eshava.Core.Linq\Eshava.Core.Linq.csproj" />
-    <ProjectReference Include="..\Eshava.Core.Security\Eshava.Core.Security.csproj" />
-    <ProjectReference Include="..\Eshava.Core.Validation\Eshava.Core.Validation.csproj" />
-    <ProjectReference Include="..\Eshava.Core\Eshava.Core.csproj" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FakeItEasy" Version="4.9.1" />

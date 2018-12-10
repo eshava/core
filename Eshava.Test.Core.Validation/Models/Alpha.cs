@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Eshava.Core.Validation.Attributes;
-using Eshava.Test.Core.Models.Interfaces;
 
-namespace Eshava.Test.Core.Models
+namespace Eshava.Test.Core.Validation.Models
 {
-	public class Alpha : IAlpha
+	public class Alpha
 	{
 		public Alpha()
 		{
@@ -71,11 +70,7 @@ namespace Eshava.Test.Core.Models
 		[Required]
 		[Unique]
 		public int? LambdaNullable { get; set; }
-
-		public long LambdaLong { get; set; }
-
-		public long? LambdaLongNullable { get; set; }
-
+		
 		[DecimalPlaces(4)]
 		[Range(-40.5, 70.5)]
 		public decimal My { get; set; }
@@ -146,13 +141,6 @@ namespace Eshava.Test.Core.Models
 		[RangeBetween("OmegaIntegerFrom", "OmegaIntegerTo")]
 		public int OmegaInteger { get; set; }
 
-		[RangeTo("OmegaLongTo", false)]
-		public long OmegaLongFrom { get; set; }
-		[RangeFrom("OmegaLongFrom", false)]
-		public long OmegaLongTo { get; set; }
-		[RangeBetween("OmegaLongFrom", "OmegaLongTo")]
-		public long OmegaLong { get; set; }
-
 		[RangeTo("OmegaDoubleTo", false)]
 		public double OmegaDoubleFrom { get; set; }
 		[RangeFrom("OmegaDoubleFrom", false)]
@@ -166,7 +154,6 @@ namespace Eshava.Test.Core.Models
 		public DateTime OmegaDateTimeTo { get; set; }
 		[RangeBetween("OmegaDateTimeFrom", "OmegaDateTimeTo")]
 		public DateTime OmegaDateTime { get; set; }
-
 
 		[EqualsTo("OmegaIntegerEqualTwo")]
 		public int OmegaIntegerEqualOne { get; set; }

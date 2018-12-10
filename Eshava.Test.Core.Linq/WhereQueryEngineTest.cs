@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using Eshava.Core.Linq;
 using Eshava.Core.Linq.Enums;
 using Eshava.Core.Linq.Models;
-using Eshava.Test.Core.Models;
+using Eshava.Test.Core.Linq.Models;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -207,26 +207,26 @@ namespace Eshava.Test.Core.Linq
 				new Alpha
 				{
 					Beta = 1,
-					Lambda = 4L,
-					LambdaNullable = 10L
+					LambdaLong = 4L,
+					LambdaLongNullable = 10L
 				},
 				new Alpha
 				{
 					Beta = 2,
-					Lambda = 6L,
-					LambdaNullable = 11L
+					LambdaLong = 6L,
+					LambdaLongNullable = 11L
 				},
 				new Alpha
 				{
 					Beta = 3,
-					Lambda = 6L,
-					LambdaNullable = 8L
+					LambdaLong = 6L,
+					LambdaLongNullable = 8L
 				},
 				new Alpha
 				{
 					Beta = 4,
-					Lambda = 6L,
-					LambdaNullable = 13L
+					LambdaLong = 6L,
+					LambdaLongNullable = 13L
 				}
 			};
 
@@ -237,20 +237,20 @@ namespace Eshava.Test.Core.Linq
 					new WhereQueryProperty
 					{
 						Operator =  CompareOperator.GreaterThan,
-						PropertyName = nameof(Alpha.Lambda),
+						PropertyName = nameof(Alpha.LambdaLong),
 						SearchTerm = "5"
 					},
 					new WhereQueryProperty
 					{
 						Operator =  CompareOperator.LessThan,
-						PropertyName = nameof(Alpha.LambdaNullable),
+						PropertyName = nameof(Alpha.LambdaLongNullable),
 						SearchTerm = "12"
 					}
 				}
 			};
 
-			Expression<Func<Alpha, bool>> expectedResultLambda = p => p.Lambda > 5L;
-			Expression<Func<Alpha, bool>> expectedResultLambdaNullable = p => p.LambdaNullable < 12L;
+			Expression<Func<Alpha, bool>> expectedResultLambda = p => p.LambdaLong > 5L;
+			Expression<Func<Alpha, bool>> expectedResultLambdaNullable = p => p.LambdaLongNullable < 12L;
 
 			// Act
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
