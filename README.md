@@ -5,7 +5,8 @@ Collection of methods, classes and helpers to simplify recurring standard action
 Extension to http, ftp and mail functionality
 
 * Ftp
-	* FtpClient based on System.Net.WebRequest
+	* FtpClient based on System.Net.WebRequest (Type: "System.Net.WebRequest");
+	* SftpClient based on SSH.NET (Type: "SSH.NET.FTP")
 * Http
 	* HttpClient based on System.Net.Http.HttpClient
 * Mail

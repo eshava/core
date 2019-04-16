@@ -14,8 +14,21 @@ namespace Eshava.Core.Communication.Ftp
 	{
 		public string Type => "System.Net.WebRequest";
 
+		/// <summary>
+		/// Download the specified file
+		/// </summary>
+		/// <param name="settings">ftp server settings</param>
+		/// <param name="fileName">Name of the file on ftp server</param>
+		/// <param name="targetPath">Path of the target directory on local file system</param>
+		/// <returns></returns>
 		public async Task<bool> DownloadAsync(FTPSettings settings, string fileName, string targetPath)
 		{
+			var directoryInfo = new DirectoryInfo(targetPath);
+			if (!directoryInfo.Exists)
+			{
+				directoryInfo.Create();
+			}
+
 			var request = CreateRequest(settings, fileName, WebRequestMethods.Ftp.DownloadFile);
 			var response = await request.GetResponseAsync();
 
@@ -35,6 +48,13 @@ namespace Eshava.Core.Communication.Ftp
 			return ftpWebResponse.StatusCode == FtpStatusCode.ClosingData;
 		}
 
+		/// <summary>
+		/// Upload the specified file
+		/// </summary>
+		/// <param name="settings">ftp server settings</param>
+		/// <param name="fileName">Name of the file on ftp server</param>
+		/// <param name="fullFileName">Name of the file, inclusive path, of the file</param>
+		/// <returns></returns>
 		public async Task<bool> UploadAsync(FTPSettings settings, string fileName, string fullFileName)
 		{
 			var request = CreateRequest(settings, fileName, WebRequestMethods.Ftp.UploadFile);
@@ -52,6 +72,33 @@ namespace Eshava.Core.Communication.Ftp
 			return response.StatusCode == FtpStatusCode.ClosingData;
 		}
 
+		/// <summary>
+		/// Delete the specified directory or file from ftp server
+		/// </summary>
+		/// <param name="settings">ftp server settings</param>
+		/// <param name="directoryOrFileName">Name of the directory or file</param>
+		/// <returns></returns>
+		public async Task<bool> DeleteAsync(FTPSettings settings, string directoryOrFileName)
+		{
+			var request = CreateRequest(settings, directoryOrFileName, WebRequestMethods.Ftp.DeleteFile);
+			var response = await request.GetResponseAsync();
+
+			response.Close();
+
+			if (!(response is FtpWebResponse ftpWebResponse))
+			{
+				throw new NotSupportedException($"Unexpected request response. Expected: {nameof(FtpWebResponse)}, but found {response.GetType()}");
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Get all file names, inclusive path, of the directory on ftp server
+		/// </summary>
+		/// <param name="settings">ftp server settings</param>
+		/// <param name="recursive">Enumerate sub directories</param>
+		/// <returns></returns>
 		public async Task<IEnumerable<string>> GetFileNamesAsync(FTPSettings settings, bool recursive)
 		{
 			var request = CreateRequest(settings, "", WebRequestMethods.Ftp.ListDirectoryDetails);
@@ -117,9 +164,19 @@ namespace Eshava.Core.Communication.Ftp
 
 		private FtpWebRequest CreateRequest(FTPSettings settings, string fileName, string method)
 		{
+			if (settings.ServerPort <= 0)
+			{
+				settings.ServerPort = 21;
+			}
+
 			if (!settings.ServerPath.IsNullOrEmpty() && !settings.ServerPath.EndsWith("/"))
 			{
 				settings.ServerPath += '/';
+			}
+
+			if (!settings.ServerUrl.ToLower().StartsWith("ftp://"))
+			{
+				settings.ServerUrl = "ftp://" + settings.ServerUrl;
 			}
 
 			if (settings.ServerUrl.EndsWith("/"))
