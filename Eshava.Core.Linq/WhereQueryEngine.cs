@@ -20,7 +20,7 @@ namespace Eshava.Core.Linq
 		private static readonly ConstantExpression _constantExpressionStringNull = Expression.Constant(null, _typeString);
 		private static readonly ConstantExpression _constantExpressionObjectNull = Expression.Constant(null, _typeObject);
 		private static readonly MethodInfo _methodInfoStringContains = _typeString.GetMethod("Contains", new[] { _typeString });
-		
+
 		private static readonly Dictionary<Type, Func<string, Type, CompareOperator, ConstantExpression>> _constantExpressions = new Dictionary<Type, Func<string, Type, CompareOperator, ConstantExpression>>
 		{
 			{ typeof(Guid), GetConstantGuid },
@@ -301,12 +301,21 @@ namespace Eshava.Core.Linq
 
 		private static ConstantExpression GetConstantDateTime(string value, Type dataType, CompareOperator compareOperator)
 		{
-			if (!DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.None, out var valueDateTime) || compareOperator == CompareOperator.None)
+			if (compareOperator == CompareOperator.None)
 			{
 				return null;
 			}
 
-			return Expression.Constant(valueDateTime, dataType);
+			DateTime valueDateTime;
+			if (DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.None, out valueDateTime)
+				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out valueDateTime)
+				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out valueDateTime)
+				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ssK", CultureInfo.InvariantCulture, DateTimeStyles.None, out valueDateTime))
+			{
+				return Expression.Constant(valueDateTime, dataType);
+			}
+
+			return null;
 		}
 
 		private Expression<Func<T, bool>> GetConditionComparableByProperty<T>(ExpressionDataContainer data) where T : class
@@ -362,7 +371,7 @@ namespace Eshava.Core.Linq
 
 			return previousVisitor.Visit(condition.Body);
 		}
-		
+
 		private static Expression GetContainsExpression(MemberExpression member, ConstantExpression constant)
 		{
 			if (member.Type == _typeString)

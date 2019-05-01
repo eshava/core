@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using Eshava.Core.Linq;
@@ -506,17 +507,17 @@ namespace Eshava.Test.Core.Linq
 					{
 						Operator =  CompareOperator.LessThanOrEqual,
 						PropertyName = nameof(Alpha.Psi),
-						SearchTerm = dateTimePsi.ToString("yyyy-MM-ddTHH:mm:ssZ")
+						SearchTerm = dateTimePsi.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture)
 					},
 					new WhereQueryProperty
 					{
 						Operator =  CompareOperator.NotEqual,
 						PropertyName = nameof(Alpha.OmegaDateTime),
-						SearchTerm = dateTimeOmega.ToString("yyyy-MM-ddTHH:mm:ssZ")
+						SearchTerm = dateTimeOmega.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture)
 					}
 				}
 			};
-
+						
 			Expression<Func<Alpha, bool>> expectedResultPsi = p => p.Psi <= dateTimePsi;
 			Expression<Func<Alpha, bool>> expectedResultOmegaDateTime = p => p.OmegaDateTime != dateTimeOmega;
 
@@ -1026,7 +1027,7 @@ namespace Eshava.Test.Core.Linq
 					Sigma = new List<int> { 1, 2, 3, }
 				}
 			};
-			
+
 			var queryParameter = new QueryParameters
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
