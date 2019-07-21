@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Eshava.Core.Extensions;
+using Eshava.Core.Linq.Attributes;
 using Eshava.Core.Linq.Enums;
 using Eshava.Core.Linq.Interfaces;
 using Eshava.Core.Linq.Models;
@@ -152,7 +153,7 @@ namespace Eshava.Core.Linq
 				{
 					where.AddRange(queryContainer.Mappings[propertyInfo.Name].Select(m => GetMappingCondition(property, m, _typeString)).Where(e => e != null).ToList());
 				}
-				else if (propertyInfo.PropertyType == _typeString)
+				else if (propertyInfo.PropertyType == _typeString && propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() == null)
 				{
 					var condition = GetPropertyCondition<T>(property, queryContainer.PropertyInfos, queryContainer.Parameter);
 
@@ -195,7 +196,7 @@ namespace Eshava.Core.Linq
 		private Expression<Func<T, bool>> GetPropertyCondition<T>(WhereQueryProperty property, IEnumerable<PropertyInfo> propertyInfos, ParameterExpression parameterExpression) where T : class
 		{
 			var propertyInfo = propertyInfos.SingleOrDefault(p => p.Name.Equals(property.PropertyName));
-			if (propertyInfo == null)
+			if (propertyInfo == null || propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() != null)
 			{
 				return null;
 			}
