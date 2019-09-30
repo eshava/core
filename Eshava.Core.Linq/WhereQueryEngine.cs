@@ -105,6 +105,31 @@ namespace Eshava.Core.Linq
 			return where;
 		}
 
+		/// <summary>
+		/// Removes all properties for which a GUID search term was passed
+		/// </summary>
+		/// <typeparam name="T">Data type</typeparam>
+		/// <param name="queryProperties">Properties which contains search term</param>
+		/// <param name="mappings">Property mappings for navigation to a subproperty</param>
+		/// <returns></returns>
+		public IWhereQueryEngine RemovePropertyMappings<T>(IEnumerable<WhereQueryProperty> queryProperties, Dictionary<string, List<Expression<Func<T, object>>>> mappings) where T : class
+		{
+			if (mappings == null)
+			{
+				return this;
+			}
+
+			foreach (var queryProperty in queryProperties)
+			{
+				if (mappings.ContainsKey(queryProperty.PropertyName) && Guid.TryParse(queryProperty.SearchTerm, out var _))
+				{
+					mappings.Remove(queryProperty.PropertyName);
+				}
+			}
+
+			return this;
+		}
+		
 		private IEnumerable<Expression<Func<T, bool>>> BuildPropertyQueryConditions<T>(BuildQueryContainer<T> queryContainer) where T : class
 		{
 			var where = new List<Expression<Func<T, bool>>>();
