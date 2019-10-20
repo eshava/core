@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Eshava.Core.Extensions;
 using Eshava.Core.Validation.Attributes;
+using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Validation.ValidationMethods
@@ -18,31 +19,30 @@ namespace Eshava.Core.Validation.ValidationMethods
 			if (parameters.NotEquals && notEqualsTo != null)
 			{
 				var notEqualsProperties = notEqualsTo.PropertyName.Contains(",") ? notEqualsTo.PropertyName.Split(',') : new[] { notEqualsTo.PropertyName };
-				var results = notEqualsProperties.Select(property => CheckEqualsTo(parameters, parameters.DataType.GetProperty(property), notEqualsTo.DefaultValue)).ToList();
+				var results = notEqualsProperties.Select(property => CheckEqualsTo(parameters, property, notEqualsTo.DefaultValue)).ToList();
 
 				if (results.All(result => result.IsValid))
 				{
 					return results.First();
 				}
 
-				return new ValidationCheckResult { ValidationError = String.Join(Environment.NewLine, results.Where(result => !result.IsValid).Select(result => result.ValidationError)) };
+				return new ValidationCheckResult { ValidationErrors = results.SelectMany(r => r.ValidationErrors).ToList() };
 			}
 
 			if (!parameters.NotEquals && equalsTo != null)
 			{
-				var propertyInfoEquals = parameters.DataType.GetProperty(equalsTo.PropertyName);
-
-				return CheckEqualsTo(parameters, propertyInfoEquals);
+				return CheckEqualsTo(parameters, equalsTo.PropertyName);
 			}
 
 			return new ValidationCheckResult { IsValid = true };
 		}
 
-		private static ValidationCheckResult CheckEqualsTo(ValidationCheckParameters parameters, PropertyInfo propertyInfoEquals, object defaultValue = null)
+		private static ValidationCheckResult CheckEqualsTo(ValidationCheckParameters parameters, string propertyNameInfoEquals, object defaultValue = null)
 		{
+			var propertyInfoEquals = parameters.DataType.GetProperty(propertyNameInfoEquals);
 			if (propertyInfoEquals == null)
 			{
-				return GetErrorResult(parameters, $"{nameof(propertyInfoEquals)}->ShouldNotBeNull");
+				return GetErrorResult(parameters, ValidationErrorType.PropertyNotFoundTo, propertyNameInfoEquals);
 			}
 
 			if (parameters.PropertyInfo.PropertyType == typeof(string))
@@ -62,13 +62,13 @@ namespace Eshava.Core.Validation.ValidationMethods
 			{
 				if (Equals(valueString, valueStringEquals) && !Equals(valueString, defaultValue))
 				{
-					return GetErrorResult(parameters, $"{propertyInfoEquals.Name}->NotEqualsStringValue");
+					return GetErrorResult(parameters, ValidationErrorType.EqualsAndNotEqualToDefaultString, propertyInfoEquals.Name);
 				}
 			}
 			else if (parameters.NotEquals && Equals(valueString, valueStringEquals) ||
 					 !parameters.NotEquals && !Equals(valueString, valueStringEquals))
 			{
-				return GetErrorResult(parameters, $"{propertyInfoEquals.Name}->EqualsOrNotEqualsStringValue");
+				return GetErrorResult(parameters, parameters.NotEquals ? ValidationErrorType.EqualsString : ValidationErrorType.NotEqualsString, propertyInfoEquals.Name);
 			}
 
 			return new ValidationCheckResult { IsValid = true };
@@ -80,21 +80,34 @@ namespace Eshava.Core.Validation.ValidationMethods
 			{
 				if (Equals(parameters.PropertyValue, propertyInfoEquals.GetValue(parameters.Model)) && !Equals(parameters.PropertyValue, defaultValue))
 				{
-					return GetErrorResult(parameters, $"{propertyInfoEquals.Name}->EqualsAndNotEqualToDefault");
+					return GetErrorResult(parameters, ValidationErrorType.EqualsAndNotEqualToDefault, propertyInfoEquals.Name);
 				}
 			}
 			else if (parameters.NotEquals && Equals(parameters.PropertyValue, propertyInfoEquals.GetValue(parameters.Model)) ||
 					 !parameters.NotEquals && !Equals(parameters.PropertyValue, propertyInfoEquals.GetValue(parameters.Model)))
 			{
-				return GetErrorResult(parameters, $"{propertyInfoEquals.Name}->EqualsOrNotEquals");
+
+				return GetErrorResult(parameters, parameters.NotEquals ? ValidationErrorType.Equals : ValidationErrorType.NotEquals, propertyInfoEquals.Name);
 			}
 
 			return new ValidationCheckResult { IsValid = true };
 		}
 
-		private static ValidationCheckResult GetErrorResult(ValidationCheckParameters parameters, string error, [CallerMemberName] string memberName = null)
+		private static ValidationCheckResult GetErrorResult(ValidationCheckParameters parameters, ValidationErrorType errorType, string propertyNameToEquals)
 		{
-			return new ValidationCheckResult { ValidationError = $"{memberName}->{nameof(parameters.NotEquals)}={parameters.NotEquals}->{parameters.PropertyInfo.Name}->{error}" };
+			return new ValidationCheckResult
+			{
+				ValidationErrors = new List<ValidationCheckResultEntry>
+				{
+					new ValidationCheckResultEntry
+					{
+						MethodType = parameters.NotEquals ? ValidationMethodType.NotEquals : ValidationMethodType.Equals,
+						ErrorType = errorType,
+						PropertyName = parameters.PropertyInfo.Name,
+						PropertyNameTo = propertyNameToEquals
+					}
+				}
+			};
 		}
 	}
 }

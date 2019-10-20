@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Eshava.Core.Extensions;
 using Eshava.Core.Validation.Attributes;
+using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Validation.ValidationMethods
@@ -33,7 +33,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			//Determining the proterty for the start value of the value range
 			var propertiesSource = rangeSource.PropertyName.Contains(",") ? rangeSource.PropertyName.Split(',') : new[] { rangeSource.PropertyName };
-			var results = new List<ValidationCheckResult>();
+			var results = new List<ValidationCheckResultEntry>();
 
 			foreach (var propertySource in propertiesSource)
 			{
@@ -41,7 +41,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 				if (propertyInfoSource == null)
 				{
-					results.Add(new ValidationCheckResult { ValidationError = $"{memberName}->{propertyInfoTarget.Name}->propertyInfoFromIsNull" });
+					results.Add(GetErrorResult(ValidationErrorType.PropertyNotFoundFrom, propertySource.Trim(), propertyInfoTarget.Name));
 
 					continue;
 				}
@@ -51,7 +51,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				//Check whether the data types match
 				if (dataType != dataTypeFrom)
 				{
-					results.Add(new ValidationCheckResult { ValidationError = $"{memberName}->{propertyInfoTarget.Name}->{propertyInfoSource.Name}->DataTypesNotEqual" });
+					results.Add(GetErrorResult(ValidationErrorType.DataTypesNotEqual, propertyInfoSource.Name, propertyInfoTarget.Name));
 
 					continue;
 				}
@@ -60,20 +60,39 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 				if (invertProperties)
 				{
-					results.Add(BaseRangeValidation.CheckRangeValue(parameters, propertyInfoTarget, propertyInfoSource));
+					var result = BaseRangeValidation.CheckRangeValue(parameters, propertyInfoTarget, propertyInfoSource);
+					if (!result.IsValid)
+					{
+						results.AddRange(result.ValidationErrors);
+					}
 				}
 				else
 				{
-					results.Add(BaseRangeValidation.CheckRangeValue(parameters, propertyInfoSource, propertyInfoTarget));
+					var result = BaseRangeValidation.CheckRangeValue(parameters, propertyInfoSource, propertyInfoTarget);
+					if (!result.IsValid)
+					{
+						results.AddRange(result.ValidationErrors);
+					}
 				}
 			}
 
-			if (results.All(result => result.IsValid))
+			if (results.Count == 0)
 			{
-				return results.First();
+				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = String.Join(Environment.NewLine, results.Where(result => !result.IsValid).Select(result => result.ValidationError)) };
+			return new ValidationCheckResult { ValidationErrors = results };
+		}
+
+		private static ValidationCheckResultEntry GetErrorResult(ValidationErrorType errorType, string propertyNameFrom, string propertyNameTo)
+		{
+			return new ValidationCheckResultEntry
+			{
+				MethodType = ValidationMethodType.RangeFromOrTo,
+				ErrorType = errorType,
+				PropertyNameFrom = propertyNameFrom,
+				PropertyNameTo = propertyNameTo
+			};
 		}
 	}
 }

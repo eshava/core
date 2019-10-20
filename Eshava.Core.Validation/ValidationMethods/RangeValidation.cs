@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Eshava.Core.Extensions;
+using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Validation.ValidationMethods
@@ -42,7 +44,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return CheckRangeLong(parameters, range);
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRange)}->{parameters.PropertyInfo.Name}->DataTypeNotSupported" };
+			return GetErrorResult(ValidationErrorType.DataTypeNotSupported, parameters.PropertyInfo.Name);
 		}
 
 		private static ValidationCheckResult CheckRangeInteger(ValidationCheckParameters parameters, RangeAttribute range)
@@ -53,7 +55,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (valueInt < min || valueInt > max)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRange)}->{parameters.PropertyInfo.Name}->IntegerValue" };
+				return GetErrorResult(ValidationErrorType.DataTypeInteger, parameters.PropertyInfo.Name);
 			}
 
 			return new ValidationCheckResult { IsValid = true };
@@ -67,7 +69,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (valueInt < min || valueInt > max)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRange)}->{parameters.PropertyInfo.Name}->LongValue" };
+				return GetErrorResult(ValidationErrorType.DataTypeLong, parameters.PropertyInfo.Name);
 			}
 
 			return new ValidationCheckResult { IsValid = true };
@@ -81,7 +83,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (valueFloat < min || valueFloat > max)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRange)}->{parameters.PropertyInfo.Name}->FloatValue" };
+				return GetErrorResult(ValidationErrorType.DataTypeFloat, parameters.PropertyInfo.Name);
 			}
 
 			return new ValidationCheckResult { IsValid = true };
@@ -95,7 +97,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (valueDouble < min || valueDouble > max)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRange)}->{parameters.PropertyInfo.Name}->DoubleValue" };
+				return GetErrorResult(ValidationErrorType.DataTypeDouble, parameters.PropertyInfo.Name);
 			}
 
 			return new ValidationCheckResult { IsValid = true };
@@ -109,10 +111,26 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (valueDecimal < min || valueDecimal > max)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRange)}->{parameters.PropertyInfo.Name}->DecimalValue" };
+				return GetErrorResult(ValidationErrorType.DataTypeDecimal, parameters.PropertyInfo.Name);
 			}
 
 			return new ValidationCheckResult { IsValid = true };
+		}
+
+		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName)
+		{
+			return new ValidationCheckResult
+			{
+				ValidationErrors = new List<ValidationCheckResultEntry>
+				{
+					new ValidationCheckResultEntry
+					{
+						MethodType = ValidationMethodType.RangeHardCoded,
+						ErrorType = errorType,
+						PropertyName = propertyName
+					}
+				}
+			};
 		}
 	}
 }

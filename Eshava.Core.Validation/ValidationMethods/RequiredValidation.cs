@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Eshava.Core.Extensions;
+using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Validation.ValidationMethods
@@ -15,7 +17,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			{
 				if (parameters.PropertyValue == null)
 				{
-					return new ValidationCheckResult { ValidationError = $"{nameof(CheckRequired)}->{parameters.PropertyInfo.Name}->ValueIsNull" };
+					return GetErrorResult(ValidationErrorType.IsNull, parameters.PropertyInfo.Name);
 				}
 
 				if (parameters.PropertyInfo.PropertyType == typeof(string))
@@ -24,7 +26,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 					if (valueString.IsNullOrEmpty())
 					{
-						return new ValidationCheckResult { ValidationError = $"{nameof(CheckRequired)}->{parameters.PropertyInfo.Name}->StringValueIsNullOrEmpty" };
+						return GetErrorResult(ValidationErrorType.IsEmpty, parameters.PropertyInfo.Name);
 					}
 				}
 
@@ -36,11 +38,27 @@ namespace Eshava.Core.Validation.ValidationMethods
 						return new ValidationCheckResult { IsValid = true };
 					}
 
-					return new ValidationCheckResult { ValidationError = $"{nameof(CheckRequired)}->{parameters.PropertyInfo.Name}->EmptyIEnumerable" };
+					return GetErrorResult(ValidationErrorType.IsEmptyIEnumerable, parameters.PropertyInfo.Name);
 				}
 			}
 
 			return new ValidationCheckResult { IsValid = true };
+		}
+
+		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName)
+		{
+			return new ValidationCheckResult
+			{
+				ValidationErrors = new List<ValidationCheckResultEntry>
+				{
+					new ValidationCheckResultEntry
+					{
+						MethodType = ValidationMethodType.Required,
+						ErrorType = errorType,
+						PropertyName = propertyName
+					}
+				}
+			};
 		}
 	}
 }
