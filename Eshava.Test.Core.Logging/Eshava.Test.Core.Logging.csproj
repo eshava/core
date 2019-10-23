@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<LangVersion>latest</LangVersion>
+		<TargetFramework>netcoreapp2.2</TargetFramework>
+		<Description>Collection of methods, classes and helpers to simplify recurring standard actions</Description>
+		<PackageLicenseUrl>https://github.com/eshava/core/blob/master/LICENSE</PackageLicenseUrl>
+		<PackageProjectUrl>https://github.com/eshava/core</PackageProjectUrl>
+		<Authors>Eshava</Authors>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="Eshava.Test.Core.Logging.v3.ncrunchproject" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="FakeItEasy" Version="5.3.0" />
+		<PackageReference Include="FluentAssertions" Version="5.9.0" />
+		<PackageReference Include="MSTest.TestFramework" Version="2.0.0" />
+		<PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Eshava.Core.Logging\Eshava.Core.Logging.csproj" />
+	</ItemGroup>
+
+</Project>

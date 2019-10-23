@@ -19,17 +19,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{A8C93CB8
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{3CE7FB1B-A8D8-4259-9B1F-D61BDACDE98C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Test.Core", "Eshava.Test.Core\Eshava.Test.Core.csproj", "{655156EA-DD38-40B3-BF0D-03DC3F3E81D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Test.Core", "Eshava.Test.Core\Eshava.Test.Core.csproj", "{655156EA-DD38-40B3-BF0D-03DC3F3E81D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Test.Core.Communication", "Eshava.Test.Core.Communication\Eshava.Test.Core.Communication.csproj", "{3F135A04-1464-4B73-864B-C598DDA44DB8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Test.Core.Communication", "Eshava.Test.Core.Communication\Eshava.Test.Core.Communication.csproj", "{3F135A04-1464-4B73-864B-C598DDA44DB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Test.Core.IO", "Eshava.Test.Core.IO\Eshava.Test.Core.IO.csproj", "{08C25B83-90D6-46AF-8C63-48B06D87E8E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Test.Core.IO", "Eshava.Test.Core.IO\Eshava.Test.Core.IO.csproj", "{08C25B83-90D6-46AF-8C63-48B06D87E8E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Test.Core.Linq", "Eshava.Test.Core.Linq\Eshava.Test.Core.Linq.csproj", "{7E634BD6-3BBE-44CB-A889-8D3F7678848F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Test.Core.Linq", "Eshava.Test.Core.Linq\Eshava.Test.Core.Linq.csproj", "{7E634BD6-3BBE-44CB-A889-8D3F7678848F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Test.Core.Security", "Eshava.Test.Core.Security\Eshava.Test.Core.Security.csproj", "{1CA82462-7744-495E-837B-1A96C92B3D66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Test.Core.Security", "Eshava.Test.Core.Security\Eshava.Test.Core.Security.csproj", "{1CA82462-7744-495E-837B-1A96C92B3D66}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Test.Core.Validation", "Eshava.Test.Core.Validation\Eshava.Test.Core.Validation.csproj", "{02F116A7-3850-4022-92FE-B4066EDE537C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Test.Core.Validation", "Eshava.Test.Core.Validation\Eshava.Test.Core.Validation.csproj", "{02F116A7-3850-4022-92FE-B4066EDE537C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Core.Logging", "Eshava.Core.Logging\Eshava.Core.Logging.csproj", "{D9F73115-4D30-4F3A-96AB-FDC4B18541BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Test.Core.Logging", "Eshava.Test.Core.Logging\Eshava.Test.Core.Logging.csproj", "{46DECA98-6715-4D15-A573-D48FB47C0041}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -85,6 +89,14 @@ Global
 		{02F116A7-3850-4022-92FE-B4066EDE537C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02F116A7-3850-4022-92FE-B4066EDE537C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02F116A7-3850-4022-92FE-B4066EDE537C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9F73115-4D30-4F3A-96AB-FDC4B18541BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9F73115-4D30-4F3A-96AB-FDC4B18541BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9F73115-4D30-4F3A-96AB-FDC4B18541BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9F73115-4D30-4F3A-96AB-FDC4B18541BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46DECA98-6715-4D15-A573-D48FB47C0041}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46DECA98-6715-4D15-A573-D48FB47C0041}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46DECA98-6715-4D15-A573-D48FB47C0041}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46DECA98-6715-4D15-A573-D48FB47C0041}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -102,6 +114,8 @@ Global
 		{7E634BD6-3BBE-44CB-A889-8D3F7678848F} = {A8C93CB8-1F31-4EE4-A83A-0B9992F8490D}
 		{1CA82462-7744-495E-837B-1A96C92B3D66} = {A8C93CB8-1F31-4EE4-A83A-0B9992F8490D}
 		{02F116A7-3850-4022-92FE-B4066EDE537C} = {A8C93CB8-1F31-4EE4-A83A-0B9992F8490D}
+		{D9F73115-4D30-4F3A-96AB-FDC4B18541BC} = {3CE7FB1B-A8D8-4259-9B1F-D61BDACDE98C}
+		{46DECA98-6715-4D15-A573-D48FB47C0041} = {A8C93CB8-1F31-4EE4-A83A-0B9992F8490D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F19A2579-903E-46D0-97F2-41BA2A7B9A37}

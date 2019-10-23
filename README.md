@@ -22,6 +22,12 @@ Extension to encapsulate i/o actions
 ## core.linq
 Extension for dynamic creation of filter and sort queries based on IQueryable
 
+## core.logging
+Extension to collect logging information
+
+* Exception logging (Microsoft.Extensions.Logging.Abstractions)
+* Data record property modifications
+
 ## core.security
 Extension to secure data worthy of protection
 
