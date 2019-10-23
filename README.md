@@ -42,3 +42,7 @@ Extension to secure data worthy of protection
 Extension for validation of objects based on default annotation attributes and additional custom annotation attributes
 
 * Uses System.ComponentModel.DataAnnotations
+
+## project dependency diagram
+
+* view on https://draw.io/
