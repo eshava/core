@@ -5,7 +5,8 @@ Collection of methods, classes and helpers to simplify recurring standard action
 Extension to http, ftp and mail functionality
 
 * Ftp
-	* FtpClient based on System.Net.WebRequest
+	* FtpClient based on System.Net.WebRequest (Type: "System.Net.WebRequest");
+	* SftpClient based on SSH.NET (Type: "SSH.NET.FTP")
 * Http
 	* HttpClient based on System.Net.Http.HttpClient
 * Mail
@@ -21,6 +22,12 @@ Extension to encapsulate i/o actions
 ## core.linq
 Extension for dynamic creation of filter and sort queries based on IQueryable
 
+## core.logging
+Extension to collect logging information
+
+* Exception logging (Microsoft.Extensions.Logging.Abstractions)
+* Data record property modifications
+
 ## core.security
 Extension to secure data worthy of protection
 
@@ -35,3 +42,7 @@ Extension to secure data worthy of protection
 Extension for validation of objects based on default annotation attributes and additional custom annotation attributes
 
 * Uses System.ComponentModel.DataAnnotations
+
+## project dependency diagram
+
+* view on https://draw.io/

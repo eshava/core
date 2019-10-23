@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Eshava.Core.Extensions;
+using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Interfaces;
 using Eshava.Core.Validation.Models;
 using Eshava.Core.Validation.ValidationMethods;
@@ -31,7 +32,18 @@ namespace Eshava.Core.Validation
 		{
 			if (model == null)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(model)} should not be null." };
+				return new ValidationCheckResult
+				{
+					ValidationErrors = new List<ValidationCheckResultEntry>
+					{
+						new ValidationCheckResultEntry
+						{
+							MethodType = ValidationMethodType.Input,
+							ErrorType =  ValidationErrorType.IsNull,
+							PropertyName = nameof(model)
+						}
+					}
+				};
 			}
 
 			var results = new List<ValidationCheckResult>();
@@ -78,7 +90,7 @@ namespace Eshava.Core.Validation
 				return results.First();
 			}
 
-			return new ValidationCheckResult { ValidationError = String.Join(Environment.NewLine, results.Where(result => !result.IsValid).Select(result => result.ValidationError)) };
+			return new ValidationCheckResult { ValidationErrors = results.SelectMany(r => r.ValidationErrors).ToList() };
 		}
 
 		private IEnumerable<ValidationCheckResult> ValidateEnumerable(object propertyValue, PropertyInfo propertyInfo, ValidationCheckParameters validationParameter)

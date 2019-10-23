@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Eshava.Core.Extensions;
+using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Validation.ValidationMethods
@@ -15,7 +16,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (datatypeFrom != datatypeTo)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeValue)}->{propertyInfoFrom.Name}->{propertyInfoTo.Name}->DataTypesNotEqual" };
+				return GetErrorResult(ValidationErrorType.DataTypesNotEqual, propertyInfoFrom.Name, propertyInfoTo.Name);
 			}
 
 			if (datatypeFrom == typeof(float))
@@ -48,7 +49,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return CheckRangeValueDateTime(parameters, propertyInfoFrom, propertyInfoTo);
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeValue)}->{propertyInfoFrom.Name}->DataTypeNotSupported" };
+			return GetErrorResult(ValidationErrorType.DataTypeNotSupported, propertyInfoFrom.Name, propertyInfoTo.Name);
 		}
 
 		private static ValidationCheckResult CheckRangeValueFloat(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -63,7 +64,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeValue)}->{propertyInfoFrom.Name}->{propertyInfoTo.Name}->CheckRangeValueFloatValue" };
+			return GetErrorResult(ValidationErrorType.DataTypeFloat, propertyInfoFrom.Name, propertyInfoTo.Name);
 		}
 
 		private static ValidationCheckResult CheckRangeValueDouble(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -78,7 +79,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeValue)}->{propertyInfoFrom.Name}->{propertyInfoTo.Name}->CheckRangeValueDoubleValue" };
+			return GetErrorResult(ValidationErrorType.DataTypeDouble, propertyInfoFrom.Name, propertyInfoTo.Name);
 		}
 
 		private static ValidationCheckResult CheckRangeValueDecimal(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -93,7 +94,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeValue)}->{propertyInfoFrom.Name}->{propertyInfoTo.Name}->CheckRangeValueDecimalValue" };
+			return GetErrorResult(ValidationErrorType.DataTypeDecimal, propertyInfoFrom.Name, propertyInfoTo.Name);
 		}
 
 		private static ValidationCheckResult CheckRangeValueInteger(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -108,7 +109,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeValue)}->{propertyInfoFrom.Name}->{propertyInfoTo.Name}->CheckRangeValueIntegerValue" };
+			return GetErrorResult(ValidationErrorType.DataTypeInteger, propertyInfoFrom.Name, propertyInfoTo.Name);
 		}
 
 		private static ValidationCheckResult CheckRangeValueLong(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -123,7 +124,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeValue)}->{propertyInfoFrom.Name}->{propertyInfoTo.Name}->CheckRangeValueLongValue" };
+			return GetErrorResult(ValidationErrorType.DataTypeLong, propertyInfoFrom.Name, propertyInfoTo.Name);
 		}
 
 		private static ValidationCheckResult CheckRangeValueDateTime(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -138,7 +139,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeValue)}->{propertyInfoFrom.Name}->{propertyInfoTo.Name}->CheckRangeValueDateTimeValue" };
+			return GetErrorResult(ValidationErrorType.DataTypeDateTime, propertyInfoFrom.Name, propertyInfoTo.Name);
 		}
 
 		public static bool CheckRangeValue<T>(T? valueFrom, T? valueTo, bool allowNull, T? valueCurrent = null) where T : struct
@@ -167,6 +168,23 @@ namespace Eshava.Core.Validation.ValidationMethods
 			}
 
 			return true;
+		}
+
+		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyNameFrom, string propertyNameTo)
+		{
+			return new ValidationCheckResult
+			{
+				ValidationErrors = new List<ValidationCheckResultEntry>
+				{
+					new ValidationCheckResultEntry
+					{
+						MethodType = ValidationMethodType.Range,
+						ErrorType = errorType,
+						PropertyNameFrom = propertyNameFrom,
+						PropertyNameTo = propertyNameTo
+					}
+				}
+			};
 		}
 	}
 }

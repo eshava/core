@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Eshava.Core.Extensions;
 using Eshava.Core.Validation.Attributes;
+using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Validation.ValidationMethods
@@ -22,7 +24,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			var propertyInfoFrom = parameters.DataType.GetProperty(rangeBetween.PropertyNameFrom);
 			if (propertyInfoFrom == null)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->PropertyInfoFromIsNull" };
+				return GetErrorResult(ValidationErrorType.PropertyNotFoundFrom, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo);
 			}
 
 			//Determining the proterty for the end value of the value range
@@ -30,14 +32,14 @@ namespace Eshava.Core.Validation.ValidationMethods
 			var propertyInfoTo = parameters.DataType.GetProperty(rangeBetween.PropertyNameTo);
 			if (propertyInfoTo == null)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->PropertyInfoToIsNull" };
+				return GetErrorResult(ValidationErrorType.PropertyNotFoundTo, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo);
 			}
 
 			//Check whether the data types match
 			var dataTypeTo = propertyInfoTo.GetDataType();
 			if (dataType != dataTypeFrom || dataType != dataTypeTo || dataTypeFrom != dataTypeTo)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->DataTypesNotEqual" };
+				return GetErrorResult(ValidationErrorType.DataTypesNotEqual, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo);
 			}
 
 			if (dataType == typeof(float))
@@ -84,7 +86,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->{propertyInfoFrom.Name}-and-{propertyInfoTo.Name}->CheckRangeValueDateTimeValue" };
+			return GetErrorResult(ValidationErrorType.DataTypeDateTime, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenInteger(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -98,7 +100,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->{propertyInfoFrom.Name}-and-{propertyInfoTo.Name}->CheckRangeValueIntegerValue" };
+			return GetErrorResult(ValidationErrorType.DataTypeInteger, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenLong(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -112,7 +114,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->{propertyInfoFrom.Name}-and-{propertyInfoTo.Name}->CheckRangeValueLongValue" };
+			return GetErrorResult(ValidationErrorType.DataTypeLong, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenDecimal(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -126,7 +128,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->{propertyInfoFrom.Name}-and-{propertyInfoTo.Name}->CheckRangeValueDecimalValue" };
+			return GetErrorResult(ValidationErrorType.DataTypeDecimal, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenDouble(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -140,7 +142,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->{propertyInfoFrom.Name}-and-{propertyInfoTo.Name}->CheckRangeValueDoubleValue" };
+			return GetErrorResult(ValidationErrorType.DataTypeDouble, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenFloat(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -154,7 +156,25 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult { IsValid = true };
 			}
 
-			return new ValidationCheckResult { ValidationError = $"{nameof(CheckRangeBetween)}->{parameters.PropertyInfo.Name}->{propertyInfoFrom.Name}-and-{propertyInfoTo.Name}->CheckRangeValueFloatValue" };
+			return GetErrorResult(ValidationErrorType.DataTypeFloat, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
+		}
+		
+		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName, string propertyNameReferenceFrom, string propertyNameReferenceTo)
+		{
+			return new ValidationCheckResult
+			{
+				ValidationErrors = new List<ValidationCheckResultEntry>
+				{
+					new ValidationCheckResultEntry
+					{
+						MethodType = ValidationMethodType.RangeBetween,
+						ErrorType = errorType,
+						PropertyName = propertyName,
+						PropertyNameFrom = propertyNameReferenceFrom,
+						PropertyNameTo = propertyNameReferenceTo
+					}
+				}
+			};
 		}
 	}
 }

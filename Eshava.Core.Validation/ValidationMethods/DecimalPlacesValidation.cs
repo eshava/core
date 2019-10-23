@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Eshava.Core.Extensions;
 using Eshava.Core.Validation.Attributes;
+using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Validation.ValidationMethods
@@ -22,7 +24,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			{
 				decimalPlacesValue = 0;
 			}
-			
+
 			if (decimalPlacesValue >= 0)
 			{
 				var faktor = Convert.ToInt32(Math.Pow(10, decimalPlacesValue));
@@ -34,7 +36,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 					if (!Equals(Math.Truncate(valueDouble), valueDouble))
 					{
-						return new ValidationCheckResult {ValidationError = $"{nameof(CheckDecimalPlaces)}->{parameters.PropertyInfo.Name}->FloatOrDoubleValue" };
+						return GetErrorResult(ValidationErrorType.DataTypeFloatOrDouble, parameters.PropertyInfo.Name);
 					}
 				}
 				else if (dataType == typeof(decimal))
@@ -44,12 +46,28 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 					if (!Equals(Math.Truncate(valueDecimal), valueDecimal))
 					{
-						return new ValidationCheckResult {ValidationError = $"{nameof(CheckDecimalPlaces)}->{parameters.PropertyInfo.Name}->DecimalValue" };
+						return GetErrorResult(ValidationErrorType.DataTypeDecimal, parameters.PropertyInfo.Name);
 					}
 				}
 			}
 
 			return new ValidationCheckResult { IsValid = true };
+		}
+
+		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName)
+		{
+			return new ValidationCheckResult
+			{
+				ValidationErrors = new List<ValidationCheckResultEntry>
+				{
+					new ValidationCheckResultEntry
+					{
+						MethodType = ValidationMethodType.DecimalPlaces,
+						ErrorType = errorType,
+						PropertyName = propertyName
+					}
+				}
+			};
 		}
 	}
 }

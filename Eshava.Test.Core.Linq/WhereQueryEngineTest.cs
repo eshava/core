@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Eshava.Core.Linq;
+using Eshava.Core.Linq.Attributes;
 using Eshava.Core.Linq.Enums;
 using Eshava.Core.Linq.Models;
 using Eshava.Test.Core.Linq.Models;
@@ -51,22 +54,32 @@ namespace Eshava.Test.Core.Linq
 				SearchTerm = "Darkwing Duck"
 			};
 
-			Expression<Func<Alpha, bool>> expectedResult = p =>
-				p.Gamma.Contains("Darkwing Duck") ||
-				p.Delta.Contains("Darkwing Duck") ||
-				p.DeltaTwo.Contains("Darkwing Duck") ||
-				p.DeltaMail.Contains("Darkwing Duck") ||
-				p.DeltaUrl.Contains("Darkwing Duck") ||
-				p.Epsilon.Contains("Darkwing Duck") ||
-				p.EpsilonTwo.Contains("Darkwing Duck") ||
-				p.Phi.Contains("Darkwing Duck");
+			var typeString = typeof(string);
+			var properties = typeof(Alpha).GetProperties().Where(p => p.PropertyType == typeString && p.CanWrite).ToList();
+			var propertyCountQueryIgnore = 0;
+
+			var exampleList = new List<Alpha>();
+			foreach (var propertyInfo in properties)
+			{
+				var alpha = new Alpha();
+				propertyInfo.SetValue(alpha, queryParameter.SearchTerm);
+				exampleList.Add(alpha);
+
+				if (propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() != null)
+				{
+					propertyCountQueryIgnore++;
+				}
+			}
 
 			// Act
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
 			result.Should().HaveCount(1);
-			result.First().Should().BeEquivalentTo(expectedResult);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(properties.Count - propertyCountQueryIgnore);
+			propertyCountQueryIgnore.Should().Be(1);
 		}
 
 		[TestMethod]
@@ -128,6 +141,60 @@ namespace Eshava.Test.Core.Linq
 			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Beta.Should().Be(2);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringPropertyQueryIgnoreTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new Alpha
+				{
+					Beta = 1,
+					DeltaTwo = "Darkwing Duck",
+					Delta = "QuackFu"
+				},
+				new Alpha
+				{
+					Beta = 2,
+					DeltaTwo = "MegaVolt",
+					Delta = "QuackFu"
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.Equal,
+						PropertyName = nameof(Alpha.DeltaTwo),
+						SearchTerm = "Darkwing Duck"
+					},
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.Contains,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "QuackFu"
+					}
+				}
+			};
+
+			Expression<Func<Alpha, bool>> expectedResultDelta = p => p.Delta != null && p.Delta.Contains("QuackFu");
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
+
+			// Assert
+			result.Should().HaveCount(1);
+			result.Single().Should().BeEquivalentTo(expectedResultDelta);
+
+			var resultWhere = exampleList.Where(result.Single().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Beta.Should().Be(1);
+			resultWhere.Last().Beta.Should().Be(2);
 		}
 
 		[TestMethod]
@@ -506,13 +573,13 @@ namespace Eshava.Test.Core.Linq
 					{
 						Operator =  CompareOperator.LessThanOrEqual,
 						PropertyName = nameof(Alpha.Psi),
-						SearchTerm = dateTimePsi.ToString("yyyy-MM-ddTHH:mm:ssZ")
+						SearchTerm = dateTimePsi.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture)
 					},
 					new WhereQueryProperty
 					{
 						Operator =  CompareOperator.NotEqual,
 						PropertyName = nameof(Alpha.OmegaDateTime),
-						SearchTerm = dateTimeOmega.ToString("yyyy-MM-ddTHH:mm:ssZ")
+						SearchTerm = dateTimeOmega.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture)
 					}
 				}
 			};
@@ -1026,7 +1093,7 @@ namespace Eshava.Test.Core.Linq
 					Sigma = new List<int> { 1, 2, 3, }
 				}
 			};
-			
+
 			var queryParameter = new QueryParameters
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
@@ -1052,6 +1119,110 @@ namespace Eshava.Test.Core.Linq
 			var resultWhere = exampleList.Where(result.First().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Beta.Should().Be(3);
+		}
+
+		[TestMethod]
+		public void RemovePropertyMappingsGuidSearchTest()
+		{
+			// Arrange
+			var queryProperties = new List<WhereQueryProperty>
+			{
+				new WhereQueryProperty
+				{
+					PropertyName = nameof(Alpha.Chi),
+					SearchTerm = Guid.NewGuid().ToString(),
+					Operator = CompareOperator.Equal
+				}
+			};
+
+			var mappings = new Dictionary<string, List<Expression<Func<Alpha, object>>>>
+			{
+				{ nameof(Alpha.Chi), new List< Expression<Func<Alpha, object>>>{ p => p.Kappa.Psi } },
+				{ nameof(Alpha.Delta), new List< Expression<Func<Alpha, object>>>{ p => p.DeltaTwo } },
+			};
+
+
+			// Act
+			_classUnderTest.RemovePropertyMappings(queryProperties, mappings);
+
+			// Assert
+			mappings.Keys.Should().HaveCount(1);
+			mappings.ContainsKey(nameof(Alpha.Delta)).Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void RemovePropertyMappingsStringSearchTest()
+		{
+			// Arrange
+			var queryProperties = new List<WhereQueryProperty>
+			{
+				new WhereQueryProperty
+				{
+					PropertyName = nameof(Alpha.Chi),
+					SearchTerm = "Darkwing Duck",
+					Operator = CompareOperator.Equal
+				}
+			};
+
+			var mappings = new Dictionary<string, List<Expression<Func<Alpha, object>>>>
+			{
+				{ nameof(Alpha.Chi), new List< Expression<Func<Alpha, object>>>{ p => p.Kappa.Psi } },
+				{ nameof(Alpha.Delta), new List< Expression<Func<Alpha, object>>>{ p => p.DeltaTwo } },
+			};
+
+
+			// Act
+			_classUnderTest.RemovePropertyMappings(queryProperties, mappings);
+
+			// Assert
+			mappings.Keys.Should().HaveCount(2);
+			mappings.ContainsKey(nameof(Alpha.Chi)).Should().BeTrue();
+			mappings.ContainsKey(nameof(Alpha.Delta)).Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void RemovePropertyMappingsNoMappingsTest()
+		{
+			// Arrange
+			var queryProperties = new List<WhereQueryProperty>
+			{
+				new WhereQueryProperty
+				{
+					PropertyName = nameof(Alpha.Chi),
+					SearchTerm = "Darkwing Duck",
+					Operator = CompareOperator.Equal
+				}
+			};
+
+			var unexpectedException = default(Exception);
+
+			// Act
+			try
+			{
+				_classUnderTest.RemovePropertyMappings<Alpha>(queryProperties, null);
+			}
+			catch (Exception ex)
+			{
+				unexpectedException = ex;
+			}
+
+			// Assert
+			unexpectedException.Should().BeNull();
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(NullReferenceException))]
+		public void RemovePropertyMappingsNoPropertiesTest()
+		{
+			// Arrange
+			var mappings = new Dictionary<string, List<Expression<Func<Alpha, object>>>>
+			{
+				{ nameof(Alpha.Chi), new List< Expression<Func<Alpha, object>>>{ p => p.Kappa.Psi } },
+				{ nameof(Alpha.Delta), new List< Expression<Func<Alpha, object>>>{ p => p.DeltaTwo } },
+			};
+
+			// Act
+			_classUnderTest.RemovePropertyMappings(null, mappings);
 		}
 	}
 }

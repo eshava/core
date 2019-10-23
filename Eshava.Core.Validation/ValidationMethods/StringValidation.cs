@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using Eshava.Core.Extensions;
+using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Validation.ValidationMethods
@@ -26,12 +28,12 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (maxLength != null && valueString.Length > maxLength.Length)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(CheckStringLength)}->{parameters.PropertyInfo.Name}->GreaterMaxLength" };
+				return GetErrorResult(ValidationErrorType.GreaterMaxLength, parameters.PropertyInfo.Name);
 			}
 
 			if (minLength != null && valueString.Length < minLength.Length)
 			{
-				return new ValidationCheckResult { ValidationError = $"{nameof(CheckStringLength)}->{parameters.PropertyInfo.Name}->LowerMinLength" };
+				return GetErrorResult(ValidationErrorType.LowerMinLength, parameters.PropertyInfo.Name);
 			}
 
 			return new ValidationCheckResult { IsValid = true };
@@ -57,7 +59,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 					if (!match.Success)
 					{
-						return new ValidationCheckResult { ValidationError = $"{nameof(CheckMailAddress)}->{parameters.PropertyInfo.Name}->NotMatch" };
+						return GetErrorResult(ValidationErrorType.NoWellFormedMailAddress, parameters.PropertyInfo.Name);
 					}
 				}
 			}
@@ -80,7 +82,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				{
 					if (valueString.Contains("@"))
 					{
-						return new ValidationCheckResult { ValidationError = $"{nameof(CheckUrl)}->{parameters.PropertyInfo.Name}->NoWellFormedUri" };
+						return GetErrorResult(ValidationErrorType.NoWellFormedUri, parameters.PropertyInfo.Name);
 					}
 
 					if (!valueString.StartsWith("http://") && !valueString.StartsWith("https://"))
@@ -96,13 +98,29 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 					if (!isValid)
 					{
-						return new ValidationCheckResult { ValidationError = $"{nameof(CheckUrl)}->{parameters.PropertyInfo.Name}->NoWellFormedUri" };
+						return GetErrorResult(ValidationErrorType.NoWellFormedUri, parameters.PropertyInfo.Name);
 					}
 
 				}
 			}
 
 			return new ValidationCheckResult { IsValid = true };
+		}
+
+		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName)
+		{
+			return new ValidationCheckResult
+			{
+				ValidationErrors = new List<ValidationCheckResultEntry>
+				{
+					new ValidationCheckResultEntry
+					{
+						MethodType = ValidationMethodType.String,
+						ErrorType = errorType,
+						PropertyName = propertyName
+					}
+				}
+			};
 		}
 	}
 }

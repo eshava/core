@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Eshava.Core.Extensions;
+using Eshava.Core.Linq.Attributes;
 using Eshava.Core.Linq.Enums;
 using Eshava.Core.Linq.Interfaces;
 using Eshava.Core.Linq.Models;
@@ -20,7 +21,7 @@ namespace Eshava.Core.Linq
 		private static readonly ConstantExpression _constantExpressionStringNull = Expression.Constant(null, _typeString);
 		private static readonly ConstantExpression _constantExpressionObjectNull = Expression.Constant(null, _typeObject);
 		private static readonly MethodInfo _methodInfoStringContains = _typeString.GetMethod("Contains", new[] { _typeString });
-		
+
 		private static readonly Dictionary<Type, Func<string, Type, CompareOperator, ConstantExpression>> _constantExpressions = new Dictionary<Type, Func<string, Type, CompareOperator, ConstantExpression>>
 		{
 			{ typeof(Guid), GetConstantGuid },
@@ -104,6 +105,31 @@ namespace Eshava.Core.Linq
 			return where;
 		}
 
+		/// <summary>
+		/// Removes all properties for which a GUID search term was passed
+		/// </summary>
+		/// <typeparam name="T">Data type</typeparam>
+		/// <param name="queryProperties">Properties which contains search term</param>
+		/// <param name="mappings">Property mappings for navigation to a subproperty</param>
+		/// <returns></returns>
+		public IWhereQueryEngine RemovePropertyMappings<T>(IEnumerable<WhereQueryProperty> queryProperties, Dictionary<string, List<Expression<Func<T, object>>>> mappings) where T : class
+		{
+			if (mappings == null)
+			{
+				return this;
+			}
+
+			foreach (var queryProperty in queryProperties)
+			{
+				if (mappings.ContainsKey(queryProperty.PropertyName) && Guid.TryParse(queryProperty.SearchTerm, out var _))
+				{
+					mappings.Remove(queryProperty.PropertyName);
+				}
+			}
+
+			return this;
+		}
+		
 		private IEnumerable<Expression<Func<T, bool>>> BuildPropertyQueryConditions<T>(BuildQueryContainer<T> queryContainer) where T : class
 		{
 			var where = new List<Expression<Func<T, bool>>>();
@@ -152,7 +178,7 @@ namespace Eshava.Core.Linq
 				{
 					where.AddRange(queryContainer.Mappings[propertyInfo.Name].Select(m => GetMappingCondition(property, m, _typeString)).Where(e => e != null).ToList());
 				}
-				else if (propertyInfo.PropertyType == _typeString)
+				else if (propertyInfo.PropertyType == _typeString && propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() == null)
 				{
 					var condition = GetPropertyCondition<T>(property, queryContainer.PropertyInfos, queryContainer.Parameter);
 
@@ -195,7 +221,7 @@ namespace Eshava.Core.Linq
 		private Expression<Func<T, bool>> GetPropertyCondition<T>(WhereQueryProperty property, IEnumerable<PropertyInfo> propertyInfos, ParameterExpression parameterExpression) where T : class
 		{
 			var propertyInfo = propertyInfos.SingleOrDefault(p => p.Name.Equals(property.PropertyName));
-			if (propertyInfo == null)
+			if (propertyInfo == null || propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() != null)
 			{
 				return null;
 			}
@@ -301,12 +327,22 @@ namespace Eshava.Core.Linq
 
 		private static ConstantExpression GetConstantDateTime(string value, Type dataType, CompareOperator compareOperator)
 		{
-			if (!DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.None, out var valueDateTime) || compareOperator == CompareOperator.None)
+			if (compareOperator == CompareOperator.None)
 			{
 				return null;
 			}
 
-			return Expression.Constant(valueDateTime, dataType);
+			DateTime valueDateTime;
+			if (DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.None, out valueDateTime)
+				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out valueDateTime)
+				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out valueDateTime)
+				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ssK", CultureInfo.InvariantCulture, DateTimeStyles.None, out valueDateTime)
+				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out valueDateTime))
+			{
+				return Expression.Constant(valueDateTime, dataType);
+			}
+
+			return null;
 		}
 
 		private Expression<Func<T, bool>> GetConditionComparableByProperty<T>(ExpressionDataContainer data) where T : class
@@ -362,7 +398,7 @@ namespace Eshava.Core.Linq
 
 			return previousVisitor.Visit(condition.Body);
 		}
-		
+
 		private static Expression GetContainsExpression(MemberExpression member, ConstantExpression constant)
 		{
 			if (member.Type == _typeString)

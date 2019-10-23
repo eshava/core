@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <LangVersion>latest</LangVersion>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Collection of methods, classes and helpers to simplify recurring standard actions</Description>
     <Company>Eshava</Company>

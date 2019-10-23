@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Eshava.Core.Validation;
+using Eshava.Core.Validation.Enums;
+using Eshava.Core.Validation.Models;
 using Eshava.Test.Core.Validation.Models;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -27,7 +30,8 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
-			result.ValidationError.Should().Be("model should not be null.");
+			result.ValidationErrors.First().MethodType.Should().Be(ValidationMethodType.Input);
+			result.ValidationErrors.First().ErrorType.Should().Be(ValidationErrorType.IsNull);
 		}
 
 		[TestMethod]
@@ -40,23 +44,99 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(14);
 
-			var expectedError = new StringBuilder();
-			expectedError.AppendLine("CheckRequired->Gamma->ValueIsNull");
-			expectedError.AppendLine("CheckEqualsToString->NotEquals=True->Gamma->Epsilon->EqualsOrNotEqualsStringValue");
-			expectedError.AppendLine("CheckEqualsToString->NotEquals=True->Delta->Epsilon->EqualsOrNotEqualsStringValue");
-			expectedError.AppendLine("CheckEqualsToString->NotEquals=True->Delta->EpsilonTwo->EqualsOrNotEqualsStringValue");
-			expectedError.AppendLine("CheckEqualsToString->NotEquals=True->DeltaTwo->EpsilonTwo->NotEqualsStringValue");
-			expectedError.AppendLine("CheckRequired->LambdaNullable->ValueIsNull");
-			expectedError.AppendLine("CheckRequired->LambdaLongNullable->ValueIsNull");
-			expectedError.AppendLine("CheckRange->Ny->FloatValue");
-			expectedError.AppendLine("CheckRange->Omikron->IntegerValue");
-			expectedError.AppendLine("CheckEqualsToObject->NotEquals=True->Pi->Rho->EqualsAndNotEqualToDefault");
-			expectedError.AppendLine("CheckEqualsToObject->NotEquals=True->Rho->Pi->EqualsAndNotEqualToDefault");
-			expectedError.AppendLine("CheckRequired->Sigma->ValueIsNull");
-			expectedError.AppendLine("CheckEqualsToObject->NotEquals=True->OmegaIntegerNotEqual->OmegaIntegerEqualTwo->EqualsOrNotEquals");
-			expectedError.Append("CheckEqualsToObject->NotEquals=True->OmegaLongNotEqual->OmegaLongEqualTwo->EqualsOrNotEquals");
-			result.ValidationError.Should().Be(expectedError.ToString());
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required
+				&& error.ErrorType == ValidationErrorType.IsNull
+				&& error.PropertyName == nameof(Alpha.Gamma))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required
+				&& error.ErrorType == ValidationErrorType.IsNull
+				&& error.PropertyName == nameof(Alpha.LambdaNullable))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required
+				&& error.ErrorType == ValidationErrorType.IsNull
+				&& error.PropertyName == nameof(Alpha.LambdaLongNullable))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required
+				&& error.ErrorType == ValidationErrorType.IsNull
+				&& error.PropertyName == nameof(Alpha.Sigma))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.EqualsString
+				&& error.PropertyName == nameof(Alpha.Gamma)
+				&& error.PropertyNameTo == nameof(Alpha.Epsilon))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.EqualsString
+				&& error.PropertyName == nameof(Alpha.Delta)
+				&& error.PropertyNameTo == nameof(Alpha.Epsilon))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.EqualsString
+				&& error.PropertyName == nameof(Alpha.Delta)
+				&& error.PropertyNameTo == nameof(Alpha.EpsilonTwo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.EqualsAndNotEqualToDefaultString
+				&& error.PropertyName == nameof(Alpha.DeltaTwo)
+				&& error.PropertyNameTo == nameof(Alpha.EpsilonTwo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeHardCoded
+				&& error.ErrorType == ValidationErrorType.DataTypeFloat
+				&& error.PropertyName == nameof(Alpha.Ny))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeHardCoded
+				&& error.ErrorType == ValidationErrorType.DataTypeInteger
+				&& error.PropertyName == nameof(Alpha.Omikron))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.EqualsAndNotEqualToDefault
+				&& error.PropertyName == nameof(Alpha.Pi)
+				&& error.PropertyNameTo == nameof(Alpha.Rho))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.EqualsAndNotEqualToDefault
+				&& error.PropertyName == nameof(Alpha.Rho)
+				&& error.PropertyNameTo == nameof(Alpha.Pi))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.Equals
+				&& error.PropertyName == nameof(Alpha.OmegaIntegerNotEqual)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaIntegerEqualTwo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.Equals
+				&& error.PropertyName == nameof(Alpha.OmegaLongNotEqual)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaLongEqualTwo))
+			.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -88,7 +168,7 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeTrue();
-			result.ValidationError.Should().BeNull();
+			result.ValidationErrors.Should().HaveCount(0);
 		}
 
 
@@ -117,15 +197,37 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(6);
 
-			var expectedError = new StringBuilder();
-			expectedError.AppendLine("CheckRequired->Gamma->StringValueIsNullOrEmpty");
-			expectedError.AppendLine("CheckRequired->LambdaNullable->ValueIsNull");
-			expectedError.AppendLine("CheckRequired->LambdaLongNullable->ValueIsNull");
-			expectedError.AppendLine("CheckRequired->Sigma->ValueIsNull");
-			expectedError.AppendLine("CheckRequired->Psi->ValueIsNull");
-			expectedError.Append("CheckRequired->Psi->ValueIsNull");
-			result.ValidationError.Should().Be(expectedError.ToString());
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required
+				&& error.ErrorType == ValidationErrorType.IsEmpty
+				&& error.PropertyName == nameof(Alpha.Gamma))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required
+				&& error.ErrorType == ValidationErrorType.IsNull
+				&& error.PropertyName == nameof(Alpha.LambdaNullable))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required
+				&& error.ErrorType == ValidationErrorType.IsNull
+				&& error.PropertyName == nameof(Alpha.LambdaLongNullable))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required
+				&& error.ErrorType == ValidationErrorType.IsNull
+				&& error.PropertyName == nameof(Alpha.Sigma))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Count(error =>
+				error.MethodType == ValidationMethodType.Required
+				&& error.ErrorType == ValidationErrorType.IsNull
+				&& error.PropertyName == nameof(Alpha.Psi))
+			.Should().Be(2);
 		}
 
 		[TestMethod]
@@ -158,15 +260,49 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(6);
 
-			var expectedError = new StringBuilder();
-			expectedError.AppendLine("CheckEqualsToString->NotEquals=False->Gamma->Delta->EqualsOrNotEqualsStringValue");
-			expectedError.AppendLine("CheckEqualsToString->NotEquals=False->Delta->Gamma->EqualsOrNotEqualsStringValue");
-			expectedError.AppendLine("CheckEqualsToObject->NotEquals=False->OmegaIntegerEqualOne->OmegaIntegerEqualTwo->EqualsOrNotEquals");
-			expectedError.AppendLine("CheckEqualsToObject->NotEquals=False->OmegaIntegerEqualTwo->OmegaIntegerEqualOne->EqualsOrNotEquals");
-			expectedError.AppendLine("CheckEqualsToObject->NotEquals=False->OmegaLongEqualOne->OmegaLongEqualTwo->EqualsOrNotEquals");
-			expectedError.Append("CheckEqualsToObject->NotEquals=False->OmegaLongEqualTwo->OmegaLongEqualOne->EqualsOrNotEquals");
-			result.ValidationError.Should().Be(expectedError.ToString());
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Equals
+				&& error.ErrorType == ValidationErrorType.NotEqualsString
+				&& error.PropertyName == nameof(Alpha.Gamma)
+				&& error.PropertyNameTo == nameof(Alpha.Delta))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Equals
+				&& error.ErrorType == ValidationErrorType.NotEqualsString
+				&& error.PropertyName == nameof(Alpha.Delta)
+				&& error.PropertyNameTo == nameof(Alpha.Gamma))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Equals
+				&& error.ErrorType == ValidationErrorType.NotEquals
+				&& error.PropertyName == nameof(Alpha.OmegaIntegerEqualOne)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaIntegerEqualTwo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Equals
+				&& error.ErrorType == ValidationErrorType.NotEquals
+				&& error.PropertyName == nameof(Alpha.OmegaIntegerEqualTwo)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaIntegerEqualOne))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Equals
+				&& error.ErrorType == ValidationErrorType.NotEquals
+				&& error.PropertyName == nameof(Alpha.OmegaLongEqualOne)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaLongEqualTwo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Equals
+				&& error.ErrorType == ValidationErrorType.NotEquals
+				&& error.PropertyName == nameof(Alpha.OmegaLongEqualTwo)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaLongEqualOne))
+			.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -192,17 +328,64 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(8);
 
-			var expectedError = new StringBuilder();
-			expectedError.AppendLine("CheckEqualsToString->NotEquals=True->Gamma->Epsilon->EqualsOrNotEqualsStringValue");
-			expectedError.AppendLine("CheckEqualsToString->NotEquals=True->Delta->Epsilon->EqualsOrNotEqualsStringValue");
-			expectedError.AppendLine("CheckEqualsToString->NotEquals=True->Delta->EpsilonTwo->EqualsOrNotEqualsStringValue");
-			expectedError.AppendLine("CheckEqualsToString->NotEquals=True->DeltaTwo->EpsilonTwo->NotEqualsStringValue");
-			expectedError.AppendLine("CheckEqualsToObject->NotEquals=True->Pi->Rho->EqualsAndNotEqualToDefault");
-			expectedError.AppendLine("CheckEqualsToObject->NotEquals=True->Rho->Pi->EqualsAndNotEqualToDefault");
-			expectedError.AppendLine("CheckEqualsToObject->NotEquals=True->OmegaIntegerNotEqual->OmegaIntegerEqualTwo->EqualsOrNotEquals");
-			expectedError.Append("CheckEqualsToObject->NotEquals=True->OmegaLongNotEqual->OmegaLongEqualTwo->EqualsOrNotEquals");
-			result.ValidationError.Should().Be(expectedError.ToString());
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.EqualsString
+				&& error.PropertyName == nameof(Alpha.Gamma)
+				&& error.PropertyNameTo == nameof(Alpha.Epsilon))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.EqualsString
+				&& error.PropertyName == nameof(Alpha.Delta)
+				&& error.PropertyNameTo == nameof(Alpha.Epsilon))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.EqualsString
+				&& error.PropertyName == nameof(Alpha.Delta)
+				&& error.PropertyNameTo == nameof(Alpha.EpsilonTwo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.EqualsAndNotEqualToDefaultString
+				&& error.PropertyName == nameof(Alpha.DeltaTwo)
+				&& error.PropertyNameTo == nameof(Alpha.EpsilonTwo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.EqualsAndNotEqualToDefault
+				&& error.PropertyName == nameof(Alpha.Pi)
+				&& error.PropertyNameTo == nameof(Alpha.Rho))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.EqualsAndNotEqualToDefault
+				&& error.PropertyName == nameof(Alpha.Rho)
+				&& error.PropertyNameTo == nameof(Alpha.Pi))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.Equals
+				&& error.PropertyName == nameof(Alpha.OmegaIntegerNotEqual)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaIntegerEqualTwo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.NotEquals
+				&& error.ErrorType == ValidationErrorType.Equals
+				&& error.PropertyName == nameof(Alpha.OmegaLongNotEqual)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaLongEqualTwo))
+			.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -231,7 +414,7 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeTrue();
-			result.ValidationError.Should().BeNull();
+			result.ValidationErrors.Should().HaveCount(0);
 		}
 
 		[TestMethod]
@@ -263,11 +446,25 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
-			var expectedError = new StringBuilder();
-			expectedError.AppendLine("CheckStringLength->Gamma->LowerMinLength");
-			expectedError.AppendLine("CheckStringLength->Delta->LowerMinLength");
-			expectedError.Append("CheckStringLength->Ypsilon->LowerMinLength");
-			result.ValidationError.Should().Be(expectedError.ToString());
+			result.ValidationErrors.Should().HaveCount(3);
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.String
+				&& error.ErrorType == ValidationErrorType.LowerMinLength
+				&& error.PropertyName == nameof(Alpha.Gamma))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.String
+				&& error.ErrorType == ValidationErrorType.LowerMinLength
+				&& error.PropertyName == nameof(Alpha.Delta))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.String
+				&& error.ErrorType == ValidationErrorType.LowerMinLength
+				&& error.PropertyName == nameof(Alpha.Ypsilon))
+			.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -298,14 +495,37 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
-			var expectedError = new StringBuilder();
-			expectedError.AppendLine("CheckStringLength->Gamma->GreaterMaxLength");
-			expectedError.AppendLine("CheckStringLength->Delta->GreaterMaxLength");
-			expectedError.AppendLine("CheckStringLength->Chi->GreaterMaxLength");
-			expectedError.AppendLine("CheckStringLength->Chi->GreaterMaxLength");
-			expectedError.AppendLine("CheckStringLength->Ypsilon->GreaterMaxLength");
-			expectedError.Append("CheckStringLength->Phi->GreaterMaxLength");
-			result.ValidationError.Should().Be(expectedError.ToString());
+			result.ValidationErrors.Should().HaveCount(6);
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.String
+				&& error.ErrorType == ValidationErrorType.GreaterMaxLength
+				&& error.PropertyName == nameof(Alpha.Gamma))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.String
+				&& error.ErrorType == ValidationErrorType.GreaterMaxLength
+				&& error.PropertyName == nameof(Alpha.Delta))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Count(error =>
+				error.MethodType == ValidationMethodType.String
+				&& error.ErrorType == ValidationErrorType.GreaterMaxLength
+				&& error.PropertyName == nameof(Alpha.Chi))
+			.Should().Be(2);
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.String
+				&& error.ErrorType == ValidationErrorType.GreaterMaxLength
+				&& error.PropertyName == nameof(Alpha.Ypsilon))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.String
+				&& error.ErrorType == ValidationErrorType.GreaterMaxLength
+				&& error.PropertyName == nameof(Alpha.Phi))
+			.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -337,15 +557,43 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(6);
 
-			var expectedError = new StringBuilder();
-			expectedError.AppendLine("CheckRange->Lambda->IntegerValue");
-			expectedError.AppendLine("CheckRange->LambdaLong->LongValue");
-			expectedError.AppendLine("CheckRange->My->DecimalValue");
-			expectedError.AppendLine("CheckRange->Ny->FloatValue");
-			expectedError.AppendLine("CheckRange->Xi->DoubleValue");
-			expectedError.Append("CheckRange->Omikron->IntegerValue");
-			result.ValidationError.Should().Be(expectedError.ToString());
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeHardCoded
+				&& error.ErrorType == ValidationErrorType.DataTypeInteger
+				&& error.PropertyName == nameof(Alpha.Lambda))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeHardCoded
+				&& error.ErrorType == ValidationErrorType.DataTypeLong
+				&& error.PropertyName == nameof(Alpha.LambdaLong))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeHardCoded
+				&& error.ErrorType == ValidationErrorType.DataTypeDecimal
+				&& error.PropertyName == nameof(Alpha.My))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeHardCoded
+				&& error.ErrorType == ValidationErrorType.DataTypeFloat
+				&& error.PropertyName == nameof(Alpha.Ny))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeHardCoded
+				&& error.ErrorType == ValidationErrorType.DataTypeDouble
+				&& error.PropertyName == nameof(Alpha.Xi))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeHardCoded
+				&& error.ErrorType == ValidationErrorType.DataTypeInteger
+				&& error.PropertyName == nameof(Alpha.Omikron))
+			.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -378,15 +626,43 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(6);
 
-			var expectedError = new StringBuilder();
-			expectedError.AppendLine("CheckRange->Lambda->IntegerValue");
-			expectedError.AppendLine("CheckRange->LambdaLong->LongValue");
-			expectedError.AppendLine("CheckRange->My->DecimalValue");
-			expectedError.AppendLine("CheckRange->Ny->FloatValue");
-			expectedError.AppendLine("CheckRange->Xi->DoubleValue");
-			expectedError.Append("CheckRange->Omikron->IntegerValue");
-			result.ValidationError.Should().Be(expectedError.ToString());
+			result.ValidationErrors.Any(error =>
+					error.MethodType == ValidationMethodType.RangeHardCoded
+					&& error.ErrorType == ValidationErrorType.DataTypeInteger
+					&& error.PropertyName == nameof(Alpha.Lambda))
+				.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeHardCoded
+				&& error.ErrorType == ValidationErrorType.DataTypeLong
+				&& error.PropertyName == nameof(Alpha.LambdaLong))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeHardCoded
+				&& error.ErrorType == ValidationErrorType.DataTypeDecimal
+				&& error.PropertyName == nameof(Alpha.My))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeHardCoded
+				&& error.ErrorType == ValidationErrorType.DataTypeFloat
+				&& error.PropertyName == nameof(Alpha.Ny))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeHardCoded
+				&& error.ErrorType == ValidationErrorType.DataTypeDouble
+				&& error.PropertyName == nameof(Alpha.Xi))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeHardCoded
+				&& error.ErrorType == ValidationErrorType.DataTypeInteger
+				&& error.PropertyName == nameof(Alpha.Omikron))
+			.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -417,11 +693,19 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(2);
 
-			var expectedError = new StringBuilder();
-			expectedError.AppendLine("CheckDecimalPlaces->My->DecimalValue");
-			expectedError.Append("CheckDecimalPlaces->Xi->FloatOrDoubleValue");
-			result.ValidationError.Should().Be(expectedError.ToString());
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.DecimalPlaces
+				&& error.ErrorType == ValidationErrorType.DataTypeDecimal
+				&& error.PropertyName == nameof(Alpha.My))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.DecimalPlaces
+				&& error.ErrorType == ValidationErrorType.DataTypeFloatOrDouble
+				&& error.PropertyName == nameof(Alpha.Xi))
+			.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -452,11 +736,14 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(2);
 
-			var expectedError = new StringBuilder();
-			expectedError.AppendLine("CheckRangeValue->MyNullableOne->MyNullableTwo->CheckRangeValueDecimalValue");
-			expectedError.Append("CheckRangeValue->MyNullableOne->MyNullableTwo->CheckRangeValueDecimalValue");
-			result.ValidationError.Should().Be(expectedError.ToString());
+			result.ValidationErrors.Count(error =>
+				error.MethodType == ValidationMethodType.Range
+				&& error.ErrorType == ValidationErrorType.DataTypeDecimal
+				&& error.PropertyNameFrom == nameof(Alpha.MyNullableOne)
+				&& error.PropertyNameTo == nameof(Alpha.MyNullableTwo))
+			.Should().Be(2);
 		}
 
 		[TestMethod]
@@ -488,7 +775,7 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeTrue();
-			result.ValidationError.Should().BeNull();
+			result.ValidationErrors.Should().HaveCount(0);
 		}
 
 		[TestMethod]
@@ -520,11 +807,14 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(2);
 
-			var expectedError = new StringBuilder();
-			expectedError.AppendLine("CheckRangeValue->MyNullableThree->MyNullableFive->CheckRangeValueDecimalValue");
-			expectedError.Append("CheckRangeValue->MyNullableThree->MyNullableFive->CheckRangeValueDecimalValue");
-			result.ValidationError.Should().Be(expectedError.ToString());
+			result.ValidationErrors.Count(error =>
+				error.MethodType == ValidationMethodType.Range
+				&& error.ErrorType == ValidationErrorType.DataTypeDecimal
+				&& error.PropertyNameFrom == nameof(Alpha.MyNullableThree)
+				&& error.PropertyNameTo == nameof(Alpha.MyNullableFive))
+			.Should().Be(2);
 		}
 
 		[TestMethod]
@@ -559,7 +849,7 @@ namespace Eshava.Test.Core.Validation
 				OmegaDoubleFrom = 0,
 				OmegaDouble = -1,
 				OmegaDoubleTo = 1,
-				OmegaDateTimeFrom  = DateTime.Today,
+				OmegaDateTimeFrom = DateTime.Today,
 				OmegaDateTime = DateTime.Today.AddDays(-1),
 				OmegaDateTimeTo = DateTime.Today.AddDays(1),
 				OmegaIntegerNotEqual = 1,
@@ -571,15 +861,55 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(6);
 
-			var expectedError = new StringBuilder();
-			expectedError.AppendLine("CheckRangeBetween->MyNullableSix->MyNullableOne-and-MyNullableTwo->CheckRangeValueDecimalValue");
-			expectedError.AppendLine("CheckRangeBetween->OmegaFloat->OmegaFloatFrom-and-OmegaFloatTo->CheckRangeValueFloatValue");
-			expectedError.AppendLine("CheckRangeBetween->OmegaInteger->OmegaIntegerFrom-and-OmegaIntegerTo->CheckRangeValueIntegerValue");
-			expectedError.AppendLine("CheckRangeBetween->OmegaLong->OmegaLongFrom-and-OmegaLongTo->CheckRangeValueLongValue");
-			expectedError.AppendLine("CheckRangeBetween->OmegaDouble->OmegaDoubleFrom-and-OmegaDoubleTo->CheckRangeValueDoubleValue");
-			expectedError.Append("CheckRangeBetween->OmegaDateTime->OmegaDateTimeFrom-and-OmegaDateTimeTo->CheckRangeValueDateTimeValue");
-			result.ValidationError.Should().Be(expectedError.ToString());
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeBetween
+				&& error.ErrorType == ValidationErrorType.DataTypeDecimal
+				&& error.PropertyName == nameof(Alpha.MyNullableSix)
+				&& error.PropertyNameFrom == nameof(Alpha.MyNullableOne)
+				&& error.PropertyNameTo == nameof(Alpha.MyNullableTwo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeBetween
+				&& error.ErrorType == ValidationErrorType.DataTypeFloat
+				&& error.PropertyName == nameof(Alpha.OmegaFloat)
+				&& error.PropertyNameFrom == nameof(Alpha.OmegaFloatFrom)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaFloatTo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeBetween
+				&& error.ErrorType == ValidationErrorType.DataTypeInteger
+				&& error.PropertyName == nameof(Alpha.OmegaInteger)
+				&& error.PropertyNameFrom == nameof(Alpha.OmegaIntegerFrom)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaIntegerTo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeBetween
+				&& error.ErrorType == ValidationErrorType.DataTypeLong
+				&& error.PropertyName == nameof(Alpha.OmegaLong)
+				&& error.PropertyNameFrom == nameof(Alpha.OmegaLongFrom)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaLongTo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeBetween
+				&& error.ErrorType == ValidationErrorType.DataTypeDouble
+				&& error.PropertyName == nameof(Alpha.OmegaDouble)
+				&& error.PropertyNameFrom == nameof(Alpha.OmegaDoubleFrom)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaDoubleTo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeBetween
+				&& error.ErrorType == ValidationErrorType.DataTypeDateTime
+				&& error.PropertyName == nameof(Alpha.OmegaDateTime)
+				&& error.PropertyNameFrom == nameof(Alpha.OmegaDateTimeFrom)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaDateTimeTo))
+			.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -626,27 +956,67 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(6);
 
-			var expectedError = new StringBuilder();
-			expectedError.AppendLine("CheckRangeBetween->MyNullableSix->MyNullableOne-and-MyNullableTwo->CheckRangeValueDecimalValue");
-			expectedError.AppendLine("CheckRangeBetween->OmegaFloat->OmegaFloatFrom-and-OmegaFloatTo->CheckRangeValueFloatValue");
-			expectedError.AppendLine("CheckRangeBetween->OmegaInteger->OmegaIntegerFrom-and-OmegaIntegerTo->CheckRangeValueIntegerValue");
-			expectedError.AppendLine("CheckRangeBetween->OmegaLong->OmegaLongFrom-and-OmegaLongTo->CheckRangeValueLongValue");
-			expectedError.AppendLine("CheckRangeBetween->OmegaDouble->OmegaDoubleFrom-and-OmegaDoubleTo->CheckRangeValueDoubleValue");
-			expectedError.Append("CheckRangeBetween->OmegaDateTime->OmegaDateTimeFrom-and-OmegaDateTimeTo->CheckRangeValueDateTimeValue");
-			result.ValidationError.Should().Be(expectedError.ToString());
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeBetween
+				&& error.ErrorType == ValidationErrorType.DataTypeDecimal
+				&& error.PropertyName == nameof(Alpha.MyNullableSix)
+				&& error.PropertyNameFrom == nameof(Alpha.MyNullableOne)
+				&& error.PropertyNameTo == nameof(Alpha.MyNullableTwo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeBetween
+				&& error.ErrorType == ValidationErrorType.DataTypeFloat
+				&& error.PropertyName == nameof(Alpha.OmegaFloat)
+				&& error.PropertyNameFrom == nameof(Alpha.OmegaFloatFrom)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaFloatTo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeBetween
+				&& error.ErrorType == ValidationErrorType.DataTypeInteger
+				&& error.PropertyName == nameof(Alpha.OmegaInteger)
+				&& error.PropertyNameFrom == nameof(Alpha.OmegaIntegerFrom)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaIntegerTo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeBetween
+				&& error.ErrorType == ValidationErrorType.DataTypeLong
+				&& error.PropertyName == nameof(Alpha.OmegaLong)
+				&& error.PropertyNameFrom == nameof(Alpha.OmegaLongFrom)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaLongTo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeBetween
+				&& error.ErrorType == ValidationErrorType.DataTypeDouble
+				&& error.PropertyName == nameof(Alpha.OmegaDouble)
+				&& error.PropertyNameFrom == nameof(Alpha.OmegaDoubleFrom)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaDoubleTo))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.RangeBetween
+				&& error.ErrorType == ValidationErrorType.DataTypeDateTime
+				&& error.PropertyName == nameof(Alpha.OmegaDateTime)
+				&& error.PropertyNameFrom == nameof(Alpha.OmegaDateTimeFrom)
+				&& error.PropertyNameTo == nameof(Alpha.OmegaDateTimeTo))
+			.Should().BeTrue();
 		}
 
 		[DataTestMethod]
-		[DataRow("Darkwing Duck", false, "CheckUrl->DeltaUrl->NoWellFormedUri", DisplayName = "Invalid url (1)")]
-		[DataRow("http://www.eshava", false, "CheckUrl->DeltaUrl->NoWellFormedUri", DisplayName = "Invalid url (2)")]
-		[DataRow("http://www.esh@ava.de", false, "CheckUrl->DeltaUrl->NoWellFormedUri", DisplayName = "Invalid url (2)")]
-		[DataRow("http://www.eshava.de/", true, null, DisplayName = "Valid url with schema (http)")]
-		[DataRow("https://www.eshava.de/", true, null, DisplayName = "Valid url with schema (https)")]
-		[DataRow("https://www.develop.eshava.de/", true, null, DisplayName = "Valid url with schema (https) and sub domain")]
-		[DataRow("www.eshava.de/", true, null, DisplayName = "Valid url without schema (www)")]
-		[DataRow("eshava.de/", true, null, DisplayName = "Valid url without schema")]
-		public void ValidateUrlTest(string url, bool isValid, string error)
+		[DataRow("Darkwing Duck", false, DisplayName = "Invalid url (1)")]
+		[DataRow("http://www.eshava", false, DisplayName = "Invalid url (2)")]
+		[DataRow("http://www.esh@ava.de", false, DisplayName = "Invalid url (2)")]
+		[DataRow("http://www.eshava.de/", true, DisplayName = "Valid url with schema (http)")]
+		[DataRow("https://www.eshava.de/", true, DisplayName = "Valid url with schema (https)")]
+		[DataRow("https://www.develop.eshava.de/", true, DisplayName = "Valid url with schema (https) and sub domain")]
+		[DataRow("www.eshava.de/", true, DisplayName = "Valid url without schema (www)")]
+		[DataRow("eshava.de/", true, DisplayName = "Valid url without schema")]
+		public void ValidateUrlTest(string url, bool isValid)
 		{
 			// Arrange
 			var source = new Alpha
@@ -672,18 +1042,28 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().Be(isValid);
-			result.ValidationError.Should().Be(error);
+
+			if (!isValid)
+			{
+				result.ValidationErrors.Should().HaveCount(1);
+
+				result.ValidationErrors.Any(error =>
+					error.MethodType == ValidationMethodType.String
+					&& error.ErrorType == ValidationErrorType.NoWellFormedUri
+					&& error.PropertyName == nameof(Alpha.DeltaUrl))
+				.Should().BeTrue();
+			}
 		}
 
 		[DataTestMethod]
-		[DataRow("Darkwing Duck", false, "CheckMailAddress->DeltaMail->NotMatch", DisplayName = "Invalid mail address (1)")]
-		[DataRow("Darkwing.Duck", false, "CheckMailAddress->DeltaMail->NotMatch", DisplayName = "Invalid mail address (2)")]
-		[DataRow("Darkwing.Duck@", false, "CheckMailAddress->DeltaMail->NotMatch", DisplayName = "Invalid mail address (3)")]
-		[DataRow("Darkwing.Duck@eshava", false, "CheckMailAddress->DeltaMail->NotMatch", DisplayName = "Invalid mail address (4)")]
-		[DataRow("Darkwing.Duck@eshava.", false, "CheckMailAddress->DeltaMail->NotMatch", DisplayName = "Invalid mail address (5)")]
-		[DataRow("Darkwing.Duck@eshava.de", true, null, DisplayName = "Valid mail address")]
-		[DataRow("@eshava.de", false, "CheckMailAddress->DeltaMail->NotMatch", DisplayName = "Invalid mail address (6)")]
-		public void ValidateMailAddressTest(string mailAddress, bool isValid, string error)
+		[DataRow("Darkwing Duck", false, DisplayName = "Invalid mail address (1)")]
+		[DataRow("Darkwing.Duck", false, DisplayName = "Invalid mail address (2)")]
+		[DataRow("Darkwing.Duck@", false, DisplayName = "Invalid mail address (3)")]
+		[DataRow("Darkwing.Duck@eshava", false, DisplayName = "Invalid mail address (4)")]
+		[DataRow("Darkwing.Duck@eshava.", false, DisplayName = "Invalid mail address (5)")]
+		[DataRow("Darkwing.Duck@eshava.de", true, DisplayName = "Valid mail address")]
+		[DataRow("@eshava.de", false, DisplayName = "Invalid mail address (6)")]
+		public void ValidateMailAddressTest(string mailAddress, bool isValid)
 		{
 			// Arrange
 			var source = new Alpha
@@ -709,7 +1089,17 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().Be(isValid);
-			result.ValidationError.Should().Be(error);
+
+			if (!isValid)
+			{
+				result.ValidationErrors.Should().HaveCount(1);
+
+				result.ValidationErrors.Any(error =>
+					error.MethodType == ValidationMethodType.String
+					&& error.ErrorType == ValidationErrorType.NoWellFormedMailAddress
+					&& error.PropertyName == nameof(Alpha.DeltaMail))
+				.Should().BeTrue();
+			}
 		}
 	}
 }

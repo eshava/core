@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Eshava.Core.Linq.Attributes;
 
 namespace Eshava.Test.Core.Linq.Models
 {
@@ -13,6 +14,7 @@ namespace Eshava.Test.Core.Linq.Models
 		public int Beta { get; set; }
 		public string Gamma { get; set; }
 		public string Delta { get; set; }
+		[QueryIgnore]
 		public string DeltaTwo { get; set; }
 		public string DeltaMail { get; set; }
 		public string DeltaUrl { get; set; }

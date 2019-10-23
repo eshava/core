@@ -1,6 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <LangVersion>latest</LangVersion>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageProjectUrl>https://github.com/eshava/core</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/eshava/core/blob/master/LICENSE</PackageLicenseUrl>
@@ -8,13 +9,12 @@
     <Authors>Eshava</Authors>
     <Company>Eshava</Company>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.0.0.1</Version>
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <Version>1.0.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Eshava.Core" Version="1.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
 
 </Project>
