@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using Eshava.Core.IO.Interfaces;
 
 namespace Eshava.Core.IO
@@ -126,6 +127,13 @@ namespace Eshava.Core.IO
 		public IFile WriteAllText(string text)
 		{
 			System.IO.File.WriteAllText(_fileInfo.FullName, text);
+
+			return this;
+		}
+
+		public IFile WriteAllText(string text, Encoding encoding)
+		{
+			System.IO.File.WriteAllText(_fileInfo.FullName, text, encoding);
 
 			return this;
 		}

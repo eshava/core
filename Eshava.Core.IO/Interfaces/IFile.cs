@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 
 namespace Eshava.Core.IO.Interfaces
 {
@@ -29,6 +30,7 @@ namespace Eshava.Core.IO.Interfaces
 		IFile WriteAllBytes(byte[] blob);
 
 		IFile WriteAllText(string text);
+		IFile WriteAllText(string text, Encoding encoding);
 
 		byte[] ReadAllBytes();
 	}
