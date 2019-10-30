@@ -45,6 +45,8 @@ namespace Eshava.Core.IO
 
 		public bool IsFile => false;
 
+		public IDirectory Parent => new Directory(_directoryInfo.Parent, _fileSystemEngine);
+
 		public IDirectory Create()
 		{
 			_directoryInfo.Create();
@@ -78,6 +80,13 @@ namespace Eshava.Core.IO
 			return _directoryInfo.EnumerateFiles(searchPattern, searchOption)
 								 .Select(fileInfo => _fileSystemEngine.GetFile(fileInfo))
 								 .ToList();
+		}
+
+		public IDirectory MoveTo(IDirectory targetDirectory)
+		{
+			_directoryInfo.MoveTo(targetDirectory.FullName);
+
+			return targetDirectory;
 		}
 	}
 }

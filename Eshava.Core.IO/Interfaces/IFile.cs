@@ -9,7 +9,7 @@ namespace Eshava.Core.IO.Interfaces
 
 		bool IsLocked { get; }
 
-		IFile CopyTo(string fullName, bool overwrite);
+		IFile CopyTo(IFile targetFile, bool overwrite);
 
 		IFile Delete();
 

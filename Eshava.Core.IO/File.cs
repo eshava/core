@@ -83,7 +83,12 @@ namespace Eshava.Core.IO
 
 		public bool IsFile => true;
 
-		public IFile CopyTo(string fullName, bool overwrite) => new File(_fileInfo.CopyTo(fullName, overwrite), _fileSystemEngine);
+		public IFile CopyTo(IFile targetFile, bool overwrite)
+		{
+			_fileInfo.CopyTo(targetFile.FullName, overwrite);
+
+			return targetFile;
+		}
 
 		public IFile Create()
 		{
