@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using Eshava.Core.IO.Interfaces;
 
 namespace Eshava.Core.IO
@@ -82,7 +83,12 @@ namespace Eshava.Core.IO
 
 		public bool IsFile => true;
 
-		public IFile CopyTo(string fullName, bool overwrite) => new File(_fileInfo.CopyTo(fullName, overwrite), _fileSystemEngine);
+		public IFile CopyTo(IFile targetFile, bool overwrite)
+		{
+			_fileInfo.CopyTo(targetFile.FullName, overwrite);
+
+			return targetFile;
+		}
 
 		public IFile Create()
 		{
@@ -126,6 +132,13 @@ namespace Eshava.Core.IO
 		public IFile WriteAllText(string text)
 		{
 			System.IO.File.WriteAllText(_fileInfo.FullName, text);
+
+			return this;
+		}
+
+		public IFile WriteAllText(string text, Encoding encoding)
+		{
+			System.IO.File.WriteAllText(_fileInfo.FullName, text, encoding);
 
 			return this;
 		}

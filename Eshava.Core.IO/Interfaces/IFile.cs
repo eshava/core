@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 
 namespace Eshava.Core.IO.Interfaces
 {
@@ -8,7 +9,7 @@ namespace Eshava.Core.IO.Interfaces
 
 		bool IsLocked { get; }
 
-		IFile CopyTo(string fullName, bool overwrite);
+		IFile CopyTo(IFile targetFile, bool overwrite);
 
 		IFile Delete();
 
@@ -29,6 +30,7 @@ namespace Eshava.Core.IO.Interfaces
 		IFile WriteAllBytes(byte[] blob);
 
 		IFile WriteAllText(string text);
+		IFile WriteAllText(string text, Encoding encoding);
 
 		byte[] ReadAllBytes();
 	}
