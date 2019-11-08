@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Eshava.Core.Dynamic.Fields.Enums;
+using Eshava.Core.Dynamic.Fields.Interfaces;
 using Eshava.Core.Dynamic.Fields.Models;
 using Eshava.Core.Dynamic.Fields.Validation.Extensions;
 using Eshava.Core.Dynamic.Fields.Validation.Models;
@@ -10,10 +11,10 @@ using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 {
-	internal static class RangeBetweenValidation<T, D>
+	internal static class RangeBetweenValidation<FD, FA, FV, T, D> where FD : IFieldDefinition<T> where FA : IFieldAssignment<T, D> where FV : IFieldValue<T>
 	{
-		private static List<(Func<Type, bool> Check, Func<ValidationCheckParameters<T, D>, BaseField, BaseField, ValidationCheckResult> Validate)> _validationRules =
-			new List<(Func<Type, bool> Check, Func<ValidationCheckParameters<T, D>, BaseField, BaseField, ValidationCheckResult> Validate)>
+		private static List<(Func<Type, bool> Check, Func<ValidationCheckParameters<FD, FA, FV, T, D>, BaseField, BaseField, ValidationCheckResult> Validate)> _validationRules =
+			new List<(Func<Type, bool> Check, Func<ValidationCheckParameters<FD, FA, FV, T, D>, BaseField, BaseField, ValidationCheckResult> Validate)>
 			{
 				(type => type == typeof(float), (parameters, fieldFrom, fieldTo) => CheckRangeBetweenFloat(parameters, fieldFrom, fieldTo)),
 				(type => type == typeof(double), (parameters, fieldFrom, fieldTo) => CheckRangeBetweenDouble(parameters, fieldFrom, fieldTo)),
@@ -23,14 +24,14 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 				(type => type == typeof(DateTime), (parameters, fieldFrom, fieldTo) => CheckRangeBetweenDateTime(parameters, fieldFrom, fieldTo))
 			};
 
-		public static ValidationCheckResult CheckRangeBetween(ValidationCheckParameters<T, D> parameters)
+		public static ValidationCheckResult CheckRangeBetween(ValidationCheckParameters<FD, FA, FV, T, D> parameters)
 		{
 			var hasRangeRule = parameters.GetConfigurations(FieldConfigurationType.RangeBetween).Any();
 			var rangeFromRule = parameters.GetConfigurations(FieldConfigurationType.RangeBetweenFrom).FirstOrDefault();
 			var rangeToRule = parameters.GetConfigurations(FieldConfigurationType.RangeBetweenTo).FirstOrDefault();
 			if (!hasRangeRule || parameters.Field.Value == null)
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			//Determining the field for the start and end value of the value range
@@ -66,85 +67,85 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			return GetErrorResult(ValidationErrorType.DataTypeNotSupported, parameters.Field.Id, rangeFromRule.ValueString, rangeToRule.ValueString);
 		}
 
-		private static ValidationCheckResult CheckRangeBetweenDateTime(ValidationCheckParameters<T, D> parameters, BaseField rangeFromField, BaseField rangeToField)
+		private static ValidationCheckResult CheckRangeBetweenDateTime(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField rangeFromField, BaseField rangeToField)
 		{
 			var value = parameters.Field.Value as DateTime? ?? DateTime.MinValue;
 			var valueFrom = rangeFromField.Value as DateTime?;
 			var valueTo = rangeToField.Value as DateTime?;
 
-			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, false, value))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeDateTime, parameters.Field.Id, rangeFromField.Id, rangeToField.Id);
 		}
 
-		private static ValidationCheckResult CheckRangeBetweenInteger(ValidationCheckParameters<T, D> parameters, BaseField rangeFromField, BaseField rangeToField)
+		private static ValidationCheckResult CheckRangeBetweenInteger(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField rangeFromField, BaseField rangeToField)
 		{
 			var value = parameters.Field.Value as int? ?? 0;
 			var valueFrom = rangeFromField.Value as int?;
 			var valueTo = rangeToField.Value as int?;
 
-			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, false, value))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeInteger, parameters.Field.Id, rangeFromField.Id, rangeToField.Id);
 		}
 
-		private static ValidationCheckResult CheckRangeBetweenLong(ValidationCheckParameters<T, D> parameters, BaseField rangeFromField, BaseField rangeToField)
+		private static ValidationCheckResult CheckRangeBetweenLong(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField rangeFromField, BaseField rangeToField)
 		{
 			var value = parameters.Field.Value as long? ?? 0;
 			var valueFrom = rangeFromField.Value as long?;
 			var valueTo = rangeToField.Value as long?;
 
-			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, false, value))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeLong, parameters.Field.Id, rangeFromField.Id, rangeToField.Id);
 		}
 
-		private static ValidationCheckResult CheckRangeBetweenDecimal(ValidationCheckParameters<T, D> parameters, BaseField rangeFromField, BaseField rangeToField)
+		private static ValidationCheckResult CheckRangeBetweenDecimal(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField rangeFromField, BaseField rangeToField)
 		{
 			var value = parameters.Field.Value as decimal? ?? 0.0m;
 			var valueFrom = rangeFromField.Value as decimal?;
 			var valueTo = rangeToField.Value as decimal?;
 
-			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, false, value))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeDecimal, parameters.Field.Id, rangeFromField.Id, rangeToField.Id);
 		}
 
-		private static ValidationCheckResult CheckRangeBetweenDouble(ValidationCheckParameters<T, D> parameters, BaseField rangeFromField, BaseField rangeToField)
+		private static ValidationCheckResult CheckRangeBetweenDouble(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField rangeFromField, BaseField rangeToField)
 		{
 			var value = parameters.Field.Value as double? ?? 0.0;
 			var valueFrom = rangeFromField.Value as double?;
 			var valueTo = rangeToField.Value as double?;
 
-			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, false, value))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeDouble, parameters.Field.Id, rangeFromField.Id, rangeToField.Id);
 		}
 
-		private static ValidationCheckResult CheckRangeBetweenFloat(ValidationCheckParameters<T, D> parameters, BaseField rangeFromField, BaseField rangeToField)
+		private static ValidationCheckResult CheckRangeBetweenFloat(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField rangeFromField, BaseField rangeToField)
 		{
 			var value = parameters.Field.Value as float? ?? 0f;
 			var valueFrom = rangeFromField.Value as float?;
 			var valueTo = rangeToField.Value as float?;
 
-			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, false, value))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeFloat, parameters.Field.Id, rangeFromField.Id, rangeToField.Id);

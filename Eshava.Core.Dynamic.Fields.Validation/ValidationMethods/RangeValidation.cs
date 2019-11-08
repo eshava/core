@@ -9,10 +9,10 @@ using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 {
-	internal static class RangeValidation<T, D>
+	internal static class RangeValidation<FD, FA, FV, T, D> where FD : IFieldDefinition<T> where FA : IFieldAssignment<T, D> where FV : IFieldValue<T>
 	{
-		private static List<(Func<Type, bool> Check, Func<ValidationCheckParameters<T, D>, IFieldConfiguration<T>, IFieldConfiguration<T>, ValidationCheckResult> Validate)> _validationRules =
-			new List<(Func<Type, bool> Check, Func<ValidationCheckParameters<T, D>, IFieldConfiguration<T>, IFieldConfiguration<T>, ValidationCheckResult> Validate)>
+		private static List<(Func<Type, bool> Check, Func<ValidationCheckParameters<FD, FA, FV, T, D>, IFieldConfiguration<T>, IFieldConfiguration<T>, ValidationCheckResult> Validate)> _validationRules =
+			new List<(Func<Type, bool> Check, Func<ValidationCheckParameters<FD, FA, FV, T, D>, IFieldConfiguration<T>, IFieldConfiguration<T>, ValidationCheckResult> Validate)>
 			{
 				(type => type == typeof(float), (parameters, minimumRule, maximumRule) => CheckRangeFloat(parameters, minimumRule, maximumRule)),
 				(type => type == typeof(double), (parameters, minimumRule, maximumRule) => CheckRangeDouble(parameters, minimumRule, maximumRule)),
@@ -21,14 +21,14 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 				(type => type == typeof(long), (parameters, minimumRule, maximumRule) => CheckRangeLong(parameters, minimumRule, maximumRule))
 			};
 
-		public static ValidationCheckResult CheckRange(ValidationCheckParameters<T, D> parameters)
+		public static ValidationCheckResult CheckRange(ValidationCheckParameters<FD, FA, FV, T, D> parameters)
 		{
 			var minimumRule = parameters.GetConfigurations(FieldConfigurationType.Minimum).FirstOrDefault();
 			var maximumRule = parameters.GetConfigurations(FieldConfigurationType.Maximum).FirstOrDefault();
 
 			if (parameters.Field.Value == null || (minimumRule == null && maximumRule == null))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			var validationRule = _validationRules.SingleOrDefault(rule => rule.Check(parameters.Field.Type));
@@ -40,7 +40,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			return GetErrorResult(ValidationErrorType.DataTypeNotSupported, parameters.Field.Id);
 		}
 
-		private static ValidationCheckResult CheckRangeInteger(ValidationCheckParameters<T, D> parameters, IFieldConfiguration<T> minimumRule, IFieldConfiguration<T> maximumRule)
+		private static ValidationCheckResult CheckRangeInteger(ValidationCheckParameters<FD, FA, FV, T, D> parameters, IFieldConfiguration<T> minimumRule, IFieldConfiguration<T> maximumRule)
 		{
 			var valueInteger = (int)parameters.Field.Value;
 			var minimum = minimumRule.ValueInteger ?? 0;
@@ -51,10 +51,10 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 				return GetErrorResult(ValidationErrorType.DataTypeInteger, parameters.Field.Id);
 			}
 
-			return new ValidationCheckResult { IsValid = true };
+			return new ValidationCheckResult();
 		}
 
-		private static ValidationCheckResult CheckRangeLong(ValidationCheckParameters<T, D> parameters, IFieldConfiguration<T> minimumRule, IFieldConfiguration<T> maximumRule)
+		private static ValidationCheckResult CheckRangeLong(ValidationCheckParameters<FD, FA, FV, T, D> parameters, IFieldConfiguration<T> minimumRule, IFieldConfiguration<T> maximumRule)
 		{
 			var valueInt = (long)parameters.Field.Value;
 			var minimum = minimumRule.ValueLong ?? 0;
@@ -65,10 +65,10 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 				return GetErrorResult(ValidationErrorType.DataTypeLong, parameters.Field.Id);
 			}
 
-			return new ValidationCheckResult { IsValid = true };
+			return new ValidationCheckResult();
 		}
 
-		private static ValidationCheckResult CheckRangeFloat(ValidationCheckParameters<T, D> parameters, IFieldConfiguration<T> minimumRule, IFieldConfiguration<T> maximumRule)
+		private static ValidationCheckResult CheckRangeFloat(ValidationCheckParameters<FD, FA, FV, T, D> parameters, IFieldConfiguration<T> minimumRule, IFieldConfiguration<T> maximumRule)
 		{
 			var valueFloat = (float)parameters.Field.Value;
 			var minimum = minimumRule.ValueFloat ?? 0;
@@ -79,10 +79,10 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 				return GetErrorResult(ValidationErrorType.DataTypeFloat, parameters.Field.Id);
 			}
 
-			return new ValidationCheckResult { IsValid = true };
+			return new ValidationCheckResult();
 		}
 
-		private static ValidationCheckResult CheckRangeDouble(ValidationCheckParameters<T, D> parameters, IFieldConfiguration<T> minimumRule, IFieldConfiguration<T> maximumRule)
+		private static ValidationCheckResult CheckRangeDouble(ValidationCheckParameters<FD, FA, FV, T, D> parameters, IFieldConfiguration<T> minimumRule, IFieldConfiguration<T> maximumRule)
 		{
 			var valueDouble = (double)parameters.Field.Value;
 			var minimum = minimumRule.ValueDouble ?? 0;
@@ -93,10 +93,10 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 				return GetErrorResult(ValidationErrorType.DataTypeDouble, parameters.Field.Id);
 			}
 
-			return new ValidationCheckResult { IsValid = true };
+			return new ValidationCheckResult();
 		}
 
-		private static ValidationCheckResult CheckRangeDecimal(ValidationCheckParameters<T, D> parameters, IFieldConfiguration<T> minimumRule, IFieldConfiguration<T> maximumRule)
+		private static ValidationCheckResult CheckRangeDecimal(ValidationCheckParameters<FD, FA, FV, T, D> parameters, IFieldConfiguration<T> minimumRule, IFieldConfiguration<T> maximumRule)
 		{
 			var valueDecimal = (decimal)parameters.Field.Value;
 			var minimum = minimumRule.ValueDecimal ?? 0;
@@ -107,7 +107,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 				return GetErrorResult(ValidationErrorType.DataTypeDecimal, parameters.Field.Id);
 			}
 
-			return new ValidationCheckResult { IsValid = true };
+			return new ValidationCheckResult();
 		}
 
 		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string fieldId)

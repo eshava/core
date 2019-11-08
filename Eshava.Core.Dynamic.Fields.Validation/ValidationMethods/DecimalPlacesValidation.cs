@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using Eshava.Core.Dynamic.Fields.Enums;
+using Eshava.Core.Dynamic.Fields.Interfaces;
 using Eshava.Core.Dynamic.Fields.Validation.Models;
 using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 {
-	internal static class DecimalPlacesValidation<T, D>
+	internal static class DecimalPlacesValidation<FD, FA, FV, T, D> where FD : IFieldDefinition<T> where FA : IFieldAssignment<T, D> where FV : IFieldValue<T>
 	{
-		public static ValidationCheckResult CheckDecimalPlaces(ValidationCheckParameters<T, D> parameters)
+		public static ValidationCheckResult CheckDecimalPlaces(ValidationCheckParameters<FD, FA, FV, T, D> parameters)
 		{
 			var decimalPlacesRule = parameters.GetConfigurations(FieldConfigurationType.DecimalPlaces).FirstOrDefault();
 			if (decimalPlacesRule == null || parameters.Field.Value == null)
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			var decimalPlacesValue = decimalPlacesRule.ValueInteger ?? 0;
@@ -50,7 +51,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 				}
 			}
 
-			return new ValidationCheckResult { IsValid = true };
+			return new ValidationCheckResult();
 		}
 
 		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string fieldId)

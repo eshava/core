@@ -9,9 +9,9 @@ using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Dynamic.Fields.Validation
 {
-	public class FieldValidationRuleEngine<T, D> : IFieldValidationRuleEngine<T, D>
+	public class FieldValidationRuleEngine<FD, FA, FV, T, D> : IFieldValidationRuleEngine<FD, FA, FV, T, D> where FD : IFieldDefinition<T> where FA : IFieldAssignment<T, D> where FV : IFieldValue<T>
 	{
-		public IEnumerable<ValidationPropertyInfo> CalculateValidationRules(FieldInformation<T, D> fieldInformation)
+		public IEnumerable<ValidationPropertyInfo> CalculateValidationRules(FieldInformation<FD, FA, FV, T, D> fieldInformation)
 		{
 			var validationProperties = new List<ValidationPropertyInfo>();
 
@@ -28,7 +28,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 				{
 					PropertyName = definition.Id.ToString(),
 					JsonName = definition.Id.ToString(),
-					CustomerSpecificFields = true,
+					IsDynamicField = true,
 					Rules = new List<ValidationRule>()
 				};
 
@@ -60,7 +60,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 							validationProperty.Rules.Add(new ValidationRule
 							{
 								Rule = "EqualsTo",
-								Field = fieldName.Trim()
+								PropertyName = fieldName.Trim()
 							});
 						});
 						break;
@@ -124,8 +124,8 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 				validationProperty.Rules.Add(new ValidationRule
 				{
 					Rule = ruleName,
-					FieldTo = fieldName.Trim(),
-					FieldToAllowNull = definition.Configurations.FirstOrDefault(c => c.ConfigurationType == FieldConfigurationType.RangeRequired) == null
+					PropertyNameTo = fieldName.Trim(),
+					PropertyNameToAllowNull = definition.Configurations.FirstOrDefault(c => c.ConfigurationType == FieldConfigurationType.RangeRequired) == null
 				});
 			});
 		}
@@ -140,8 +140,8 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 				validationProperty.Rules.Add(new ValidationRule
 				{
 					Rule = "RangeBetween",
-					FieldFrom = rangeFrom.ValueString,
-					FieldTo = rangeTo.ValueString
+					PropertyNameFrom = rangeFrom.ValueString,
+					PropertyNameTo = rangeTo.ValueString
 				});
 			}
 		}
@@ -179,7 +179,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 				validationProperty.Rules.Add(new ValidationRule
 				{
 					Rule = "NotEqualsTo",
-					Field = fieldName.Trim(),
+					PropertyName = fieldName.Trim(),
 					DefaultValue = defaultValue?.ToString()
 				});
 			});

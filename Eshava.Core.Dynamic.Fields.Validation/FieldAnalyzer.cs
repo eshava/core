@@ -7,10 +7,12 @@ using Eshava.Core.Dynamic.Fields.Interfaces;
 using Eshava.Core.Dynamic.Fields.Models;
 using Eshava.Core.Dynamic.Fields.Validation.Interfaces;
 using Eshava.Core.Extensions;
+using Eshava.Core.Validation.Attributes;
+using Eshava.Core.Validation.Extension;
 
-namespace Eshava.Core.Dynamic.Fields
+namespace Eshava.Core.Dynamic.Fields.Validation
 {
-	public class FieldAnalyzer<T, D> : IFieldAnalyzer<T, D>
+	public class FieldAnalyzer<FD, FA, FV, T, D> : IFieldAnalyzer<FD, FA, FV, T, D> where FD : IFieldDefinition<T> where FA : IFieldAssignment<T, D> where FV : IFieldValue<T>
 	{
 		private static List<(Func<FieldType, bool> Check, Func<IFieldValue<T>, BaseField> Convert)> _mapping =
 			new List<(Func<FieldType, bool> Check, Func<IFieldValue<T>, BaseField> Convert)>
@@ -27,7 +29,7 @@ namespace Eshava.Core.Dynamic.Fields
 				(type => type == FieldType.ComboxBoxGuid, field => new BaseField { Id = field.Id.ToString(), Type = typeof(Guid), Value = field.ValueGuid })
 			};
 
-		public AnalysisResult Analyse(object model, FieldInformation<T, D> fieldInformation)
+		public AnalysisResult Analyse(object model, FieldInformation<FD, FA, FV, T, D> fieldInformation)
 		{
 			var result = AddFieldAssignments(fieldInformation);
 			result = Analyse(model, result);
@@ -35,7 +37,7 @@ namespace Eshava.Core.Dynamic.Fields
 			return new AnalysisResult(result);
 		}
 
-		private Dictionary<string, BaseField> AddFieldAssignments(FieldInformation<T, D> fieldInformation)
+		private Dictionary<string, BaseField> AddFieldAssignments(FieldInformation<FD, FA, FV, T, D> fieldInformation)
 		{
 			var result = new Dictionary<string, BaseField>();
 
@@ -84,7 +86,7 @@ namespace Eshava.Core.Dynamic.Fields
 
 		private Dictionary<string, BaseField> AnalyseProperty(object model, PropertyInfo propertyInfo, Dictionary<string, BaseField> result)
 		{
-			if (propertyInfo.PropertyType.ImplementsIEnumerable())
+			if (propertyInfo.PropertyType.ImplementsIEnumerable() || propertyInfo.HasAttribute<ValidationIgnoreAttribute>())
 			{
 				return result;
 			}

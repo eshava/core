@@ -11,9 +11,9 @@ using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 {
-	internal static class EqualsValidation<T, D>
+	internal static class EqualsValidation<FD, FA, FV, T, D> where FD : IFieldDefinition<T> where FA : IFieldAssignment<T, D> where FV : IFieldValue<T>
 	{
-		public static ValidationCheckResult CheckEqualsTo(ValidationCheckParameters<T, D> parameters)
+		public static ValidationCheckResult CheckEqualsTo(ValidationCheckParameters<FD, FA, FV, T, D> parameters)
 		{
 			var equalRules = parameters.GetConfigurations(FieldConfigurationType.EqualsTo);
 			var notEqualRules = parameters.GetConfigurations(FieldConfigurationType.NotEqualsTo);
@@ -29,10 +29,10 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 				return CheckEqualsTo(parameters, equalRules);
 			}
 
-			return new ValidationCheckResult { IsValid = true };
+			return new ValidationCheckResult();
 		}
 
-		private static ValidationCheckResult CheckEqualsTo(ValidationCheckParameters<T, D> parameters, IEnumerable<IFieldConfiguration<T>> rules, object defaultValue = null)
+		private static ValidationCheckResult CheckEqualsTo(ValidationCheckParameters<FD, FA, FV, T, D> parameters, IEnumerable<IFieldConfiguration<T>> rules, object defaultValue = null)
 		{
 			var results = rules.Select(rule => CheckEqualsTo(parameters, rule.ValueString, defaultValue)).ToList();
 			if (results.All(result => result.IsValid))
@@ -43,7 +43,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			return new ValidationCheckResult { ValidationErrors = results.SelectMany(r => r.ValidationErrors).ToList() };
 		}
 
-		private static ValidationCheckResult CheckEqualsTo(ValidationCheckParameters<T, D> parameters, string propertyNameInfoEquals, object defaultValue = null)
+		private static ValidationCheckResult CheckEqualsTo(ValidationCheckParameters<FD, FA, FV, T, D> parameters, string propertyNameInfoEquals, object defaultValue = null)
 		{
 			var fieldEquals = propertyNameInfoEquals.GetFieldSource(parameters);
 			if (fieldEquals == null)
@@ -59,7 +59,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			return CheckEqualsToObject(parameters, fieldEquals, defaultValue);
 		}
 
-		private static ValidationCheckResult CheckEqualsToString(ValidationCheckParameters<T, D> parameters, BaseField fieldEquals, object defaultValue = null)
+		private static ValidationCheckResult CheckEqualsToString(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField fieldEquals, object defaultValue = null)
 		{
 			var valueString = (parameters.Field.Value as string).ReturnNullByEmpty();
 			var valueStringEquals = (fieldEquals.Value as string).ReturnNullByEmpty();
@@ -77,10 +77,10 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 				return GetErrorResult(parameters, parameters.NotEquals ? ValidationErrorType.EqualsString : ValidationErrorType.NotEqualsString, fieldEquals.Id);
 			}
 
-			return new ValidationCheckResult { IsValid = true };
+			return new ValidationCheckResult();
 		}
 
-		private static ValidationCheckResult CheckEqualsToObject(ValidationCheckParameters<T, D> parameters, BaseField fieldEquals, object defaultValue = null)
+		private static ValidationCheckResult CheckEqualsToObject(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField fieldEquals, object defaultValue = null)
 		{
 			if (parameters.NotEquals && defaultValue != null)
 			{
@@ -96,10 +96,10 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 				return GetErrorResult(parameters, parameters.NotEquals ? ValidationErrorType.Equals : ValidationErrorType.NotEquals, fieldEquals.Id);
 			}
 
-			return new ValidationCheckResult { IsValid = true };
+			return new ValidationCheckResult();
 		}
 
-		private static ValidationCheckResult GetErrorResult(ValidationCheckParameters<T, D> parameters, ValidationErrorType errorType, string fieldToEqualsId)
+		private static ValidationCheckResult GetErrorResult(ValidationCheckParameters<FD, FA, FV, T, D> parameters, ValidationErrorType errorType, string fieldToEqualsId)
 		{
 			return new ValidationCheckResult
 			{

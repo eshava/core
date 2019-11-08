@@ -11,24 +11,24 @@ using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Dynamic.Fields
 {
-	public class FieldValidationEngine<T, D> : IFieldValidationEngine<T, D>
+	public class FieldValidationEngine<FD, FA, FV, T, D> : IFieldValidationEngine<FD, FA, FV, T, D> where FD : IFieldDefinition<T> where FA : IFieldAssignment<T, D> where FV : IFieldValue<T>
 	{
-		private readonly List<Func<ValidationCheckParameters<T, D>, ValidationCheckResult>> _validationMethods = new List<Func<ValidationCheckParameters<T, D>, ValidationCheckResult>>
+		private readonly List<Func<ValidationCheckParameters<FD, FA, FV, T, D>, ValidationCheckResult>> _validationMethods = new List<Func<ValidationCheckParameters<FD, FA, FV, T, D>, ValidationCheckResult>>
 		{
-			RequiredValidation<T, D>.CheckRequired,
-			StringValidation<T, D>.CheckStringLength,
-			StringValidation<T, D>.CheckMailAddress,
-			StringValidation<T, D>.CheckUrl,
-			DecimalPlacesValidation<T, D>.CheckDecimalPlaces,
-			RangeValidation<T, D>.CheckRange,
-			RangeFromOrToValidation<T, D>.CheckRangeFrom,
-			RangeFromOrToValidation<T, D>.CheckRangeTo,
-			RangeBetweenValidation<T, D>.CheckRangeBetween,
-			parameter => { parameter.NotEquals = false; return EqualsValidation<T, D>.CheckEqualsTo(parameter); },
-			parameter => { parameter.NotEquals = true; return EqualsValidation<T, D>.CheckEqualsTo(parameter); }
+			RequiredValidation<FD, FA, FV, T, D>.CheckRequired,
+			StringValidation<FD, FA, FV, T, D>.CheckStringLength,
+			StringValidation<FD, FA, FV, T, D>.CheckMailAddress,
+			StringValidation<FD, FA, FV, T, D>.CheckUrl,
+			DecimalPlacesValidation<FD, FA, FV, T, D>.CheckDecimalPlaces,
+			RangeValidation<FD, FA, FV, T, D>.CheckRange,
+			RangeFromOrToValidation<FD, FA, FV, T, D>.CheckRangeFrom,
+			RangeFromOrToValidation<FD, FA, FV, T, D>.CheckRangeTo,
+			RangeBetweenValidation<FD, FA, FV, T, D>.CheckRangeBetween,
+			parameter => { parameter.NotEquals = false; return EqualsValidation<FD, FA, FV, T, D>.CheckEqualsTo(parameter); },
+			parameter => { parameter.NotEquals = true; return EqualsValidation<FD, FA, FV, T, D>.CheckEqualsTo(parameter); }
 		};
 
-		public ValidationCheckResult Validate(FieldInformation<T, D> fieldInformation, AnalysisResult analysisResult)
+		public ValidationCheckResult Validate(FieldInformation<FD, FA, FV, T, D> fieldInformation, AnalysisResult analysisResult)
 		{
 			if ((fieldInformation?.IsValid ?? false) || (analysisResult?.Result?.Count ?? 0) == 0)
 			{
@@ -49,13 +49,12 @@ namespace Eshava.Core.Dynamic.Fields
 			foreach (var fieldValue in fieldInformation.Values)
 			{
 				var fieldAssignment = fieldInformation.GetAssignment(fieldValue.AssignmentId);
-				var fieldDefinition = fieldAssignment == null ? null : fieldInformation.GetDefinition(fieldAssignment.DefinitionId);
+				var fieldDefinition = fieldAssignment == default ? default : fieldInformation.GetDefinition(fieldAssignment.DefinitionId);
 
 				if (fieldAssignment == null || fieldDefinition == null)
 				{
 					results.Add(new ValidationCheckResult
 					{
-						IsValid = false,
 						ValidationErrors = new List<ValidationCheckResultEntry>
 						{
 							new ValidationCheckResultEntry
@@ -71,7 +70,7 @@ namespace Eshava.Core.Dynamic.Fields
 				}
 
 				var baseField = analysisResult.Result[fieldAssignment.Id.ToString()];
-				var validationParameter = new ValidationCheckParameters<T, D>
+				var validationParameter = new ValidationCheckParameters<FD, FA, FV, T, D>
 				{
 					AnalysisResult = analysisResult,
 					FieldDefinition = fieldDefinition,

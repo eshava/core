@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Eshava.Core.Dynamic.Fields.Interfaces;
 using Eshava.Core.Dynamic.Fields.Models;
 using Eshava.Core.Dynamic.Fields.Validation.Models;
 using Eshava.Core.Extensions;
@@ -8,9 +9,9 @@ using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 {
-	internal static class BaseRangeValidation
+	internal static class BaseRangeValidation<FD, FA, FV, T, D> where FD : IFieldDefinition<T> where FA : IFieldAssignment<T, D> where FV : IFieldValue<T>
 	{
-		public static ValidationCheckResult CheckRangeValue<T, D>(ValidationCheckParameters<T, D> parameters, BaseField fieldFrom, BaseField fieldTo)
+		public static ValidationCheckResult CheckRangeValue(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField fieldFrom, BaseField fieldTo)
 		{
 			if (fieldFrom.Type != fieldTo.Type)
 			{
@@ -50,7 +51,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			return GetErrorResult(ValidationErrorType.DataTypeNotSupported, fieldFrom.Id, fieldTo.Id);
 		}
 
-		private static ValidationCheckResult CheckRangeValueFloat<T, D>(ValidationCheckParameters<T, D> parameters, BaseField fieldFrom, BaseField fieldTo)
+		private static ValidationCheckResult CheckRangeValueFloat(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField fieldFrom, BaseField fieldTo)
 		{
 			var valueFromObject = fieldFrom.Value;
 			var valueToObject = fieldTo.Value;
@@ -59,13 +60,13 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 
 			if (CheckRangeValue(valueFrom, valueTo, parameters.AllowNull))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeFloat, fieldFrom.Id, fieldTo.Id);
 		}
 
-		private static ValidationCheckResult CheckRangeValueDouble<T, D>(ValidationCheckParameters<T, D> parameters, BaseField fieldFrom, BaseField fieldTo)
+		private static ValidationCheckResult CheckRangeValueDouble(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField fieldFrom, BaseField fieldTo)
 		{
 			var valueFromObject = fieldFrom.Value;
 			var valueToObject = fieldTo.Value;
@@ -74,13 +75,13 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 
 			if (CheckRangeValue(valueFrom, valueTo, parameters.AllowNull))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeDouble, fieldFrom.Id, fieldTo.Id);
 		}
 
-		private static ValidationCheckResult CheckRangeValueDecimal<T, D>(ValidationCheckParameters<T, D> parameters, BaseField fieldFrom, BaseField fieldTo)
+		private static ValidationCheckResult CheckRangeValueDecimal(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField fieldFrom, BaseField fieldTo)
 		{
 			var valueFromObject = fieldFrom.Value;
 			var valueToObject = fieldTo.Value;
@@ -89,13 +90,13 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 
 			if (CheckRangeValue(valueFrom, valueTo, parameters.AllowNull))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeDecimal, fieldFrom.Id, fieldTo.Id);
 		}
 
-		private static ValidationCheckResult CheckRangeValueInteger<T, D>(ValidationCheckParameters<T, D> parameters, BaseField fieldFrom, BaseField fieldTo)
+		private static ValidationCheckResult CheckRangeValueInteger(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField fieldFrom, BaseField fieldTo)
 		{
 			var valueFromObject = fieldFrom.Value;
 			var valueToObject = fieldTo.Value;
@@ -104,13 +105,13 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 
 			if (CheckRangeValue(valueFrom, valueTo, parameters.AllowNull))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeInteger, fieldFrom.Id, fieldTo.Id);
 		}
 
-		private static ValidationCheckResult CheckRangeValueLong<T, D>(ValidationCheckParameters<T, D> parameters, BaseField fieldFrom, BaseField fieldTo)
+		private static ValidationCheckResult CheckRangeValueLong(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField fieldFrom, BaseField fieldTo)
 		{
 			var valueFromObject = fieldFrom.Value;
 			var valueToObject = fieldTo.Value;
@@ -119,13 +120,13 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 
 			if (CheckRangeValue(valueFrom, valueTo, parameters.AllowNull))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeLong, fieldFrom.Id, fieldTo.Id);
 		}
 
-		private static ValidationCheckResult CheckRangeValueDateTime<T, D>(ValidationCheckParameters<T, D> parameters, BaseField fieldFrom, BaseField fieldTo)
+		private static ValidationCheckResult CheckRangeValueDateTime(ValidationCheckParameters<FD, FA, FV, T, D> parameters, BaseField fieldFrom, BaseField fieldTo)
 		{
 			var valueFromObject = fieldFrom.Value;
 			var valueToObject = fieldTo.Value;
@@ -134,7 +135,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 
 			if (CheckRangeValue(valueFrom, valueTo, parameters.AllowNull))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeDateTime, fieldFrom.Id, fieldTo.Id);
