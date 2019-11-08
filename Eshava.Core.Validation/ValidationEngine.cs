@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Eshava.Core.Extensions;
+using Eshava.Core.Validation.Attributes;
 using Eshava.Core.Validation.Enums;
+using Eshava.Core.Validation.Extension;
 using Eshava.Core.Validation.Interfaces;
 using Eshava.Core.Validation.Models;
 using Eshava.Core.Validation.ValidationMethods;
@@ -51,6 +53,11 @@ namespace Eshava.Core.Validation
 
 			foreach (var propertyInfo in modelType.GetProperties())
 			{
+				if (propertyInfo.HasAttribute<ValidationIgnoreAttribute>())
+				{
+					continue;
+				}
+
 				var propertyValue = propertyInfo.GetValue(model);
 				var validationParameter = new ValidationCheckParameters
 				{

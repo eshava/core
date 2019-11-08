@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Eshava.Core.Extensions;
 using Eshava.Core.Validation.Attributes;
@@ -10,6 +11,17 @@ namespace Eshava.Core.Validation.ValidationMethods
 {
 	internal static class RangeBetweenValidation
 	{
+		private static List<(Func<Type, bool> Check, Func<ValidationCheckParameters, PropertyInfo, PropertyInfo, ValidationCheckResult> Validate)> _validationRules =
+			new List<(Func<Type, bool> Check, Func<ValidationCheckParameters, PropertyInfo, PropertyInfo, ValidationCheckResult> Validate)>
+			{
+				(type => type == typeof(float), (parameters, propertyInfoFrom, propertyInfoTo) => CheckRangeBetweenFloat(parameters, propertyInfoFrom, propertyInfoTo)),
+				(type => type == typeof(double), (parameters, propertyInfoFrom, propertyInfoTo) => CheckRangeBetweenDouble(parameters, propertyInfoFrom, propertyInfoTo)),
+				(type => type == typeof(decimal), (parameters, propertyInfoFrom, propertyInfoTo) => CheckRangeBetweenDecimal(parameters, propertyInfoFrom, propertyInfoTo)),
+				(type => type == typeof(int), (parameters, propertyInfoFrom, propertyInfoTo) => CheckRangeBetweenInteger(parameters, propertyInfoFrom, propertyInfoTo)),
+				(type => type == typeof(long), (parameters, propertyInfoFrom, propertyInfoTo) => CheckRangeBetweenLong(parameters, propertyInfoFrom, propertyInfoTo)),
+				(type => type == typeof(DateTime), (parameters, propertyInfoFrom, propertyInfoTo) => CheckRangeBetweenDateTime(parameters, propertyInfoFrom, propertyInfoTo))
+			};
+
 		public static ValidationCheckResult CheckRangeBetween(ValidationCheckParameters parameters)
 		{
 			var dataType = parameters.PropertyInfo.GetDataType();
@@ -17,62 +29,44 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (parameters.PropertyValue == null || rangeBetween == null)
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
-			//Determining the proterty for the start value of the value range
+			//Determining the property for the start and end value of the value range
 			var propertyInfoFrom = parameters.DataType.GetProperty(rangeBetween.PropertyNameFrom);
-			if (propertyInfoFrom == null)
+			var propertyInfoTo = parameters.DataType.GetProperty(rangeBetween.PropertyNameTo);
+			if (propertyInfoFrom == null || propertyInfoTo == null)
 			{
-				return GetErrorResult(ValidationErrorType.PropertyNotFoundFrom, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo);
+				var resultFrom = propertyInfoFrom == null ? GetErrorResult(ValidationErrorType.PropertyNotFoundFrom, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo) : null;
+				var resultTo = propertyInfoTo == null ? GetErrorResult(ValidationErrorType.PropertyNotFoundTo, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo) : null;
+
+				if (resultFrom != null && resultTo != null)
+				{
+					resultFrom.ValidationErrors.Add(resultTo.ValidationErrors.Single());
+
+					return resultFrom;
+				}
+
+				return resultFrom ?? resultTo;
 			}
 
-			//Determining the proterty for the end value of the value range
 			var dataTypeFrom = propertyInfoFrom.GetDataType();
-			var propertyInfoTo = parameters.DataType.GetProperty(rangeBetween.PropertyNameTo);
-			if (propertyInfoTo == null)
-			{
-				return GetErrorResult(ValidationErrorType.PropertyNotFoundTo, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo);
-			}
+			
 
 			//Check whether the data types match
 			var dataTypeTo = propertyInfoTo.GetDataType();
-			if (dataType != dataTypeFrom || dataType != dataTypeTo || dataTypeFrom != dataTypeTo)
+			if (dataType != dataTypeFrom || dataType != dataTypeTo)
 			{
 				return GetErrorResult(ValidationErrorType.DataTypesNotEqual, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo);
 			}
 
-			if (dataType == typeof(float))
+			var validationRule = _validationRules.SingleOrDefault(rule => rule.Check(dataType));
+			if (validationRule.Validate != null)
 			{
-				return CheckRangeBetweenFloat(parameters, propertyInfoFrom, propertyInfoTo);
+				return validationRule.Validate(parameters, propertyInfoFrom, propertyInfoTo);
 			}
 
-			if (dataType == typeof(double))
-			{
-				return CheckRangeBetweenDouble(parameters, propertyInfoFrom, propertyInfoTo);
-			}
-
-			if (dataType == typeof(decimal))
-			{
-				return CheckRangeBetweenDecimal(parameters, propertyInfoFrom, propertyInfoTo);
-			}
-
-			if (dataType == typeof(int))
-			{
-				return CheckRangeBetweenInteger(parameters, propertyInfoFrom, propertyInfoTo);
-			}
-
-			if (dataType == typeof(long))
-			{
-				return CheckRangeBetweenLong(parameters, propertyInfoFrom, propertyInfoTo);
-			}
-
-			if (dataType == typeof(DateTime))
-			{
-				return CheckRangeBetweenDateTime(parameters, propertyInfoFrom, propertyInfoTo);
-			}
-
-			return new ValidationCheckResult { IsValid = true };
+			return GetErrorResult(ValidationErrorType.DataTypeNotSupported, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo);
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenDateTime(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -83,7 +77,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeDateTime, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
@@ -97,7 +91,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeInteger, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
@@ -111,7 +105,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeLong, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
@@ -125,7 +119,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeDecimal, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
@@ -139,7 +133,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeDouble, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
@@ -153,7 +147,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeFloat, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);

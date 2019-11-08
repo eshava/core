@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Eshava.Core.Validation;
 using Eshava.Core.Validation.Enums;
-using Eshava.Core.Validation.Models;
 using Eshava.Test.Core.Validation.Models;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

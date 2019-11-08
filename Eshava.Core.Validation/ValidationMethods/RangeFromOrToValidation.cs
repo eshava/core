@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Eshava.Core.Extensions;
 using Eshava.Core.Validation.Attributes;
 using Eshava.Core.Validation.Enums;
@@ -20,7 +19,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			return CheckRangeFromOrTo<RangeToAttribute>(parameters, true);
 		}
 
-		private static ValidationCheckResult CheckRangeFromOrTo<T>(ValidationCheckParameters parameters, bool invertProperties, [CallerMemberName] string memberName = null) where T : AbstractRangeFromOrToAttribute
+		private static ValidationCheckResult CheckRangeFromOrTo<T>(ValidationCheckParameters parameters, bool invertProperties) where T : AbstractRangeFromOrToAttribute
 		{
 			var propertyInfoTarget = parameters.PropertyInfo;
 			var rangeSource = Attribute.GetCustomAttribute(propertyInfoTarget, typeof(T)) as AbstractRangeFromOrToAttribute;
@@ -28,10 +27,10 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (rangeSource == null)
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
-			//Determining the proterty for the start value of the value range
+			//Determining the property for the start value of the value range
 			var propertiesSource = rangeSource.PropertyName.Contains(",") ? rangeSource.PropertyName.Split(',') : new[] { rangeSource.PropertyName };
 			var results = new List<ValidationCheckResultEntry>();
 
@@ -78,7 +77,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (results.Count == 0)
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return new ValidationCheckResult { ValidationErrors = results };

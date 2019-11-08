@@ -185,5 +185,9 @@ namespace Eshava.Test.Core.Validation.Models
 
 		public bool StigmaOne { get; set; }
 		public bool? StigmaTwo { get; set; }
+
+		[Required]
+		[ValidationIgnore]
+		public string StigmaThree { get; set; }
 	}
 }
