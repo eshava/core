@@ -35,14 +35,14 @@ namespace Eshava.Core.Validation.ValidationMethods
 					var elements = parameters.PropertyValue as IEnumerable;
 					if (elements.Cast<object>().Any())
 					{
-						return new ValidationCheckResult { IsValid = true };
+						return new ValidationCheckResult();
 					}
 
 					return GetErrorResult(ValidationErrorType.IsEmptyIEnumerable, parameters.PropertyInfo.Name);
 				}
 			}
 
-			return new ValidationCheckResult { IsValid = true };
+			return new ValidationCheckResult();
 		}
 
 		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName)

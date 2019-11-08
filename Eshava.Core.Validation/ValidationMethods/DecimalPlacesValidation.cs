@@ -16,7 +16,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (parameters.PropertyValue == null || decimalPlaces == null)
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			var decimalPlacesValue = decimalPlaces.DecimalPlaces;
@@ -51,7 +51,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				}
 			}
 
-			return new ValidationCheckResult { IsValid = true };
+			return new ValidationCheckResult();
 		}
 
 		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName)

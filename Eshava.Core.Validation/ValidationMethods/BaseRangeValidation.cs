@@ -61,7 +61,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (CheckRangeValue(valueFrom, valueTo, parameters.AllowNull))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeFloat, propertyInfoFrom.Name, propertyInfoTo.Name);
@@ -76,7 +76,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (CheckRangeValue(valueFrom, valueTo, parameters.AllowNull))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeDouble, propertyInfoFrom.Name, propertyInfoTo.Name);
@@ -91,7 +91,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (CheckRangeValue(valueFrom, valueTo, parameters.AllowNull))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeDecimal, propertyInfoFrom.Name, propertyInfoTo.Name);
@@ -106,7 +106,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (CheckRangeValue(valueFrom, valueTo, parameters.AllowNull))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeInteger, propertyInfoFrom.Name, propertyInfoTo.Name);
@@ -121,7 +121,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (CheckRangeValue(valueFrom, valueTo, parameters.AllowNull))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeLong, propertyInfoFrom.Name, propertyInfoTo.Name);
@@ -136,7 +136,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (CheckRangeValue(valueFrom, valueTo, parameters.AllowNull))
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			return GetErrorResult(ValidationErrorType.DataTypeDateTime, propertyInfoFrom.Name, propertyInfoTo.Name);

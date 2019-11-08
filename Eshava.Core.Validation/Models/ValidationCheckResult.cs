@@ -9,7 +9,7 @@ namespace Eshava.Core.Validation.Models
 			ValidationErrors = new List<ValidationCheckResultEntry>();
 		}
 
-		public bool IsValid { get; set; }
 		public IList<ValidationCheckResultEntry> ValidationErrors { get; set; }
+		public bool IsValid { get { return ValidationErrors.Count == 0; } }
 	}
 }

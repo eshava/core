@@ -42,6 +42,8 @@ Extension to secure data worthy of protection
 Extension for validation of objects based on default annotation attributes and additional custom annotation attributes
 
 * Uses System.ComponentModel.DataAnnotations
+* Validating an object instance
+* Creating a set of validation rules based on a class
 
 ## project dependency diagram
 

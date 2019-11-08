@@ -1,26 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 using Eshava.Core.Extensions;
 using Eshava.Core.Validation.Enums;
+using Eshava.Core.Validation.Extension;
 using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Validation.ValidationMethods
 {
 	internal static class StringValidation
 	{
+		private static Type _typeString = typeof(string);
+		
 		public static ValidationCheckResult CheckStringLength(ValidationCheckParameters parameters)
 		{
-			if (parameters.PropertyInfo.PropertyType.GetDataTypeFromIEnumerable() != typeof(string))
+			if (parameters.PropertyInfo.PropertyType.GetDataTypeFromIEnumerable() != _typeString)
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			var valueString = parameters.PropertyValue as string;
 			if (valueString.IsNullOrEmpty())
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			var maxLength = Attribute.GetCustomAttribute(parameters.PropertyInfo, typeof(MaxLengthAttribute)) as MaxLengthAttribute;
@@ -36,14 +38,14 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return GetErrorResult(ValidationErrorType.LowerMinLength, parameters.PropertyInfo.Name);
 			}
 
-			return new ValidationCheckResult { IsValid = true };
+			return new ValidationCheckResult();
 		}
 
 		public static ValidationCheckResult CheckMailAddress(ValidationCheckParameters parameters)
 		{
-			if (parameters.PropertyInfo.PropertyType != typeof(string))
+			if (parameters.PropertyInfo.PropertyType.GetDataTypeFromIEnumerable() != _typeString)
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			var dataType = Attribute.GetCustomAttribute(parameters.PropertyInfo, typeof(DataTypeAttribute)) as DataTypeAttribute;
@@ -51,26 +53,19 @@ namespace Eshava.Core.Validation.ValidationMethods
 			if (dataType != null && dataType.DataType == DataType.EmailAddress)
 			{
 				var valueString = parameters.PropertyValue as string;
-				if (!valueString.IsNullOrEmpty())
+				if (!valueString.IsNullOrEmpty() && !valueString.IsEmailAddress())
 				{
-					var regex = new Regex(@"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
-											@"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-\w]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$", RegexOptions.IgnoreCase);
-					var match = regex.Match(valueString);
-
-					if (!match.Success)
-					{
-						return GetErrorResult(ValidationErrorType.NoWellFormedMailAddress, parameters.PropertyInfo.Name);
-					}
+					return GetErrorResult(ValidationErrorType.NoWellFormedMailAddress, parameters.PropertyInfo.Name);
 				}
 			}
 
-			return new ValidationCheckResult { IsValid = true };
+			return new ValidationCheckResult();
 		}
 		public static ValidationCheckResult CheckUrl(ValidationCheckParameters parameters)
 		{
-			if (parameters.PropertyInfo.PropertyType != typeof(string))
+			if (parameters.PropertyInfo.PropertyType.GetDataTypeFromIEnumerable() != _typeString)
 			{
-				return new ValidationCheckResult { IsValid = true };
+				return new ValidationCheckResult();
 			}
 
 			var dataType = Attribute.GetCustomAttribute(parameters.PropertyInfo, typeof(DataTypeAttribute)) as DataTypeAttribute;
@@ -78,33 +73,13 @@ namespace Eshava.Core.Validation.ValidationMethods
 			if (dataType != null && dataType.DataType == DataType.Url)
 			{
 				var valueString = parameters.PropertyValue as string;
-				if (!valueString.IsNullOrEmpty())
+				if (!valueString.IsNullOrEmpty() && !valueString.IsUrl())
 				{
-					if (valueString.Contains("@"))
-					{
-						return GetErrorResult(ValidationErrorType.NoWellFormedUri, parameters.PropertyInfo.Name);
-					}
-
-					if (!valueString.StartsWith("http://") && !valueString.StartsWith("https://"))
-					{
-						valueString = "http://" + valueString;
-					}
-
-					var isValid = Uri.TryCreate(valueString, UriKind.Absolute, out var outputUri) &&
-								  outputUri.Host.Replace("www.", "").Split('.').Length > 1 &&
-								  outputUri.HostNameType == UriHostNameType.Dns &&
-								  outputUri.Host.Length > outputUri.Host.LastIndexOf(".", StringComparison.Ordinal) + 1 &&
-								  255 >= valueString.Length;
-
-					if (!isValid)
-					{
-						return GetErrorResult(ValidationErrorType.NoWellFormedUri, parameters.PropertyInfo.Name);
-					}
-
+					return GetErrorResult(ValidationErrorType.NoWellFormedUri, parameters.PropertyInfo.Name);
 				}
 			}
 
-			return new ValidationCheckResult { IsValid = true };
+			return new ValidationCheckResult();
 		}
 
 		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName)
