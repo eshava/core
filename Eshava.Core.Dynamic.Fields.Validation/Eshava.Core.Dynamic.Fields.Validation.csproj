@@ -20,11 +20,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="Eshava.Core" Version="1.0.0.1" />
-		<PackageReference Include="Eshava.Core.Validation" Version="1.0.2.2" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\Eshava.Core.Dynamic.Fields\Eshava.Core.Dynamic.Fields.csproj" />
+		<PackageReference Include="Eshava.Core.Dynamic.Fields" Version="1.0.0" />
+		<PackageReference Include="Eshava.Core.Validation" Version="1.0.2.3" />
 	</ItemGroup>
 
 </Project>
