@@ -9,7 +9,7 @@ using Eshava.Core.Dynamic.Fields.Validation.ValidationMethods;
 using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 
-namespace Eshava.Core.Dynamic.Fields
+namespace Eshava.Core.Dynamic.Fields.Validation
 {
 	public class FieldValidationEngine<FD, FA, FV, T, D> : IFieldValidationEngine<FD, FA, FV, T, D> where FD : IFieldDefinition<T> where FA : IFieldAssignment<T, D> where FV : IFieldValue<T>
 	{
@@ -30,7 +30,7 @@ namespace Eshava.Core.Dynamic.Fields
 
 		public ValidationCheckResult Validate(FieldInformation<FD, FA, FV, T, D> fieldInformation, AnalysisResult analysisResult)
 		{
-			if ((fieldInformation?.IsValid ?? false) || (analysisResult?.Result?.Count ?? 0) == 0)
+			if (!(fieldInformation?.IsValid ?? false) || (analysisResult?.Result?.Count ?? 0) == 0)
 			{
 				return new ValidationCheckResult
 				{
@@ -59,7 +59,7 @@ namespace Eshava.Core.Dynamic.Fields
 						{
 							new ValidationCheckResultEntry
 							{
-								PropertyName = fieldValue.Id.ToString(),
+								 PropertyName = fieldValue.Id.ToString(),
 								 ErrorType = ValidationErrorType.IsNull,
 								 MethodType = ValidationMethodType.Input,
 								 PropertyNameFrom = nameof(IFieldDefinition<T>) + ": " + (fieldDefinition == null ? "missing" : fieldDefinition.Id.ToString()),

@@ -34,6 +34,8 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 				return new ValidationCheckResult();
 			}
 
+			parameters.AllowNull = parameters.GetConfigurations(FieldConfigurationType.AllowNull).Any();
+
 			//Determining the field for the start and end value of the value range
 			var rangeFromField = rangeFromRule?.ValueString.GetFieldSource(parameters);
 			var rangeToField = rangeToRule?.ValueString.GetFieldSource(parameters);
@@ -73,7 +75,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			var valueFrom = rangeFromField.Value as DateTime?;
 			var valueTo = rangeToField.Value as DateTime?;
 
-			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, parameters.AllowNull, value))
 			{
 				return new ValidationCheckResult();
 			}
@@ -87,7 +89,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			var valueFrom = rangeFromField.Value as int?;
 			var valueTo = rangeToField.Value as int?;
 
-			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, parameters.AllowNull, value))
 			{
 				return new ValidationCheckResult();
 			}
@@ -101,7 +103,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			var valueFrom = rangeFromField.Value as long?;
 			var valueTo = rangeToField.Value as long?;
 
-			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, parameters.AllowNull, value))
 			{
 				return new ValidationCheckResult();
 			}
@@ -115,7 +117,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			var valueFrom = rangeFromField.Value as decimal?;
 			var valueTo = rangeToField.Value as decimal?;
 
-			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, parameters.AllowNull, value))
 			{
 				return new ValidationCheckResult();
 			}
@@ -129,7 +131,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			var valueFrom = rangeFromField.Value as double?;
 			var valueTo = rangeToField.Value as double?;
 
-			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, parameters.AllowNull, value))
 			{
 				return new ValidationCheckResult();
 			}
@@ -143,7 +145,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			var valueFrom = rangeFromField.Value as float?;
 			var valueTo = rangeToField.Value as float?;
 
-			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation<FD, FA, FV, T, D>.CheckRangeValue(valueFrom, valueTo, parameters.AllowNull, value))
 			{
 				return new ValidationCheckResult();
 			}

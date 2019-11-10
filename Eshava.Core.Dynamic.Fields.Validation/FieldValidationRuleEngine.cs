@@ -154,7 +154,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 			switch (definition.FieldType)
 			{
 				case FieldType.NumberInteger:
-				case FieldType.ComboBoxInt:
+				case FieldType.ComboBoxInteger:
 					defaultValue = configNotEqualDefault?.ValueInteger;
 					break;
 				case FieldType.NumberDecimal:
@@ -210,7 +210,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 				case FieldType.Checkbox:
 					validationProperty.DataType = "boolean";
 					break;
-				case FieldType.ComboBoxInt:
+				case FieldType.ComboBoxInteger:
 					validationProperty.DataType = "select";
 					validationProperty.Rules.Add(new ValidationRule { Rule = "Number" });
 					break;

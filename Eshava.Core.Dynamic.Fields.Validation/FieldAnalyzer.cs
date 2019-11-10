@@ -17,14 +17,17 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 		private static List<(Func<FieldType, bool> Check, Func<IFieldValue<T>, BaseField> Convert)> _mapping =
 			new List<(Func<FieldType, bool> Check, Func<IFieldValue<T>, BaseField> Convert)>
 			{
-				(type => type == FieldType.NumberInteger, field => new BaseField { Id = field.Id.ToString(), Type = typeof(int), Value = field.ValueInt }),
-				(type => type == FieldType.ComboBoxInt, field => new BaseField { Id = field.Id.ToString(), Type = typeof(int), Value = field.ValueInt }),
-				(type => type == FieldType.NumberDecimal, field => new BaseField { Id = field.Id.ToString(), Type = typeof(decimal), Value = field.ValueDecimals }),
+				(type => type == FieldType.NumberInteger, field => new BaseField { Id = field.Id.ToString(), Type = typeof(int), Value = field.ValueInteger }),
+				(type => type == FieldType.ComboBoxInteger, field => new BaseField { Id = field.Id.ToString(), Type = typeof(int), Value = field.ValueInteger }),
+				(type => type == FieldType.NumberLong, field => new BaseField { Id = field.Id.ToString(), Type = typeof(long), Value = field.ValueLong }),
+				(type => type == FieldType.NumberDouble, field => new BaseField { Id = field.Id.ToString(), Type = typeof(double), Value = field.ValueDouble }),
+				(type => type == FieldType.NumberFloat, field => new BaseField { Id = field.Id.ToString(), Type = typeof(float), Value = field.ValueFloat }),
+				(type => type == FieldType.NumberDecimal, field => new BaseField { Id = field.Id.ToString(), Type = typeof(decimal), Value = field.ValueDecimal }),
 				(type => type == FieldType.Text, field => new BaseField { Id = field.Id.ToString(), Type = typeof(string), Value = field.ValueString }),
 				(type => type == FieldType.TextMultiline, field => new BaseField { Id = field.Id.ToString(), Type = typeof(string), Value = field.ValueString }),
 				(type => type == FieldType.AutoComplete, field => new BaseField { Id = field.Id.ToString(), Type = typeof(string), Value = field.ValueString }),
 				(type => type == FieldType.DateTime, field => new BaseField { Id = field.Id.ToString(), Type = typeof(DateTime), Value = field.ValueDateTime }),
-				(type => type == FieldType.Checkbox, field => new BaseField { Id = field.Id.ToString(), Type = typeof(bool), Value = field.ValueBool }),
+				(type => type == FieldType.Checkbox, field => new BaseField { Id = field.Id.ToString(), Type = typeof(bool), Value = field.ValueBoolean }),
 				(type => type == FieldType.Guid, field => new BaseField { Id = field.Id.ToString(), Type = typeof(Guid), Value = field.ValueGuid }),
 				(type => type == FieldType.ComboxBoxGuid, field => new BaseField { Id = field.Id.ToString(), Type = typeof(Guid), Value = field.ValueGuid })
 			};

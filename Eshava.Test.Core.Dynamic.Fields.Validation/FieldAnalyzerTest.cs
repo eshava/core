@@ -21,33 +21,34 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 		}
 
 		[DataTestMethod]
-		[DataRow(FieldType.NumberInteger, nameof(DynamicFieldValue.ValueInt), typeof(int), 1)]
-		[DataRow(FieldType.ComboBoxInt, nameof(DynamicFieldValue.ValueInt), typeof(int), 2)]
+		[DataRow(FieldType.NumberInteger, nameof(DynamicFieldValue.ValueInteger), typeof(int), 1)]
+		[DataRow(FieldType.ComboBoxInteger, nameof(DynamicFieldValue.ValueInteger), typeof(int), 2)]
 		[DataRow(FieldType.Text, nameof(DynamicFieldValue.ValueString), typeof(string), "Launchpad McQuack")]
 		[DataRow(FieldType.TextMultiline, nameof(DynamicFieldValue.ValueString), typeof(string), "Let's get dangerous")]
 		[DataRow(FieldType.AutoComplete, nameof(DynamicFieldValue.ValueString), typeof(string), "Morgana Macawber")]
-		[DataRow(FieldType.Checkbox, nameof(DynamicFieldValue.ValueBool), typeof(bool), true)]
+		[DataRow(FieldType.Checkbox, nameof(DynamicFieldValue.ValueBoolean), typeof(bool), true)]
 		public void AnalyseDataTypesDataRowTest(FieldType fieldType, string valuePropertyName, Type type, object value)
 		{
 			// Arrange
-			var field = new DynamicFieldValue { Id = fieldType.ToString() + "Value", AssignmentId = fieldType.ToString() + "Assignment" };
-			typeof(DynamicFieldValue).GetProperty(valuePropertyName).SetValue(field, value);
 			var alpha = new Alpha
 			{
 				Beta = "Darkwing Duck",
 				Gamma = "MegaVolt",
-				FieldValues = new List<DynamicFieldValue> { field }
+				FieldValues = new List<DynamicFieldValue> 
+				{
+					ConfigurationHelper.CreateField(fieldType, valuePropertyName, value) 
+				}
 			};
 
 			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
 			{
 				Definitions = new List<DynamicFieldDefinition>
 				{
-					new DynamicFieldDefinition { FieldType = fieldType, Id = fieldType.ToString() },
+					ConfigurationHelper.CreateDefinition(fieldType)
 				},
 				Assignments = new List<DynamicFieldAssignment>
 				{
-					new DynamicFieldAssignment { Id = fieldType.ToString() + "Assignment", DefinitionId = fieldType.ToString() },
+					ConfigurationHelper.CreateAssignment(fieldType)
 				},
 				Values = alpha.FieldValues
 			};
@@ -84,10 +85,10 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 				Gamma = "MegaVolt",
 				FieldValues = new List<DynamicFieldValue>
 				{
-					new DynamicFieldValue { Id = nameof(FieldType.NumberDecimal) + "Value", AssignmentId = nameof(FieldType.NumberDecimal) + "Assignment", ValueDecimals = 3.5m },
-					new DynamicFieldValue { Id = nameof(FieldType.DateTime) + "Value", AssignmentId = nameof(FieldType.DateTime) + "Assignment", ValueDateTime = DateTime.Today },
-					new DynamicFieldValue { Id = nameof(FieldType.Guid) + "Value", AssignmentId = nameof(FieldType.Guid) + "Assignment", ValueGuid = guidOne },
-					new DynamicFieldValue { Id = nameof(FieldType.ComboxBoxGuid) + "Value", AssignmentId = nameof(FieldType.ComboxBoxGuid) + "Assignment", ValueGuid = guidTwo }
+					ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), 3.5m),
+					ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today),
+					ConfigurationHelper.CreateField(FieldType.Guid, nameof(DynamicFieldValue.ValueGuid), guidOne),
+					ConfigurationHelper.CreateField(FieldType.ComboxBoxGuid, nameof(DynamicFieldValue.ValueGuid), guidTwo)
 				}
 			};
 
@@ -95,17 +96,17 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			{
 				Definitions = new List<DynamicFieldDefinition>
 				{
-					new DynamicFieldDefinition { FieldType = FieldType.NumberDecimal, Id = nameof(FieldType.NumberDecimal) },
-					new DynamicFieldDefinition { FieldType = FieldType.DateTime, Id = nameof(FieldType.DateTime) },
-					new DynamicFieldDefinition { FieldType = FieldType.Guid, Id = nameof(FieldType.Guid) },
-					new DynamicFieldDefinition { FieldType = FieldType.ComboxBoxGuid, Id = nameof(FieldType.ComboxBoxGuid) }
+					ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal),
+					ConfigurationHelper.CreateDefinition(FieldType.DateTime),
+					ConfigurationHelper.CreateDefinition(FieldType.Guid),
+					ConfigurationHelper.CreateDefinition(FieldType.ComboxBoxGuid)
 				},
 				Assignments = new List<DynamicFieldAssignment>
 				{
-					new DynamicFieldAssignment { Id = nameof(FieldType.NumberDecimal) + "Assignment", DefinitionId = nameof(FieldType.NumberDecimal) },
-					new DynamicFieldAssignment { Id = nameof(FieldType.DateTime) + "Assignment", DefinitionId = nameof(FieldType.DateTime) },
-					new DynamicFieldAssignment { Id = nameof(FieldType.Guid) + "Assignment", DefinitionId = nameof(FieldType.Guid) },
-					new DynamicFieldAssignment { Id = nameof(FieldType.ComboxBoxGuid) + "Assignment", DefinitionId = nameof(FieldType.ComboxBoxGuid) }
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime),
+					ConfigurationHelper.CreateAssignment(FieldType.Guid),
+					ConfigurationHelper.CreateAssignment(FieldType.ComboxBoxGuid)
 				},
 				Values = alpha.FieldValues
 			};
@@ -149,7 +150,7 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			{
 				FieldValues = new List<DynamicFieldValue>
 				{
-					new DynamicFieldValue { Id = nameof(FieldType.Text) + "Value", AssignmentId = nameof(FieldType.Text) + "Assignment", ValueString = "Let's get dangerous" }
+					ConfigurationHelper.CreateField(FieldType.Text, nameof(DynamicFieldValue.ValueString), "Let's get dangerous")
 				}
 			};
 
@@ -157,12 +158,12 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			{
 				Definitions = new List<DynamicFieldDefinition>
 				{
-					new DynamicFieldDefinition { FieldType = FieldType.Text, Id = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateDefinition(FieldType.Text)
 				},
 				Assignments = new List<DynamicFieldAssignment>
 				{
-					new DynamicFieldAssignment { Id = nameof(FieldType.Text) + "Assignment", DefinitionId = nameof(FieldType.Text) },
-					new DynamicFieldAssignment { Id = nameof(FieldType.Text) + "Assignment", DefinitionId = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateAssignment(FieldType.Text),
+					ConfigurationHelper.CreateAssignment(FieldType.Text)
 				},
 				Values = alpha.FieldValues
 			};
@@ -184,7 +185,7 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			{
 				FieldValues = new List<DynamicFieldValue>
 				{
-					new DynamicFieldValue { Id = nameof(FieldType.Text) + "Value", AssignmentId = nameof(FieldType.Text) + "Assignment", ValueString = "Let's get dangerous" }
+					ConfigurationHelper.CreateField(FieldType.Text, nameof(DynamicFieldValue.ValueString), "Let's get dangerous")
 				}
 			};
 
@@ -192,11 +193,11 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			{
 				Definitions = new List<DynamicFieldDefinition>
 				{
-					new DynamicFieldDefinition { FieldType = FieldType.TextMultiline, Id = nameof(FieldType.TextMultiline) }
+					ConfigurationHelper.CreateDefinition(FieldType.TextMultiline)
 				},
 				Assignments = new List<DynamicFieldAssignment>
 				{
-					new DynamicFieldAssignment { Id = nameof(FieldType.Text) + "Assignment", DefinitionId = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateAssignment(FieldType.Text)
 				},
 				Values = alpha.FieldValues
 			};
@@ -216,7 +217,7 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			{
 				FieldValues = new List<DynamicFieldValue>
 				{
-					new DynamicFieldValue { Id = nameof(FieldType.TextMultiline) + "Value", AssignmentId = nameof(FieldType.TextMultiline) + "Assignment", ValueString = "Let's get dangerous" }
+					ConfigurationHelper.CreateField(FieldType.TextMultiline, nameof(DynamicFieldValue.ValueString), "Let's get dangerous")
 				}
 			};
 
@@ -224,11 +225,11 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			{
 				Definitions = new List<DynamicFieldDefinition>
 				{
-					new DynamicFieldDefinition { FieldType = FieldType.Text, Id = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateDefinition(FieldType.Text)
 				},
 				Assignments = new List<DynamicFieldAssignment>
 				{
-					new DynamicFieldAssignment { Id = nameof(FieldType.Text) + "Assignment", DefinitionId = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateAssignment(FieldType.Text)
 				},
 				Values = alpha.FieldValues
 			};
@@ -248,7 +249,7 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			{
 				FieldValues = new List<DynamicFieldValue>
 				{
-					new DynamicFieldValue { Id = nameof(FieldType.Text) + "Value", AssignmentId = nameof(FieldType.Text) + "Assignment", ValueString = "Let's get dangerous" }
+					ConfigurationHelper.CreateField(FieldType.Text, nameof(DynamicFieldValue.ValueString), "Let's get dangerous")
 				}
 			};
 
@@ -257,7 +258,7 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 				Definitions = new List<DynamicFieldDefinition>(),
 				Assignments = new List<DynamicFieldAssignment>
 				{
-					new DynamicFieldAssignment { Id = nameof(FieldType.Text) + "Assignment", DefinitionId = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateAssignment(FieldType.Text)
 				},
 				Values = alpha.FieldValues
 			};
@@ -265,7 +266,7 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			{
 				Definitions = new List<DynamicFieldDefinition>
 				{
-					new DynamicFieldDefinition { FieldType = FieldType.Text, Id = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateDefinition(FieldType.Text)
 				},
 				Assignments = new List<DynamicFieldAssignment>(),
 				Values = alpha.FieldValues
@@ -274,11 +275,11 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			{
 				Definitions = new List<DynamicFieldDefinition>
 				{
-					new DynamicFieldDefinition { FieldType = FieldType.Text, Id = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateDefinition(FieldType.Text)
 				},
 				Assignments = new List<DynamicFieldAssignment>
 				{
-					new DynamicFieldAssignment { Id = nameof(FieldType.Text) + "Assignment", DefinitionId = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateAssignment(FieldType.Text)
 				},
 				Values = new List<DynamicFieldValue>()
 			};
@@ -303,15 +304,15 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			{
 				Definitions = new List<DynamicFieldDefinition>
 				{
-					new DynamicFieldDefinition { FieldType = FieldType.Text, Id = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateDefinition(FieldType.Text)
 				},
 				Assignments = new List<DynamicFieldAssignment>
 				{
-					new DynamicFieldAssignment { Id = nameof(FieldType.Text) + "Assignment", DefinitionId = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateAssignment(FieldType.Text)
 				},
 				Values = new List<DynamicFieldValue>
 				{
-					new DynamicFieldValue { Id = nameof(FieldType.Text) + "Value", AssignmentId = nameof(FieldType.Text) + "Assignment", ValueString = "Let's get dangerous" }
+					ConfigurationHelper.CreateField(FieldType.Text, nameof(DynamicFieldValue.ValueString), "Let's get dangerous")
 				}
 			};
 
@@ -333,11 +334,11 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 				Gamma = "MegaVolt",
 				Delta = new Omega
 				{
-					Stigma = "Darkwing Duck"
+					Stigma = 666
 				},
 				FieldValues = new List<DynamicFieldValue>
 				{
-					new DynamicFieldValue { Id = nameof(FieldType.Text) + "Value", AssignmentId = nameof(FieldType.Text) + "Assignment", ValueString = "Let's get dangerous" }
+					ConfigurationHelper.CreateField(FieldType.Text, nameof(DynamicFieldValue.ValueString), "Let's get dangerous")
 				}
 			};
 
@@ -345,11 +346,11 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			{
 				Definitions = new List<DynamicFieldDefinition>
 				{
-					new DynamicFieldDefinition { FieldType = FieldType.Text, Id = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateDefinition(FieldType.Text)
 				},
 				Assignments = new List<DynamicFieldAssignment>
 				{
-					new DynamicFieldAssignment { Id = nameof(FieldType.Text) + "Assignment", DefinitionId = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateAssignment(FieldType.Text)
 				},
 				Values = alpha.FieldValues
 			};
@@ -363,9 +364,9 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 
 			result.Result[nameof(Omega.Stigma)].Id.Should().Be(nameof(Omega.Stigma));
 			result.Result[nameof(Omega.Stigma)].Value.Should().Be(alpha.Delta.Stigma);
-			result.Result[nameof(Omega.Stigma)].Type.Should().Be(typeof(string));
+			result.Result[nameof(Omega.Stigma)].Type.Should().Be(typeof(int));
 		}
-		
+
 		[TestMethod]
 		public void AnalyseValidationIgnoreTest()
 		{
@@ -380,12 +381,12 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 					Gamma = "gamme",
 					Delta = new Omega
 					{
-						Stigma = "stigma"
+						Stigma = 666
 					}
 				},
 				FieldValues = new List<DynamicFieldValue>
 				{
-					new DynamicFieldValue { Id = nameof(FieldType.Text) + "Value", AssignmentId = nameof(FieldType.Text) + "Assignment", ValueString = "Let's get dangerous" }
+					ConfigurationHelper.CreateField(FieldType.Text, nameof(DynamicFieldValue.ValueString), "Let's get dangerous")
 				}
 			};
 
@@ -393,11 +394,11 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			{
 				Definitions = new List<DynamicFieldDefinition>
 				{
-					new DynamicFieldDefinition { FieldType = FieldType.Text, Id = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateDefinition(FieldType.Text)
 				},
 				Assignments = new List<DynamicFieldAssignment>
 				{
-					new DynamicFieldAssignment { Id = nameof(FieldType.Text) + "Assignment", DefinitionId = nameof(FieldType.Text) }
+					ConfigurationHelper.CreateAssignment(FieldType.Text)
 				},
 				Values = alpha.FieldValues
 			};

@@ -2,6 +2,6 @@
 {
 	public class Omega
 	{
-		public string Stigma { get; set; }
+		public int Stigma { get; set; }
 	}
 }

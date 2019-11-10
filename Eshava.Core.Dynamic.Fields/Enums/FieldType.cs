@@ -12,10 +12,11 @@
 		DateTime = 7,
 		Checkbox = 8,
 		DynamicCode = 11,
-		ComboBoxInt = 12,
+		ComboBoxInteger = 12,
 		ComboxBoxGuid = 13,
 		AutoComplete = 14,
 		Guid = 15,
-		BoxedCheckbox = 16
+		BoxedCheckbox = 16,
+		NumberLong = 17
 	}
 }

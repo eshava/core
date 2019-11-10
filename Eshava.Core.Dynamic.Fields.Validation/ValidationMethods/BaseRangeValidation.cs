@@ -141,7 +141,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			return GetErrorResult(ValidationErrorType.DataTypeDateTime, fieldFrom.Id, fieldTo.Id);
 		}
 
-		public static bool CheckRangeValue<T>(T? valueFrom, T? valueTo, bool allowNull, T? valueCurrent = null) where T : struct
+		public static bool CheckRangeValue<T1>(T1? valueFrom, T1? valueTo, bool allowNull, T1? valueCurrent = null) where T1 : struct
 		{
 			if (typeof(T).IsDataTypeNullable())
 			{
@@ -150,20 +150,17 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 
 			if ((valueFrom.HasValue && !valueTo.HasValue && !allowNull) ||
 				(!valueFrom.HasValue && valueTo.HasValue && !allowNull) ||
-				(valueFrom.HasValue && valueTo.HasValue && Comparer<T>.Default.Compare(valueFrom.Value, valueTo.Value) == 1))
+				(valueFrom.HasValue && valueTo.HasValue && Comparer<T1>.Default.Compare(valueFrom.Value, valueTo.Value) == 1))
 			{
 				return false;
 			}
 
 			if (valueCurrent.HasValue)
 			{
-				//No limit has been set, so the current value is always valid.
-				if (!valueFrom.HasValue)
-				{
-					return true;
-				}
-
-				return Comparer<T>.Default.Compare(valueFrom.Value, valueCurrent.Value) <= 0 && Comparer<T>.Default.Compare(valueTo.Value, valueCurrent.Value) >= 0;
+				return (!valueFrom.HasValue || Comparer<T1>.Default.Compare(valueFrom.Value, valueCurrent.Value) <= 0)
+					   &&
+					   (!valueTo.HasValue || Comparer<T1>.Default.Compare(valueTo.Value, valueCurrent.Value) >= 0)
+					   ;
 			}
 
 			return true;

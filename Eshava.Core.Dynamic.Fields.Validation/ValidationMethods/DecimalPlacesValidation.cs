@@ -29,12 +29,22 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			{
 				var faktor = Convert.ToInt32(Math.Pow(10, decimalPlacesValue));
 
-				if (parameters.Field.Type == typeof(float) || parameters.Field.Type == typeof(double))
+				if (parameters.Field.Type == typeof(float))
 				{
-					var valueDouble = Convert.ToDouble(parameters.Field.Value);
+					var valueFloat = (float)parameters.Field.Value;
+					valueFloat *= faktor;
+
+					if (Math.Truncate(valueFloat) != valueFloat)
+					{
+						return GetErrorResult(ValidationErrorType.DataTypeFloatOrDouble, parameters.Field.Id);
+					}
+				}
+				else if (parameters.Field.Type == typeof(double))
+				{
+					var valueDouble = (double)parameters.Field.Value;
 					valueDouble *= faktor;
 
-					if (!Equals(Math.Truncate(valueDouble), valueDouble))
+					if (Math.Truncate(valueDouble) != valueDouble)
 					{
 						return GetErrorResult(ValidationErrorType.DataTypeFloatOrDouble, parameters.Field.Id);
 					}
@@ -44,7 +54,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 					var valueDecimal = (decimal)parameters.Field.Value;
 					valueDecimal *= faktor;
 
-					if (!Equals(Math.Truncate(valueDecimal), valueDecimal))
+					if (Math.Truncate(valueDecimal) != valueDecimal)
 					{
 						return GetErrorResult(ValidationErrorType.DataTypeDecimal, parameters.Field.Id);
 					}

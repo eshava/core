@@ -10,6 +10,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="Eshava.Test.Core.Dynamic.Fields.Validation.v3.ncrunchproject" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\Eshava.Core.Dynamic.Fields.Validation\Eshava.Core.Dynamic.Fields.Validation.csproj" />
 	</ItemGroup>
 
