@@ -158,13 +158,10 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (valueCurrent.HasValue)
 			{
-				//No limit has been set, so the current value is always valid.
-				if (!valueFrom.HasValue)
-				{
-					return true;
-				}
-
-				return Comparer<T>.Default.Compare(valueFrom.Value, valueCurrent.Value) <= 0 && Comparer<T>.Default.Compare(valueTo.Value, valueCurrent.Value) >= 0;
+				return (!valueFrom.HasValue || Comparer<T>.Default.Compare(valueFrom.Value, valueCurrent.Value) <= 0)
+					   &&
+					   (!valueTo.HasValue || Comparer<T>.Default.Compare(valueTo.Value, valueCurrent.Value) >= 0)
+					   ;
 			}
 
 			return true;

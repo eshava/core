@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
+﻿using System.Linq;
 using Eshava.Core.Validation;
-using Eshava.Core.Validation.Attributes;
 using Eshava.Test.Core.Validation.Models;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 
 namespace Eshava.Test.Core.Validation
 {
@@ -202,8 +197,8 @@ namespace Eshava.Test.Core.Validation
 			delta.DataType.Should().Be("number");
 			delta.Rules.Should().HaveCount(3);
 			delta.Rules.Single(r => r.Rule == "DecimalPlaces").Value.Should().Be(0);
-			alpha.Rules.Single(r => r.Rule == "Range").Minimum.Should().Be(-5);
-			alpha.Rules.Single(r => r.Rule == "Range").Maximum.Should().Be(7);
+			delta.Rules.Single(r => r.Rule == "RangeBetween").PropertyNameFrom.Should().Be(nameof(DataTypeProperties.Beta));
+			delta.Rules.Single(r => r.Rule == "RangeBetween").PropertyNameTo.Should().Be(nameof(DataTypeProperties.Gamma));
 			delta.Rules.SingleOrDefault(r => r.Rule == "Number").Should().NotBeNull();
 
 			var epsilon = rules.Single(r => r.PropertyName == nameof(DataTypeProperties.Epsilon));
@@ -211,8 +206,7 @@ namespace Eshava.Test.Core.Validation
 			epsilon.Rules.Should().HaveCount(2);
 			epsilon.Rules.Single(r => r.Rule == "DecimalPlaces").Value.Should().Be(3);
 			epsilon.Rules.SingleOrDefault(r => r.Rule == "Number").Should().NotBeNull();
-
-
+			
 			var zeta = rules.Single(r => r.PropertyName == nameof(DataTypeProperties.Zeta));
 			zeta.DataType.Should().Be("dateTime");
 			zeta.Rules.Should().HaveCount(0);
@@ -286,126 +280,6 @@ namespace Eshava.Test.Core.Validation
 			justAnotherPropertyProperties.Last().DataType.Should().Be("string");
 			justAnotherPropertyProperties.Last().Rules.Should().HaveCount(1);
 			justAnotherPropertyProperties.Last().Rules.Single().Rule.Should().Be("Custom");
-		}
-
-		private class BasicRules
-		{
-			[Required]
-			public string CamelCaseName { get; set; }
-
-			[SpecialValidation]
-			[JsonProperty("itsNotJustAnotherProperty")]
-			public string JustAnotherProperty { get; set; }
-
-			[ValidationIgnore]
-			public string IgnoreMe { get; set; }
-		}
-
-		private class OnlyStringProperties
-		{
-			public string Alpha { get; set; }
-
-			[MinLength(2)]
-			public string Beta { get; set; }
-
-			[MaxLength(10)]
-			public string Gamma { get; set; }
-
-			[MinLength(2)]
-			[MaxLength(10)]
-			public string Delta { get; set; }
-
-			[EqualsTo("Zeta, Eta")]
-			public string Epsilon { get; set; }
-
-			[EqualsTo("Eta")]
-			public string Zeta { get; set; }
-
-			[EqualsTo("Zeta")]
-			[NotEqualsTo("Theta,Iota", "Omega")]
-			public string Eta { get; set; }
-
-			[NotEqualsTo("Iota", "Omega")]
-			public string Theta { get; set; }
-
-			[NotEqualsTo("Theta", "Omega")]
-			public string Iota { get; set; }
-		}
-
-		private class DataTypeAttributeData
-		{
-			[DataType(DataType.Password)]
-			public string Alpha { get; set; }
-
-			[DataType(DataType.DateTime)]
-			public DateTime Beta { get; set; }
-
-			[DataType(DataType.Date)]
-			public DateTime Gamma { get; set; }
-
-			[DataType(DataType.Time)]
-			public DateTime Delta { get; set; }
-
-			[DataType(DataType.MultilineText)]
-			public string Epsilon { get; set; }
-
-			[DataType(DataType.EmailAddress)]
-			public string Zeta { get; set; }
-
-			[DataType(DataType.Url)]
-			public string Eta { get; set; }
-
-			[DataType(DataType.Custom)]
-			public Guid Theta { get; set; }
-
-			[DataType(DataType.Custom)]
-			public DateTime Iota { get; set; }
-		}
-
-		private class DataTypeProperties
-		{
-			[Range(-5, 7)]
-			public int? Alpha { get; set; }
-
-			[RangeTo(nameof(Gamma), true)]
-			public long? Beta { get; set; }
-
-			[RangeFrom(nameof(Beta), false)]
-			public double? Gamma { get; set; }
-
-			[RangeBetween(nameof(Beta), nameof(Gamma))]
-			public float? Delta { get; set; }
-
-			[DecimalPlaces(3)]
-			public decimal? Epsilon { get; set; }
-
-			public DateTime? Zeta { get; set; }
-
-			public Guid? Eta { get; set; }
-
-			public bool? Theta { get; set; }
-
-			public Alphabet Iota { get; set; }
-
-			[Tags]
-			public string Kappa { get; set; }
-
-			[Typeahead]
-			public string Lambda { get; set; }
-
-			[DropDownList]
-			public string My { get; set; }
-
-			[DropDownList]
-			public int? Ny { get; set; }
-		}
-
-		private class ComplexData
-		{
-			public IEnumerable<string> Alpha { get; set; }
-			public IList<int> Beta { get; set; }
-			public List<BasicRules> Gamma { get; set; }
-			public BasicRules Delta { get; set; }
-		}
+		}		
 	}
 }

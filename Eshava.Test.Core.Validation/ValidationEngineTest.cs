@@ -1005,6 +1005,153 @@ namespace Eshava.Test.Core.Validation
 			.Should().BeTrue();
 		}
 
+		[TestMethod]
+		public void ValidateRangeBetweenAllowNullLeftTest()
+		{
+			// Arrange
+			var data = new RangeBetweenData
+			{
+				AlphaFrom = null,
+				AlphaValue = 5m,
+				AlphaTo = 7m,
+				BetaFrom = null,
+				BetaValue = 5.0,
+				BetaTo = 7.0,
+				GammaFrom = null,
+				GammaValue = 5f,
+				GammaTo = 7f,
+				DeltaFrom = null,
+				DeltaValue = 5,
+				DeltaTo = 7,
+				EpsilonFrom = null,
+				EpsilonValue = 5L,
+				EpsilonTo = 7L,
+				ZetaFrom = null,
+				ZetaValue = DateTime.Today,
+				ZetaTo = DateTime.Today.AddDays(2.0)
+			};
+
+			// Act
+			var result = _classUnderTest.Validate(data);
+
+			// Assert
+			result.IsValid.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenAllowNullRightTest()
+		{
+			// Arrange
+			var data = new RangeBetweenData
+			{
+				AlphaFrom = 3m,
+				AlphaValue = 5m,
+				AlphaTo = null,
+				BetaFrom = 3.0,
+				BetaValue = 5.0,
+				BetaTo = null,
+				GammaFrom = 3f,
+				GammaValue = 5f,
+				GammaTo = null,
+				DeltaFrom = 3,
+				DeltaValue = 5,
+				DeltaTo = null,
+				EpsilonFrom = 3L,
+				EpsilonValue = 5L,
+				EpsilonTo = null,
+				ZetaFrom = DateTime.Today.AddDays(-2.0),
+				ZetaValue = DateTime.Today,
+				ZetaTo = null
+			};
+
+			// Act
+			var result = _classUnderTest.Validate(data);
+
+			// Assert
+			result.IsValid.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenAllowNullLeftAndGreaterValueTest()
+		{
+			// Arrange
+			var data = new RangeBetweenData
+			{
+				AlphaFrom = null,
+				AlphaValue = 10m,
+				AlphaTo = 7m,
+				BetaFrom = null,
+				BetaValue = 10.0,
+				BetaTo = 7.0,
+				GammaFrom = null,
+				GammaValue = 10f,
+				GammaTo = 7f,
+				DeltaFrom = null,
+				DeltaValue = 10,
+				DeltaTo = 7,
+				EpsilonFrom = null,
+				EpsilonValue = 10L,
+				EpsilonTo = 7L,
+				ZetaFrom = null,
+				ZetaValue = DateTime.Today.AddDays(4.0),
+				ZetaTo = DateTime.Today.AddDays(2.0)
+			};
+
+			// Act
+			var result = _classUnderTest.Validate(data);
+
+			// Assert
+			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(6);
+			result.ValidationErrors.All(error =>
+					error.MethodType == ValidationMethodType.RangeBetween
+				 && error.ErrorType != ValidationErrorType.DataTypesNotEqual
+				 && error.ErrorType != ValidationErrorType.DataTypeNotSupported)
+				.Should()
+				.BeTrue();
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenAllowNullRightAndLowerValueTest()
+		{
+			// Arrange
+			var data = new RangeBetweenData
+			{
+				AlphaFrom = 10m,
+				AlphaValue = 5m,
+				AlphaTo = null,
+				BetaFrom = 10.0,
+				BetaValue = 5.0,
+				BetaTo = null,
+				GammaFrom = 10f,
+				GammaValue = 5f,
+				GammaTo = null,
+				DeltaFrom = 10,
+				DeltaValue = 5,
+				DeltaTo = null,
+				EpsilonFrom = 10L,
+				EpsilonValue = 5L,
+				EpsilonTo = null,
+				ZetaFrom = DateTime.Today.AddDays(-2.0),
+				ZetaValue = DateTime.Today.AddDays(-4.0),
+				ZetaTo = null
+			};
+
+			// Act
+			var result = _classUnderTest.Validate(data);
+
+			// Assert
+			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(6);
+			result.ValidationErrors.All(error => 
+					error.MethodType == ValidationMethodType.RangeBetween 
+				 && error.ErrorType != ValidationErrorType.DataTypesNotEqual 
+				 && error.ErrorType != ValidationErrorType.DataTypeNotSupported)
+				.Should()
+				.BeTrue();
+		}
+
+
 		[DataTestMethod]
 		[DataRow("Darkwing Duck", false, DisplayName = "Invalid url (1)")]
 		[DataRow("http://www.eshava", false, DisplayName = "Invalid url (2)")]
