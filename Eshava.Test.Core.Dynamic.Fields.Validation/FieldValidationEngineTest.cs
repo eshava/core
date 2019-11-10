@@ -4,7 +4,7 @@ using System.Linq;
 using Eshava.Core.Dynamic.Fields.Enums;
 using Eshava.Core.Dynamic.Fields.Models;
 using Eshava.Core.Dynamic.Fields.Validation;
-using Eshava.Core.Extensions;
+using Eshava.Core.Validation.Enums;
 using Eshava.Test.Core.Dynamic.Fields.Validation.Models;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -421,43 +421,31 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			var fieldDefinitionOne = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null, "One");
 			fieldDefinitionOne.Configurations = new List<DynamicFieldConfiguration>
 			{
-				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Minimum },
-				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Maximum },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Minimum, ValueDecimal = 3m },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Maximum, ValueDecimal = 7m }
 			};
-			fieldDefinitionOne.Configurations.First().ValueDecimal = 3m;
-			fieldDefinitionOne.Configurations.Last().ValueDecimal = 7m;
-
-
+			
 			var fieldDefinitionTwo = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null, "Two");
 			fieldDefinitionTwo.Configurations = new List<DynamicFieldConfiguration>
 			{
-				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Minimum },
-				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Maximum },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Minimum, ValueDecimal = 3m },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Maximum, ValueDecimal = 7m }
 			};
-			fieldDefinitionTwo.Configurations.First().ValueDecimal = 3m;
-			fieldDefinitionTwo.Configurations.Last().ValueDecimal = 7m;
-
-
-
+			
 			var fieldDefinitionThree = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null, "Three");
 			fieldDefinitionThree.Configurations = new List<DynamicFieldConfiguration>
 			{
-				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Minimum },
-				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Maximum },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Minimum, ValueDecimal = 3m },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Maximum, ValueDecimal = 7m }
 			};
-			fieldDefinitionThree.Configurations.First().ValueDecimal = 3m;
-			fieldDefinitionThree.Configurations.Last().ValueDecimal = 7m;
-
-
+			
 			var fieldDefinitionFour = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null, "Four");
 			fieldDefinitionFour.Configurations = new List<DynamicFieldConfiguration>
 			{
-				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Minimum },
-				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Maximum },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Minimum, ValueDecimal = 3m },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.Maximum, ValueDecimal = 7m }
 			};
-			fieldDefinitionFour.Configurations.First().ValueDecimal = 3m;
-			fieldDefinitionFour.Configurations.Last().ValueDecimal = 7m;
-
+			
 			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
 			{
 				Definitions = new List<DynamicFieldDefinition>
@@ -606,7 +594,34 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 		[DataRow(FieldType.NumberInteger, FieldType.NumberInteger, FieldType.NumberInteger, nameof(DynamicFieldValue.ValueInteger), nameof(DynamicFieldValue.ValueInteger), nameof(DynamicFieldValue.ValueInteger), 3, 1, null, true, true)]
 		[DataRow(FieldType.NumberInteger, FieldType.NumberInteger, FieldType.NumberLong, nameof(DynamicFieldValue.ValueInteger), nameof(DynamicFieldValue.ValueInteger), nameof(DynamicFieldValue.ValueLong), 3, 1, 5L, false, false)]
 		[DataRow(FieldType.NumberLong, FieldType.NumberInteger, FieldType.NumberInteger, nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueInteger), nameof(DynamicFieldValue.ValueInteger), 3L, 1, 5, false, false)]
-		public void ValidateRangeDataRowTest(FieldType field, FieldType fieldTypeFrom, FieldType fieldTypeTo, string valuePropertyName, string valuePropertyNameFrom, string valuePropertyNameTo, object value, object valueFrom, object valueTo, bool allowNull, bool expectedResult)
+		[DataRow(FieldType.NumberLong, FieldType.NumberLong, FieldType.NumberLong, nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), 2L, 2L, 2L, false, true)]
+		[DataRow(FieldType.NumberLong, FieldType.NumberLong, FieldType.NumberLong, nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), 3L, 1L, 5L, false, true)]
+		[DataRow(FieldType.NumberLong, FieldType.NumberLong, FieldType.NumberLong, nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), 1L, 3L, 5L, false, false)]
+		[DataRow(FieldType.NumberLong, FieldType.NumberLong, FieldType.NumberLong, nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), null, 3L, 5L, false, true)]
+		[DataRow(FieldType.NumberLong, FieldType.NumberLong, FieldType.NumberLong, nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), 3L, null, 5L, false, false)]
+		[DataRow(FieldType.NumberLong, FieldType.NumberLong, FieldType.NumberLong, nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), 3L, 1L, null, false, false)]
+		[DataRow(FieldType.NumberLong, FieldType.NumberLong, FieldType.NumberLong, nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), null, 3L, 5L, true, true)]
+		[DataRow(FieldType.NumberLong, FieldType.NumberLong, FieldType.NumberLong, nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), 3L, null, 5L, true, true)]
+		[DataRow(FieldType.NumberLong, FieldType.NumberLong, FieldType.NumberLong, nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), nameof(DynamicFieldValue.ValueLong), 3L, 1L, null, true, true)]
+		[DataRow(FieldType.NumberFloat, FieldType.NumberFloat, FieldType.NumberFloat, nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), 2f, 2f, 2f, false, true)]
+		[DataRow(FieldType.NumberFloat, FieldType.NumberFloat, FieldType.NumberFloat, nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), 3f, 1f, 5f, false, true)]
+		[DataRow(FieldType.NumberFloat, FieldType.NumberFloat, FieldType.NumberFloat, nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), 1f, 3f, 5f, false, false)]
+		[DataRow(FieldType.NumberFloat, FieldType.NumberFloat, FieldType.NumberFloat, nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), null, 3f, 5f, false, true)]
+		[DataRow(FieldType.NumberFloat, FieldType.NumberFloat, FieldType.NumberFloat, nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), 3f, null, 5f, false, false)]
+		[DataRow(FieldType.NumberFloat, FieldType.NumberFloat, FieldType.NumberFloat, nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), 3f, 1f, null, false, false)]
+		[DataRow(FieldType.NumberFloat, FieldType.NumberFloat, FieldType.NumberFloat, nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), null, 3f, 5f, true, true)]
+		[DataRow(FieldType.NumberFloat, FieldType.NumberFloat, FieldType.NumberFloat, nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), 3f, null, 5f, true, true)]
+		[DataRow(FieldType.NumberFloat, FieldType.NumberFloat, FieldType.NumberFloat, nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), nameof(DynamicFieldValue.ValueFloat), 3f, 1f, null, true, true)]
+		[DataRow(FieldType.NumberDouble, FieldType.NumberDouble, FieldType.NumberDouble, nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), 2.0, 2.0, 2.0, false, true)]
+		[DataRow(FieldType.NumberDouble, FieldType.NumberDouble, FieldType.NumberDouble, nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), 3.0, 1.0, 5.0, false, true)]
+		[DataRow(FieldType.NumberDouble, FieldType.NumberDouble, FieldType.NumberDouble, nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), 1.0, 3.0, 5.0, false, false)]
+		[DataRow(FieldType.NumberDouble, FieldType.NumberDouble, FieldType.NumberDouble, nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), null, 3.0, 5.0, false, true)]
+		[DataRow(FieldType.NumberDouble, FieldType.NumberDouble, FieldType.NumberDouble, nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), 3.0, null, 5.0, false, false)]
+		[DataRow(FieldType.NumberDouble, FieldType.NumberDouble, FieldType.NumberDouble, nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), 3.0, 1.0, null, false, false)]
+		[DataRow(FieldType.NumberDouble, FieldType.NumberDouble, FieldType.NumberDouble, nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), null, 3.0, 5.0, true, true)]
+		[DataRow(FieldType.NumberDouble, FieldType.NumberDouble, FieldType.NumberDouble, nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), 3.0, null, 5.0, true, true)]
+		[DataRow(FieldType.NumberDouble, FieldType.NumberDouble, FieldType.NumberDouble, nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), nameof(DynamicFieldValue.ValueDouble), 3.0, 1.0, null, true, true)]
+		public void ValidateRangeBetweenDataRowTest(FieldType field, FieldType fieldTypeFrom, FieldType fieldTypeTo, string valuePropertyName, string valuePropertyNameFrom, string valuePropertyNameTo, object value, object valueFrom, object valueTo, bool allowNull, bool expectedResult)
 		{
 			// Arrange
 			var alpha = new Alpha
@@ -660,6 +675,878 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 
 			// Assert
 			result.IsValid.Should().Be(expectedResult);
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenDecimalLowerValueTest()
+		{
+			// Arrange
+			var fieldFrom = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), 3m, "From");
+			var fieldTo = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), 7m, "To");
+			var field = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), 1m);
+
+			var alpha = new Alpha
+			{
+				Beta = "Darkwing Duck",
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue> { field, fieldFrom, fieldTo}
+			};
+			
+			var fieldDefinitionFrom = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null, "From");
+			var fieldDefinitionTo = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null, "To");
+			
+
+			var fieldDefinition = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null);
+			fieldDefinition.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetween },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenFrom, ValueString = nameof(FieldType.NumberDecimal) + "ValueFrom" },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenTo, ValueString = nameof(FieldType.NumberDecimal) + "ValueTo" }
+			};
+						
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionFrom,
+					fieldDefinitionTo,
+					fieldDefinition,
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal),
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal, "From"),
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal, "To")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(1);
+			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.DataTypeDecimal);
+			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween);
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenDecimalGreaterValueTest()
+		{
+			// Arrange
+			var fieldFrom = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), 3m, "From");
+			var fieldTo = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), 7m, "To");
+			var field = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), 10m);
+
+			var alpha = new Alpha
+			{
+				Beta = "Darkwing Duck",
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue> { field, fieldFrom, fieldTo }
+			};
+
+			var fieldDefinitionFrom = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null, "From");
+			var fieldDefinitionTo = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null, "To");
+
+
+			var fieldDefinition = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null);
+			fieldDefinition.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetween },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenFrom, ValueString = nameof(FieldType.NumberDecimal) + "ValueFrom" },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenTo, ValueString = nameof(FieldType.NumberDecimal) + "ValueTo" }
+			};
+
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionFrom,
+					fieldDefinitionTo,
+					fieldDefinition,
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal),
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal, "From"),
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal, "To")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(1);
+			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.DataTypeDecimal);
+			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween);
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenDecimalTest()
+		{
+			// Arrange
+			var fieldFrom = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), 3m, "From");
+			var fieldTo = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), 7m, "To");
+			var field = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), 5m);
+
+			var alpha = new Alpha
+			{
+				Beta = "Darkwing Duck",
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue> { field, fieldFrom, fieldTo }
+			};
+
+			var fieldDefinitionFrom = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null, "From");
+			var fieldDefinitionTo = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null, "To");
+
+
+			var fieldDefinition = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null);
+			fieldDefinition.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetween },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenFrom, ValueString = nameof(FieldType.NumberDecimal) + "ValueFrom" },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenTo, ValueString = nameof(FieldType.NumberDecimal) + "ValueTo" }
+			};
+
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionFrom,
+					fieldDefinitionTo,
+					fieldDefinition,
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal),
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal, "From"),
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal, "To")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().BeTrue();
+			result.ValidationErrors.Should().HaveCount(0);
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenDecimalAllowNullLeftTest()
+		{
+			// Arrange
+			var fieldFrom = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), null, "From");
+			var fieldTo = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), 7m, "To");
+			var field = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), 5m);
+
+			var alpha = new Alpha
+			{
+				Beta = "Darkwing Duck",
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue> { field, fieldFrom, fieldTo }
+			};
+
+			var fieldDefinitionFrom = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null, "From");
+			var fieldDefinitionTo = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null, "To");
+
+
+			var fieldDefinition = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null);
+			fieldDefinition.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetween },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.AllowNull },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenFrom, ValueString = nameof(FieldType.NumberDecimal) + "ValueFrom" },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenTo, ValueString = nameof(FieldType.NumberDecimal) + "ValueTo" }
+			};
+
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionFrom,
+					fieldDefinitionTo,
+					fieldDefinition,
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal),
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal, "From"),
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal, "To")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().BeTrue();
+			result.ValidationErrors.Should().HaveCount(0);
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenDecimalAllowNullRightTest()
+		{
+			// Arrange
+			var fieldFrom = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), 3m, "From");
+			var fieldTo = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), null, "To");
+			var field = ConfigurationHelper.CreateField(FieldType.NumberDecimal, nameof(DynamicFieldValue.ValueDecimal), 5m);
+
+			var alpha = new Alpha
+			{
+				Beta = "Darkwing Duck",
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue> { field, fieldFrom, fieldTo }
+			};
+
+			var fieldDefinitionFrom = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null, "From");
+			var fieldDefinitionTo = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null, "To");
+
+
+			var fieldDefinition = ConfigurationHelper.CreateDefinition(FieldType.NumberDecimal, null);
+			fieldDefinition.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetween },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.AllowNull },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenFrom, ValueString = nameof(FieldType.NumberDecimal) + "ValueFrom" },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenTo, ValueString = nameof(FieldType.NumberDecimal) + "ValueTo" }
+			};
+
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionFrom,
+					fieldDefinitionTo,
+					fieldDefinition,
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal),
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal, "From"),
+					ConfigurationHelper.CreateAssignment(FieldType.NumberDecimal, "To")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().BeTrue();
+			result.ValidationErrors.Should().HaveCount(0);
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenDateTimeLowerValueTest()
+		{
+			// Arrange
+			var fieldFrom = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today, "From");
+			var fieldTo = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today.AddDays(2.0), "To");
+			var field = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today.AddDays(-2.0));
+
+			var alpha = new Alpha
+			{
+				Beta = "Darkwing Duck",
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue> { field, fieldFrom, fieldTo }
+			};
+
+			var fieldDefinitionFrom = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "From");
+			var fieldDefinitionTo = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "To");
+
+
+			var fieldDefinition = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null);
+			fieldDefinition.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetween },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenFrom, ValueString = nameof(FieldType.DateTime) + "ValueFrom" },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenTo, ValueString = nameof(FieldType.DateTime) + "ValueTo" }
+			};
+
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionFrom,
+					fieldDefinitionTo,
+					fieldDefinition,
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "From"),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "To")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(1);
+			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.DataTypeDateTime);
+			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween);
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenDateTimeGreaterValueTest()
+		{
+			// Arrange
+			var fieldFrom = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today.AddDays(-2.0), "From");
+			var fieldTo = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today, "To");
+			var field = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today.AddDays(2.0));
+
+			var alpha = new Alpha
+			{
+				Beta = "Darkwing Duck",
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue> { field, fieldFrom, fieldTo }
+			};
+
+			var fieldDefinitionFrom = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "From");
+			var fieldDefinitionTo = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "To");
+
+
+			var fieldDefinition = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null);
+			fieldDefinition.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetween },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenFrom, ValueString = nameof(FieldType.DateTime) + "ValueFrom" },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenTo, ValueString = nameof(FieldType.DateTime) + "ValueTo" }
+			};
+
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionFrom,
+					fieldDefinitionTo,
+					fieldDefinition,
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "From"),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "To")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(1);
+			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.DataTypeDateTime);
+			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween);
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenDateTimeTest()
+		{
+			// Arrange
+			var fieldFrom = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today.AddDays(-2.0), "From");
+			var fieldTo = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today.AddDays(2.0), "To");
+			var field = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today);
+
+			var alpha = new Alpha
+			{
+				Beta = "Darkwing Duck",
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue> { field, fieldFrom, fieldTo }
+			};
+
+			var fieldDefinitionFrom = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "From");
+			var fieldDefinitionTo = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "To");
+
+
+			var fieldDefinition = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null);
+			fieldDefinition.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetween },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenFrom, ValueString = nameof(FieldType.DateTime) + "ValueFrom" },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenTo, ValueString = nameof(FieldType.DateTime) + "ValueTo" }
+			};
+
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionFrom,
+					fieldDefinitionTo,
+					fieldDefinition,
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "From"),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "To")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().BeTrue();
+			result.ValidationErrors.Should().HaveCount(0);
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenDateTimeAllowNullLeftTest()
+		{
+			// Arrange
+			var fieldFrom = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), null, "From");
+			var fieldTo = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today.AddDays(2.0), "To");
+			var field = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today);
+
+			var alpha = new Alpha
+			{
+				Beta = "Darkwing Duck",
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue> { field, fieldFrom, fieldTo }
+			};
+
+			var fieldDefinitionFrom = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "From");
+			var fieldDefinitionTo = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "To");
+
+
+			var fieldDefinition = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null);
+			fieldDefinition.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetween },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.AllowNull },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenFrom, ValueString = nameof(FieldType.DateTime) + "ValueFrom" },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenTo, ValueString = nameof(FieldType.DateTime) + "ValueTo" }
+			};
+
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionFrom,
+					fieldDefinitionTo,
+					fieldDefinition,
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "From"),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "To")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().BeTrue();
+			result.ValidationErrors.Should().HaveCount(0);
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenDateTimeAllowNullRightTest()
+		{
+			// Arrange
+			var fieldFrom = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today, "From");
+			var fieldTo = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), null, "To");
+			var field = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today.AddDays(2.0));
+
+			var alpha = new Alpha
+			{
+				Beta = "Darkwing Duck",
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue> { field, fieldFrom, fieldTo }
+			};
+
+			var fieldDefinitionFrom = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "From");
+			var fieldDefinitionTo = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "To");
+
+
+			var fieldDefinition = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null);
+			fieldDefinition.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetween },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.AllowNull },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenFrom, ValueString = nameof(FieldType.DateTime) + "ValueFrom" },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenTo, ValueString = nameof(FieldType.DateTime) + "ValueTo" }
+			};
+
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionFrom,
+					fieldDefinitionTo,
+					fieldDefinition,
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "From"),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "To")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().BeTrue();
+			result.ValidationErrors.Should().HaveCount(0);
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenDateTimePropertyNotFoundLeftTest()
+		{
+			// Arrange
+			var fieldFrom = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today.AddDays(-2.0), "From");
+			var fieldTo = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today.AddDays(2.0), "To");
+			var field = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today);
+
+			var alpha = new Alpha
+			{
+				Beta = "Darkwing Duck",
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue> { field, fieldFrom, fieldTo }
+			};
+
+			var fieldDefinitionFrom = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "From");
+			var fieldDefinitionTo = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "To");
+
+
+			var fieldDefinition = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null);
+			fieldDefinition.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetween },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.AllowNull },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenFrom, ValueString = nameof(FieldType.DateTime) + "LaunchpadMcQuack" },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenTo, ValueString = nameof(FieldType.DateTime) + "ValueTo" }
+			};
+
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionFrom,
+					fieldDefinitionTo,
+					fieldDefinition,
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "From"),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "To")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(1);
+			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween);
+			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.PropertyNotFoundFrom);
+			result.ValidationErrors.Single().PropertyNameFrom.Should().Be(nameof(FieldType.DateTime) + "LaunchpadMcQuack");
+			result.ValidationErrors.Single().PropertyNameTo.Should().Be(nameof(FieldType.DateTime) + "ValueTo");
+			result.ValidationErrors.Single().PropertyName.Should().Be(nameof(FieldType.DateTime) + "Value");
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenDateTimePropertyNotFoundRightTest()
+		{
+			// Arrange
+			var fieldFrom = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today.AddDays(-2.0), "From");
+			var fieldTo = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today.AddDays(2.0), "To");
+			var field = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today);
+
+			var alpha = new Alpha
+			{
+				Beta = "Darkwing Duck",
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue> { field, fieldFrom, fieldTo }
+			};
+
+			var fieldDefinitionFrom = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "From");
+			var fieldDefinitionTo = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "To");
+
+
+			var fieldDefinition = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null);
+			fieldDefinition.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetween },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.AllowNull },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenFrom, ValueString = nameof(FieldType.DateTime) + "ValueFrom" },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenTo, ValueString = nameof(FieldType.DateTime) + "LaunchpadMcQuack" }
+			};
+
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionFrom,
+					fieldDefinitionTo,
+					fieldDefinition,
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "From"),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "To")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(1);
+			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween);
+			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.PropertyNotFoundTo);
+			result.ValidationErrors.Single().PropertyNameFrom.Should().Be(nameof(FieldType.DateTime) + "ValueFrom");
+			result.ValidationErrors.Single().PropertyNameTo.Should().Be(nameof(FieldType.DateTime) + "LaunchpadMcQuack");
+			result.ValidationErrors.Single().PropertyName.Should().Be(nameof(FieldType.DateTime) + "Value");
+		}
+
+		[TestMethod]
+		public void ValidateRangeBetweenDateTimePropertyNotFoundBothTest()
+		{
+			// Arrange
+			var fieldFrom = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today.AddDays(-2.0), "From");
+			var fieldTo = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today.AddDays(2.0), "To");
+			var field = ConfigurationHelper.CreateField(FieldType.DateTime, nameof(DynamicFieldValue.ValueDateTime), DateTime.Today);
+
+			var alpha = new Alpha
+			{
+				Beta = "Darkwing Duck",
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue> { field, fieldFrom, fieldTo }
+			};
+
+			var fieldDefinitionFrom = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "From");
+			var fieldDefinitionTo = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null, "To");
+
+
+			var fieldDefinition = ConfigurationHelper.CreateDefinition(FieldType.DateTime, null);
+			fieldDefinition.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetween },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.AllowNull },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenFrom, ValueString = nameof(FieldType.DateTime) + "MorganaMacawber" },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.RangeBetweenTo, ValueString = nameof(FieldType.DateTime) + "LaunchpadMcQuack" }
+			};
+
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionFrom,
+					fieldDefinitionTo,
+					fieldDefinition,
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "From"),
+					ConfigurationHelper.CreateAssignment(FieldType.DateTime, "To")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(2);
+			result.ValidationErrors.First().MethodType.Should().Be(ValidationMethodType.RangeBetween);
+			result.ValidationErrors.First().ErrorType.Should().Be(ValidationErrorType.PropertyNotFoundFrom);
+			result.ValidationErrors.First().PropertyNameFrom.Should().Be(nameof(FieldType.DateTime) + "MorganaMacawber");
+			result.ValidationErrors.First().PropertyNameTo.Should().Be(nameof(FieldType.DateTime) + "LaunchpadMcQuack");
+			result.ValidationErrors.First().PropertyName.Should().Be(nameof(FieldType.DateTime) + "Value");
+			result.ValidationErrors.Last().MethodType.Should().Be(ValidationMethodType.RangeBetween);
+			result.ValidationErrors.Last().ErrorType.Should().Be(ValidationErrorType.PropertyNotFoundTo);
+			result.ValidationErrors.Last().PropertyNameFrom.Should().Be(nameof(FieldType.DateTime) + "MorganaMacawber");
+			result.ValidationErrors.Last().PropertyNameTo.Should().Be(nameof(FieldType.DateTime) + "LaunchpadMcQuack");
+			result.ValidationErrors.Last().PropertyName.Should().Be(nameof(FieldType.DateTime) + "Value");
+		}
+		
+		[DataTestMethod]
+		[DataRow("Darkwing Duck", "Darkwing Duck", "Darkwing Duck", "", true, true)]
+		[DataRow("Launchpad McQuack", "Darkwing Duck", "Darkwing Duck", "", true, false)]
+		[DataRow("Darkwing Duck", "Launchpad McQuack", "Darkwing Duck", "", true, false)]
+		[DataRow("Darkwing Duck", "Darkwing Duck", "Launchpad McQuack", "", true, false)]
+		[DataRow("Darkwing Duck", "Darkwing Duck", "Darkwing Duck", "Darkwing Duck", false, true)]
+		[DataRow("Darkwing Duck", "Darkwing Duck", "Darkwing Duck", "Launchpad McQuack", false, false)]
+		[DataRow("Launchpad McQuack", "Darkwing Duck", "Darkwing Duck", "Launchpad McQuack", false, false)]
+		[DataRow("Darkwing Duck", "Launchpad McQuack", "Darkwing Duck", "Launchpad McQuack", false, false)]
+		[DataRow("Darkwing Duck", "Darkwing Duck", "Launchpad McQuack", "Launchpad McQuack", false, false)]
+		[DataRow("Launchpad McQuack", "Launchpad McQuack", "Darkwing Duck", "Launchpad McQuack", false, true)]
+		[DataRow("Launchpad McQuack", "Darkwing Duck", "Launchpad McQuack",  "Launchpad McQuack", false, true)]
+		[DataRow("Darkwing Duck", "Launchpad McQuack", "Launchpad McQuack",  "Launchpad McQuack", false, true)]
+		[DataRow("Darkwing Duck Hero", "Darkwing Duck Super Hero", "Darkwing Duck", "Launchpad McQuack", false, true)]
+		public void ValidateEqualDataRowTest(string propertyValueOne, string propertyValueTwo, string propertyValueThree, string defaultValue, bool equal, bool expectedResult)
+		{
+			// Arrange
+			var alpha = new Alpha
+			{
+				Beta = propertyValueThree,
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue>
+				{
+					ConfigurationHelper.CreateField(FieldType.Text, nameof(DynamicFieldValue.ValueString), propertyValueOne, "One"),
+					ConfigurationHelper.CreateField(FieldType.Text, nameof(DynamicFieldValue.ValueString), propertyValueTwo, "Two")
+				}
+			};
+
+			var configurationType = equal ? FieldConfigurationType.EqualsTo : FieldConfigurationType.NotEqualsTo;
+
+			var fieldDefinitionOne = ConfigurationHelper.CreateDefinition(FieldType.Text, null, "One");
+			fieldDefinitionOne.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = configurationType, ValueString = nameof(FieldType.Text) + "ValueTwo" },
+				new DynamicFieldConfiguration { ConfigurationType = configurationType, ValueString = nameof(Alpha.Beta) },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.NotEqualsDefault, ValueString = defaultValue }
+			};
+
+			var fieldDefinitionTwo = ConfigurationHelper.CreateDefinition(FieldType.Text, null, "Two");
+			fieldDefinitionTwo.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = configurationType, ValueString = nameof(FieldType.Text) + "ValueOne" },
+				new DynamicFieldConfiguration { ConfigurationType = configurationType, ValueString = nameof(Alpha.Beta) },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.NotEqualsDefault, ValueString = defaultValue }
+			};
+
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionOne,
+					fieldDefinitionTwo
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.Text, "One"),
+					ConfigurationHelper.CreateAssignment(FieldType.Text, "Two")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().Be(expectedResult);
+		}
+
+		[DataTestMethod]
+		[DataRow("ValueOne", "ValueThree", true, 1)]
+		[DataRow("ValueThree", "ValueTwo", true, 1)]
+		[DataRow("ValueThree", "ValueFour", true, 2)]
+		[DataRow("ValueOne", "ValueThree", false, 1)]
+		[DataRow("ValueThree", "ValueTwo", false, 1)]
+		[DataRow("ValueThree", "ValueFour", false, 2)]
+
+		public void ValidateEqualDataRowPropertyNotFoundTest(string propertyNameOne, string propertyNameTwo, bool equal, int errorCount)
+		{
+			// Arrange
+			var alpha = new Alpha
+			{
+				Beta = "Launchpad McQuack",
+				Gamma = "MegaVolt",
+				FieldValues = new List<DynamicFieldValue>
+				{
+					ConfigurationHelper.CreateField(FieldType.Text, nameof(DynamicFieldValue.ValueString), "Darkwing Duck", "One"),
+					ConfigurationHelper.CreateField(FieldType.Text, nameof(DynamicFieldValue.ValueString), "Darkwing Duck", "Two")
+				}
+			};
+
+			var configurationType = equal ? FieldConfigurationType.EqualsTo : FieldConfigurationType.NotEqualsTo;
+
+			var fieldDefinitionOne = ConfigurationHelper.CreateDefinition(FieldType.Text, null, "One");
+			fieldDefinitionOne.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = configurationType, ValueString = nameof(FieldType.Text) + propertyNameTwo },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.NotEqualsDefault, ValueString = "Darkwing Duck" }
+			};
+
+			var fieldDefinitionTwo = ConfigurationHelper.CreateDefinition(FieldType.Text, null, "Two");
+			fieldDefinitionTwo.Configurations = new List<DynamicFieldConfiguration>
+			{
+				new DynamicFieldConfiguration { ConfigurationType = configurationType, ValueString = nameof(FieldType.Text) + propertyNameOne },
+				new DynamicFieldConfiguration { ConfigurationType = FieldConfigurationType.NotEqualsDefault, ValueString = "Darkwing Duck" }
+			};
+
+			var fieldInformation = new FieldInformation<DynamicFieldDefinition, DynamicFieldAssignment, DynamicFieldValue, string, int>
+			{
+				Definitions = new List<DynamicFieldDefinition>
+				{
+					fieldDefinitionOne,
+					fieldDefinitionTwo
+				},
+				Assignments = new List<DynamicFieldAssignment>
+				{
+					ConfigurationHelper.CreateAssignment(FieldType.Text, "One"),
+					ConfigurationHelper.CreateAssignment(FieldType.Text, "Two")
+				},
+				Values = alpha.FieldValues
+			};
+
+			var analysisResult = _fieldAnalyzer.Analyse(alpha, fieldInformation);
+
+			// Act
+			var result = _classUnderTest.Validate(fieldInformation, analysisResult);
+
+			// Assert
+			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(errorCount);
+			result.ValidationErrors.All(error => error.MethodType == (equal ?ValidationMethodType.Equals : ValidationMethodType.NotEquals)).Should().BeTrue();
+			result.ValidationErrors.All(error => error.ErrorType == ValidationErrorType.PropertyNotFoundTo).Should().BeTrue();
 		}
 	}
 }

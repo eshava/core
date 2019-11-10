@@ -143,7 +143,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 
 		public static bool CheckRangeValue<T1>(T1? valueFrom, T1? valueTo, bool allowNull, T1? valueCurrent = null) where T1 : struct
 		{
-			if (typeof(T).IsDataTypeNullable())
+			if (typeof(T1).IsDataTypeNullable())
 			{
 				throw new NotSupportedException("Nullable data types are not supported.");
 			}
