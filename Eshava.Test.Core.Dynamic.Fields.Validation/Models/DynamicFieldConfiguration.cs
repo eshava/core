@@ -16,6 +16,7 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation.Models
 		public float? ValueFloat { get; set; }
 		public decimal? ValueDecimal { get; set; }
 		public string ValueString { get; set; }
+		public DateTime? ValueDateTime { get; set; }
 		public Guid? ValueGuid { get; set; }
 		public byte[] ValueBinary { get; set; }
 	}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Eshava.Core.Dynamic.Fields.Enums;
 using Eshava.Core.Dynamic.Fields.Interfaces;
@@ -50,32 +51,44 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 					case FieldConfigurationType.Required:
 						validationProperty.Rules.Add(new ValidationRule { Rule = "Required" });
 						break;
+					case FieldConfigurationType.MinLength:
+					case FieldConfigurationType.MaxLength:
+						AddStringLengthRule(definition, configuration, validationProperty);
+						break;
 					case FieldConfigurationType.Maximum:
 					case FieldConfigurationType.Minimum:
 						AddRangeRule(definition, configuration, validationProperty);
 						break;
 					case FieldConfigurationType.EqualsTo:
-						configuration.ValueString.Split(',').ToList().ForEach(fieldName =>
+						validationProperty.Rules.Add(new ValidationRule
 						{
-							validationProperty.Rules.Add(new ValidationRule
-							{
-								Rule = "EqualsTo",
-								PropertyName = fieldName.Trim()
-							});
+							Rule = "EqualsTo",
+							PropertyName = configuration.ValueString.Trim()
 						});
 						break;
 					case FieldConfigurationType.NotEqualsTo:
 						AddNotEqualsRule(definition, configuration, validationProperty);
 						break;
 					case FieldConfigurationType.DecimalPlaces:
-						validationProperty.Rules.Add(new ValidationRule
+						var decimalPlacesRule = validationProperty.Rules.SingleOrDefault(rule => rule.Rule == "DecimalPlaces");
+						if (decimalPlacesRule == null)
 						{
-							Rule = "Decimals",
-							Value = configuration.ValueInteger ?? 0
-						});
+							validationProperty.Rules.Add(new ValidationRule
+							{
+								Rule = "DecimalPlaces",
+								Value = configuration.ValueInteger ?? 0
+							});
+						}
+						else
+						{
+							decimalPlacesRule.Value = configuration.ValueInteger ?? 0;
+						}
 						break;
 					case FieldConfigurationType.Date:
 						validationProperty.DataType = "date";
+						break;
+					case FieldConfigurationType.Time:
+						validationProperty.DataType = "time";
 						break;
 					case FieldConfigurationType.Email:
 						validationProperty.Rules.Add(new ValidationRule { Rule = "Email" });
@@ -84,13 +97,25 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 						validationProperty.Rules.Add(new ValidationRule { Rule = "Url" });
 						break;
 					case FieldConfigurationType.RangeFrom:
+						AddRangeFromRule(definition, configuration, validationProperty);
+						break;
 					case FieldConfigurationType.RangeTo:
-						AddRangeFromOrToRule(definition, configuration, validationProperty);
+						AddRangeToRule(definition, configuration, validationProperty);
 						break;
 					case FieldConfigurationType.RangeBetween:
 						AddRangeBetweenRule(definition, validationProperty);
 						break;
 				}
+			}
+		}
+
+		private void AddStringLengthRule(IFieldDefinition<T> definition, IFieldConfiguration<T> configuration, ValidationPropertyInfo validationProperty)
+		{
+			if (configuration.ValueInteger.HasValue)
+			{
+				var ruleName = configuration.ConfigurationType == FieldConfigurationType.MinLength ? "MinLength" : "MaxLength";
+				var rule = new ValidationRule { Rule = ruleName, Value = configuration.ValueInteger.Value };
+				validationProperty.Rules.Add(rule);
 			}
 		}
 
@@ -116,16 +141,28 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 			}
 		}
 
-		private void AddRangeFromOrToRule(IFieldDefinition<T> definition, IFieldConfiguration<T> configuration, ValidationPropertyInfo validationProperty)
+		private void AddRangeFromRule(IFieldDefinition<T> definition, IFieldConfiguration<T> configuration, ValidationPropertyInfo validationProperty)
 		{
-			var ruleName = configuration.ConfigurationType == FieldConfigurationType.RangeFrom ? "RangeFrom" : "RangeTo";
 			configuration.ValueString.Split(',').ToList().ForEach(fieldName =>
 			{
 				validationProperty.Rules.Add(new ValidationRule
 				{
-					Rule = ruleName,
+					Rule = "RangeFrom",
+					PropertyNameFrom = fieldName.Trim(),
+					PropertyNameFromAllowNull = definition.Configurations.FirstOrDefault(c => c.ConfigurationType == FieldConfigurationType.AllowNull) != null
+				});
+			});
+		}
+
+		private void AddRangeToRule(IFieldDefinition<T> definition, IFieldConfiguration<T> configuration, ValidationPropertyInfo validationProperty)
+		{
+			configuration.ValueString.Split(',').ToList().ForEach(fieldName =>
+			{
+				validationProperty.Rules.Add(new ValidationRule
+				{
+					Rule = "RangeTo",
 					PropertyNameTo = fieldName.Trim(),
-					PropertyNameToAllowNull = definition.Configurations.FirstOrDefault(c => c.ConfigurationType == FieldConfigurationType.RangeRequired) == null
+					PropertyNameToAllowNull = definition.Configurations.FirstOrDefault(c => c.ConfigurationType == FieldConfigurationType.AllowNull) != null
 				});
 			});
 		}
@@ -137,11 +174,14 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 
 			if (rangeFrom != null && rangeTo != null)
 			{
+				var allowNull = definition.Configurations.FirstOrDefault(c => c.ConfigurationType == FieldConfigurationType.AllowNull) != null;
 				validationProperty.Rules.Add(new ValidationRule
 				{
 					Rule = "RangeBetween",
 					PropertyNameFrom = rangeFrom.ValueString,
-					PropertyNameTo = rangeTo.ValueString
+					PropertyNameTo = rangeTo.ValueString,
+					PropertyNameFromAllowNull = allowNull,
+					PropertyNameToAllowNull = allowNull
 				});
 			}
 		}
@@ -149,39 +189,45 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 		private void AddNotEqualsRule(IFieldDefinition<T> definition, IFieldConfiguration<T> configuration, ValidationPropertyInfo validationProperty)
 		{
 			var configNotEqualDefault = definition.Configurations.FirstOrDefault(c => c.ConfigurationType == FieldConfigurationType.NotEqualsDefault);
-			object defaultValue = null;
+			string defaultValue = null;
 
 			switch (definition.FieldType)
 			{
 				case FieldType.NumberInteger:
 				case FieldType.ComboBoxInteger:
-					defaultValue = configNotEqualDefault?.ValueInteger;
+					defaultValue = configNotEqualDefault?.ValueInteger?.ToString(CultureInfo.InvariantCulture);
+					break;
+				case FieldType.NumberLong:
+					defaultValue = configNotEqualDefault?.ValueLong?.ToString(CultureInfo.InvariantCulture);
 					break;
 				case FieldType.NumberDecimal:
+					defaultValue = configNotEqualDefault?.ValueDecimal?.ToString(CultureInfo.InvariantCulture);
+					break;
 				case FieldType.NumberDouble:
+					defaultValue = configNotEqualDefault?.ValueDouble?.ToString(CultureInfo.InvariantCulture);
+					break;
 				case FieldType.NumberFloat:
-					defaultValue = configNotEqualDefault?.ValueDecimal;
+					defaultValue = configNotEqualDefault?.ValueFloat?.ToString(CultureInfo.InvariantCulture);
 					break;
 				case FieldType.DateTime:
+					defaultValue = configNotEqualDefault?.ValueDateTime?.ToString("yyyy-MM-ddTHH:mm:ss");
+					break;
 				case FieldType.AutoComplete:
 				case FieldType.Text:
 				case FieldType.TextMultiline:
-					defaultValue = configNotEqualDefault?.ValueString;
+					defaultValue = configNotEqualDefault?.ValueString?.ToString(CultureInfo.InvariantCulture);
 					break;
 				case FieldType.ComboxBoxGuid:
 				case FieldType.Guid:
-					defaultValue = configNotEqualDefault?.ValueGuid;
+					defaultValue = configNotEqualDefault?.ValueGuid.ToString();
 					break;
 			}
 
-			configuration.ValueString.Split(',').ToList().ForEach(fieldName =>
+			validationProperty.Rules.Add(new ValidationRule
 			{
-				validationProperty.Rules.Add(new ValidationRule
-				{
-					Rule = "NotEqualsTo",
-					PropertyName = fieldName.Trim(),
-					DefaultValue = defaultValue?.ToString()
-				});
+				Rule = "NotEqualsTo",
+				PropertyName = configuration.ValueString.Trim(),
+				DefaultValue = defaultValue
 			});
 		}
 
@@ -195,6 +241,11 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 				case FieldType.NumberFloat:
 					validationProperty.DataType = "number";
 					validationProperty.Rules.Add(new ValidationRule { Rule = "Number" });
+					validationProperty.Rules.Add(new ValidationRule
+					{
+						Rule = "DecimalPlaces",
+						Value = 0
+					});
 					break;
 				case FieldType.AutoComplete:
 				case FieldType.Text:

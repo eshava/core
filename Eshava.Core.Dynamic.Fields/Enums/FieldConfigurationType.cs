@@ -27,6 +27,7 @@
 		TextMultilineRows = 22,
 		NotEqualsDefault = 23,
 		CSSClass = 24 /* BoxedCheckBox */,
-		AllowNull = 25
+		AllowNull = 25,
+		Time = 26
 	}
 }
