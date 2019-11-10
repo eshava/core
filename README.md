@@ -12,6 +12,16 @@ Extension to http, ftp and mail functionality
 * Mail
 	* MailClient based on System.Net.Mail.SmtpClient
 
+## core.dynamic.fields
+Extension to define and configure dynamic fields that are not hard-coded in a C# class. 	
+	
+## core.dynamic.fields.validation
+Extension for validation of dynamic fields configured rules
+
+* Uses core.dynamic.fields
+* Validating an object instance
+* Creating a set of validation rules based on dynamic fields	
+		
 ## core.io
 Extension to encapsulate i/o actions
 

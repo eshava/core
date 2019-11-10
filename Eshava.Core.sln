@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2041
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29424.173
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Core", "Eshava.Core\Eshava.Core.csproj", "{CF242659-86E2-479E-B1F0-6F34D1FBE86F}"
 EndProject
@@ -31,9 +31,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Test.Core.Security",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Test.Core.Validation", "Eshava.Test.Core.Validation\Eshava.Test.Core.Validation.csproj", "{02F116A7-3850-4022-92FE-B4066EDE537C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Core.Logging", "Eshava.Core.Logging\Eshava.Core.Logging.csproj", "{D9F73115-4D30-4F3A-96AB-FDC4B18541BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Core.Logging", "Eshava.Core.Logging\Eshava.Core.Logging.csproj", "{D9F73115-4D30-4F3A-96AB-FDC4B18541BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Test.Core.Logging", "Eshava.Test.Core.Logging\Eshava.Test.Core.Logging.csproj", "{46DECA98-6715-4D15-A573-D48FB47C0041}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Test.Core.Logging", "Eshava.Test.Core.Logging\Eshava.Test.Core.Logging.csproj", "{46DECA98-6715-4D15-A573-D48FB47C0041}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Core.Dynamic.Fields", "Eshava.Core.Dynamic.Fields\Eshava.Core.Dynamic.Fields.csproj", "{3919B4EF-2FDF-4F4F-9ECA-9EC0BECE195F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Core.Dynamic.Fields.Validation", "Eshava.Core.Dynamic.Fields.Validation\Eshava.Core.Dynamic.Fields.Validation.csproj", "{20DE1B39-45BB-4C82-8E49-BE5309A40D50}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eshava.Test.Core.Dynamic.Fields.Validation", "Eshava.Test.Core.Dynamic.Fields.Validation\Eshava.Test.Core.Dynamic.Fields.Validation.csproj", "{8104DA09-6EE9-4327-BEFD-D57E1A6A0283}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,6 +103,18 @@ Global
 		{46DECA98-6715-4D15-A573-D48FB47C0041}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46DECA98-6715-4D15-A573-D48FB47C0041}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46DECA98-6715-4D15-A573-D48FB47C0041}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3919B4EF-2FDF-4F4F-9ECA-9EC0BECE195F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3919B4EF-2FDF-4F4F-9ECA-9EC0BECE195F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3919B4EF-2FDF-4F4F-9ECA-9EC0BECE195F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3919B4EF-2FDF-4F4F-9ECA-9EC0BECE195F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20DE1B39-45BB-4C82-8E49-BE5309A40D50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20DE1B39-45BB-4C82-8E49-BE5309A40D50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20DE1B39-45BB-4C82-8E49-BE5309A40D50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20DE1B39-45BB-4C82-8E49-BE5309A40D50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8104DA09-6EE9-4327-BEFD-D57E1A6A0283}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8104DA09-6EE9-4327-BEFD-D57E1A6A0283}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8104DA09-6EE9-4327-BEFD-D57E1A6A0283}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8104DA09-6EE9-4327-BEFD-D57E1A6A0283}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -116,6 +134,9 @@ Global
 		{02F116A7-3850-4022-92FE-B4066EDE537C} = {A8C93CB8-1F31-4EE4-A83A-0B9992F8490D}
 		{D9F73115-4D30-4F3A-96AB-FDC4B18541BC} = {3CE7FB1B-A8D8-4259-9B1F-D61BDACDE98C}
 		{46DECA98-6715-4D15-A573-D48FB47C0041} = {A8C93CB8-1F31-4EE4-A83A-0B9992F8490D}
+		{3919B4EF-2FDF-4F4F-9ECA-9EC0BECE195F} = {3CE7FB1B-A8D8-4259-9B1F-D61BDACDE98C}
+		{20DE1B39-45BB-4C82-8E49-BE5309A40D50} = {3CE7FB1B-A8D8-4259-9B1F-D61BDACDE98C}
+		{8104DA09-6EE9-4327-BEFD-D57E1A6A0283} = {A8C93CB8-1F31-4EE4-A83A-0B9992F8490D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F19A2579-903E-46D0-97F2-41BA2A7B9A37}
