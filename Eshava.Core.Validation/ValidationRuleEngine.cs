@@ -274,7 +274,9 @@ namespace Eshava.Core.Validation
 				{
 					Rule = "RangeBetween",
 					PropertyNameFrom = attRangeBetween.PropertyNameFrom,
-					PropertyNameTo = attRangeBetween.PropertyNameTo
+					PropertyNameTo = attRangeBetween.PropertyNameTo,
+					PropertyNameFromAllowNull = propertyInfo.PropertyType.IsDataTypeNullable(),
+					PropertyNameToAllowNull = propertyInfo.PropertyType.IsDataTypeNullable()
 				});
 			}
 		}

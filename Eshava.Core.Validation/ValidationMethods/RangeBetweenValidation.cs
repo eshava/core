@@ -32,6 +32,8 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult();
 			}
 
+			parameters.AllowNull = parameters.PropertyInfo.PropertyType.IsDataTypeNullable();
+
 			//Determining the property for the start and end value of the value range
 			var propertyInfoFrom = parameters.DataType.GetProperty(rangeBetween.PropertyNameFrom);
 			var propertyInfoTo = parameters.DataType.GetProperty(rangeBetween.PropertyNameTo);
@@ -75,7 +77,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			var valueFrom = propertyInfoFrom.GetValue(parameters.Model) as DateTime?;
 			var valueTo = propertyInfoTo.GetValue(parameters.Model) as DateTime?;
 
-			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, parameters.AllowNull, value))
 			{
 				return new ValidationCheckResult();
 			}
@@ -89,7 +91,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			var valueFrom = propertyInfoFrom.GetValue(parameters.Model) as int?;
 			var valueTo = propertyInfoTo.GetValue(parameters.Model) as int?;
 
-			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, parameters.AllowNull, value))
 			{
 				return new ValidationCheckResult();
 			}
@@ -103,7 +105,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			var valueFrom = propertyInfoFrom.GetValue(parameters.Model) as long?;
 			var valueTo = propertyInfoTo.GetValue(parameters.Model) as long?;
 
-			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, parameters.AllowNull, value))
 			{
 				return new ValidationCheckResult();
 			}
@@ -117,7 +119,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			var valueFrom = propertyInfoFrom.GetValue(parameters.Model) as decimal?;
 			var valueTo = propertyInfoTo.GetValue(parameters.Model) as decimal?;
 
-			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, parameters.AllowNull, value))
 			{
 				return new ValidationCheckResult();
 			}
@@ -131,7 +133,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			var valueFrom = propertyInfoFrom.GetValue(parameters.Model) as double?;
 			var valueTo = propertyInfoTo.GetValue(parameters.Model) as double?;
 
-			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, parameters.AllowNull, value))
 			{
 				return new ValidationCheckResult();
 			}
@@ -145,7 +147,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			var valueFrom = propertyInfoFrom.GetValue(parameters.Model) as float?;
 			var valueTo = propertyInfoTo.GetValue(parameters.Model) as float?;
 
-			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, false, value))
+			if (BaseRangeValidation.CheckRangeValue(valueFrom, valueTo, parameters.AllowNull, value))
 			{
 				return new ValidationCheckResult();
 			}
