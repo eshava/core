@@ -109,7 +109,7 @@ namespace Eshava.Core.Extensions
 			return value.IsNullOrEmpty() ? null : value;
 		}
 
-		private static T GetEnumType<T>(this string typeValue, T defaultValue) where T : Enum
+		public static T GetEnumType<T>(this string typeValue, T defaultValue) where T : Enum
 		{
 			foreach (var enumMember in (T[])Enum.GetValues(typeof(T)))
 			{
