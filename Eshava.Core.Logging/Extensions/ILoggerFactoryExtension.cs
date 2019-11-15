@@ -6,9 +6,9 @@ namespace Eshava.Core.Logging.Extensions
 {
 	public static class ILoggerFactoryExtension
 	{
-		public static ILoggerFactory AddProvider(this ILoggerFactory loggerFactory, LogSettings logSettings, string version, ILogWriter logWriter)
+		public static ILoggerFactory AddProvider(this ILoggerFactory loggerFactory, LogSettings logSettings, ILogWriter logWriter)
 		{
-			loggerFactory.AddProvider(new LoggerProvider(logSettings, version, logWriter));
+			loggerFactory.AddProvider(new LoggerProvider(logSettings, logWriter));
 
 			return loggerFactory;
 		}

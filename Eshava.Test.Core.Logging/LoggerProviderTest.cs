@@ -32,7 +32,7 @@ namespace Eshava.Test.Core.Logging
 			};
 
 			_logWriterFake = A.Fake<ILogWriter>();
-			_classUnderTest = new LoggerProvider(logSettings, "1.0.0.0", _logWriterFake);
+			_classUnderTest = new LoggerProvider(logSettings, _logWriterFake);
 		}
 
 		[TestMethod]

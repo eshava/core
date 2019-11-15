@@ -10,14 +10,12 @@ namespace Eshava.Core.Logging
 	public class LogEngine : ILogger
 	{
 		private readonly string _categoryName;
-		private readonly string _version;
 		private readonly ILogWriter _logWriter;
 		private readonly LogLevel _logLevel;
 
-		public LogEngine(string categoryName, string version, LogLevel logLevel, ILogWriter logWriter)
+		public LogEngine(string categoryName, LogLevel logLevel, ILogWriter logWriter)
 		{
 			_categoryName = categoryName;
-			_version = version;
 			_logWriter = logWriter;
 			_logLevel = logLevel;
 		}
@@ -75,7 +73,6 @@ namespace Eshava.Core.Logging
 				},
 				LogLevel = logLevel.ToString().ToLower(),
 				ApplicationId = eventId.Name,
-				Version = _version,
 				Category = _categoryName,
 				Message = logMessage,
 				Additional = additionalInformation?.Information == null ? null : JsonConvert.DeserializeObject<JToken>(JsonConvert.SerializeObject(additionalInformation?.Information)),

@@ -22,7 +22,7 @@ namespace Eshava.Test.Core.Logging
 		public void Setup()
 		{
 			_logWriterFake = A.Fake<ILogWriter>();
-			_classUnderTest = new LogEngine("DarkwingDuck", "1.0.0.0", LogLevel.Error, _logWriterFake);
+			_classUnderTest = new LogEngine("DarkwingDuck", LogLevel.Error, _logWriterFake);
 		}
 
 		[DataTestMethod]
@@ -86,7 +86,7 @@ namespace Eshava.Test.Core.Logging
 			logEntry.LogLevel.Should().Be(LogLevel.Error.ToString().ToLower());
 			logEntry.ApplicationId.Should().Be("MegaVolt");
 			logEntry.Category.Should().Be("DarkwingDuck");
-			logEntry.Version.Should().Be("1.0.0.0");
+			logEntry.Version.Should().BeNull();
 
 			logEntry.Message.Message.Should().Be(additionalInformation.Message);
 			logEntry.Message.Class.Should().Be(additionalInformation.Class);

@@ -12,17 +12,15 @@ namespace Eshava.Core.Logging
 		private const string GARBAGE_CATEGORY = "Garbage";
 		private const string DEFAULT_CATEGORY = "Default";
 
-		private readonly string _version;
 		private readonly ILogWriter _logWriter;
 		private readonly LogSettings _logSettings;
 		private readonly Dictionary<string, LogEngine> _logEngines;
 		private static readonly object _lock = new object();
 
-		public LoggerProvider(LogSettings logSettings, string version, ILogWriter logWriter)
+		public LoggerProvider(LogSettings logSettings, ILogWriter logWriter)
 		{
 			_logEngines = new Dictionary<string, LogEngine>();
 			_logSettings = logSettings ?? new LogSettings();
-			_version = version;
 			_logWriter = logWriter;
 
 			Initialize();
@@ -51,7 +49,7 @@ namespace Eshava.Core.Logging
 
 		private LogEngine GenerateLogEngine(string categoryName, LogLevel logLevel)
 		{
-			return new LogEngine(categoryName, _version, logLevel, _logWriter);
+			return new LogEngine(categoryName, logLevel, _logWriter);
 		}
 
 		private LogLevel GetLogLevel(string categoryName)
