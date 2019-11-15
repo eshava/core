@@ -11,6 +11,7 @@ namespace Eshava.Core.Logging.Models
 		public string ApplicationId { get; set; }
 		public string LogLevel { get; set; }
 		public string Version { get; set; }
+		public string Source { get; set; }
 		public string Category { get; set; }
 		public LogMessage Message { get; set; }
 		public LogEntryException Exception { get; set; }
