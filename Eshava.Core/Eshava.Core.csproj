@@ -5,11 +5,19 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Company>Eshava</Company>
     <Authors>Eshava</Authors>
-    <PackageLicenseUrl>https://github.com/eshava/core/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/eshava/core</PackageProjectUrl>
     <Description>Collection of methods, classes and helpers to simplify recurring standard actions</Description>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Version>1.0.0.2</Version>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
