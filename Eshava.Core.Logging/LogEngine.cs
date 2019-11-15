@@ -9,8 +9,6 @@ namespace Eshava.Core.Logging
 {
 	public class LogEngine : ILogger
 	{
-		public const string DEFAULT = "Default";
-
 		private readonly string _categoryName;
 		private readonly string _version;
 		private readonly ILogWriter _logWriter;
@@ -31,7 +29,7 @@ namespace Eshava.Core.Logging
 
 		public bool IsEnabled(LogLevel logLevel)
 		{
-			return GetLogLevelValue(_logLevel) <= GetLogLevelValue(logLevel);
+			return (int)_logLevel <= (int)logLevel;
 		}
 
 		/// <summary>
@@ -101,27 +99,6 @@ namespace Eshava.Core.Logging
 				StackTrace = exception.StackTrace,
 				InnerException = ConvertException(exception.InnerException)
 			};
-		}
-
-		private int GetLogLevelValue(LogLevel logLevel)
-		{
-			switch (logLevel)
-			{
-				case LogLevel.Trace:
-					return 1;
-				case LogLevel.Debug:
-					return 2;
-				case LogLevel.Information:
-					return 3;
-				case LogLevel.Warning:
-					return 4;
-				case LogLevel.Error:
-					return 5;
-				case LogLevel.Critical:
-					return 6;
-				default:
-					return 7;
-			}
 		}
 	}
 }
