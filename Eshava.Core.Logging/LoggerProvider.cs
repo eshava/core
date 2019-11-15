@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Eshava.Core.Extensions;
 using Eshava.Core.Logging.Interfaces;
 using Eshava.Core.Logging.Models;
@@ -8,6 +9,9 @@ namespace Eshava.Core.Logging
 {
 	public class LoggerProvider : ILoggerProvider
 	{
+		private const string GARBAGE_CATEGORY = "Garbage";
+		private const string DEFAULT_CATEGORY = "Default";
+
 		private readonly string _version;
 		private readonly ILogWriter _logWriter;
 		private readonly LogSettings _logSettings;
@@ -26,7 +30,7 @@ namespace Eshava.Core.Logging
 
 		public ILogger CreateLogger(string categoryName)
 		{
-			categoryName = categoryName.IsNullOrEmpty() ? LogEngine.DEFAULT : categoryName;
+			categoryName = ValidateCategoryName(categoryName);
 
 			lock (_lock)
 			{
@@ -52,14 +56,31 @@ namespace Eshava.Core.Logging
 
 		private LogLevel GetLogLevel(string categoryName)
 		{
-			return _logSettings.LogLevel.ContainsKey(categoryName) ? _logSettings.LogLevel[categoryName] : _logSettings.LogLevel[LogEngine.DEFAULT];
+			return _logSettings.LogLevel.ContainsKey(categoryName) ? _logSettings.LogLevel[categoryName] : _logSettings.LogLevel[DEFAULT_CATEGORY];
+		}
+
+		private string ValidateCategoryName(string categoryName)
+		{
+			if (_logSettings.IgnoredCategories.Any(category => categoryName.ToLower().Contains(category)))
+			{
+				return GARBAGE_CATEGORY;
+			}
+
+			return categoryName.IsNullOrEmpty() ? DEFAULT_CATEGORY : categoryName.Split('.').Last();
 		}
 
 		private void Initialize()
 		{
-			if (!_logSettings.LogLevel.ContainsKey(LogEngine.DEFAULT))
+			if (!_logSettings.LogLevel.ContainsKey(DEFAULT_CATEGORY))
 			{
-				_logSettings.LogLevel.Add(LogEngine.DEFAULT, LogLevel.Debug);
+				_logSettings.LogLevel.Add(DEFAULT_CATEGORY, LogLevel.Warning);
+			}
+
+			_logSettings.LogLevel.Add(GARBAGE_CATEGORY, LogLevel.None);
+
+			for (var index = 0; index < _logSettings.IgnoredCategories.Count; index++)
+			{
+				_logSettings.IgnoredCategories[index] = _logSettings.IgnoredCategories[index].ToLower();
 			}
 		}
 	}

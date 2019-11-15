@@ -24,6 +24,10 @@ namespace Eshava.Test.Core.Logging
 				{
 					{ "DarkwingDuck", LogLevel.Warning },
 					{ "LaunchpadMcQuack", LogLevel.Trace },
+				},
+				IgnoredCategories = new List<string>
+				{
+					"MegaVolt"
 				}
 			};
 
@@ -93,6 +97,25 @@ namespace Eshava.Test.Core.Logging
 
 			// Assert
 			loggerOne.Should().NotBe(loggerTwo);
+		}
+
+		[TestMethod]
+		public void CreateGarbageLoggerLogLevelTest()
+		{
+			// Arrange
+			var categoryName = "megaVolt";
+
+			// Act
+			var logger = _classUnderTest.CreateLogger(categoryName);
+
+			// Assert
+			logger.IsEnabled(LogLevel.Trace).Should().BeFalse();
+			logger.IsEnabled(LogLevel.Debug).Should().BeFalse();
+			logger.IsEnabled(LogLevel.Information).Should().BeFalse();
+			logger.IsEnabled(LogLevel.Warning).Should().BeFalse();
+			logger.IsEnabled(LogLevel.Error).Should().BeFalse();
+			logger.IsEnabled(LogLevel.Critical).Should().BeFalse();
+			logger.IsEnabled(LogLevel.None).Should().BeTrue();
 		}
 	}
 }
