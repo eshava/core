@@ -71,6 +71,50 @@ namespace Eshava.Test.Core.Logging
 		}
 
 		[TestMethod]
+		public void CreateInsertLogsIgnoreNullValueTest()
+		{
+			// Arrange
+			var dataRecord = new DataRecord
+			{
+				Id = 1,
+				RecordName = "Darkwing Duck",
+				RecordValue = "MegaVolt",
+				RecordVersion = null,
+				Timestamp = DateTime.UtcNow.Date
+			};
+
+			// Act
+			var logs = _classUnderTest.CreateInsertLogs(dataRecord, dataRecord.Id, 2).ToList();
+
+			// Assert
+			logs.Should().HaveCount(3);
+			var logOne = logs[0];
+			var logTwo = logs[1];
+			var logThree = logs[2];
+
+			logOne.DataRecordId.Should().Be(dataRecord.Id);
+			logOne.DataRecordParentId.Should().Be(2);
+			logOne.DataRecordName.Should().Be(nameof(DataRecord));
+			logOne.DataType.Should().Be(typeof(int));
+			logOne.PropertyName.Should().Be("Id");
+			logOne.Value.Should().Be(dataRecord.Id);
+
+			logTwo.DataRecordId.Should().Be(dataRecord.Id);
+			logTwo.DataRecordParentId.Should().Be(2);
+			logTwo.DataRecordName.Should().Be(nameof(DataRecord));
+			logTwo.DataType.Should().Be<string>();
+			logTwo.PropertyName.Should().Be(nameof(DataRecord.RecordName));
+			logTwo.Value.Should().Be(dataRecord.RecordName);
+
+			logThree.DataRecordId.Should().Be(dataRecord.Id);
+			logThree.DataRecordParentId.Should().Be(2);
+			logThree.DataRecordName.Should().Be(nameof(DataRecord));
+			logThree.DataType.Should().Be<DateTime>();
+			logThree.PropertyName.Should().Be(nameof(DataRecord.Timestamp));
+			logThree.Value.Should().Be(dataRecord.Timestamp);
+		}
+
+		[TestMethod]
 		public void CreateUpdateLogsTest()
 		{
 			// Arrange
@@ -111,6 +155,50 @@ namespace Eshava.Test.Core.Logging
 			logTwo.DataType.Should().Be<string>();
 			logTwo.PropertyName.Should().Be(nameof(DataRecord.RecordVersion));
 			logTwo.Value.Should().Be(dataRecord.RecordVersion);
+		}
+
+		[TestMethod]
+		public void CreateUpdateLogsNullValueTest()
+		{
+			// Arrange
+			var dataRecord = new DataRecord
+			{
+				Id = 1,
+				RecordName = "Darkwing Duck",
+				RecordValue = "MegaVolt",
+				RecordVersion = null
+			};
+
+			var dataRecordToCompare = new DataRecord
+			{
+				Id = 1,
+				RecordName = "Darkwing Duck !!!",
+				RecordValue = "MegaVolt",
+				RecordVersion = "1.0.0.1"
+			};
+
+			// Act
+			var logs = _classUnderTest.CreateUpdateLogs(dataRecord, dataRecordToCompare, dataRecord.Id, 2);
+
+			// Assert
+			logs.Should().HaveCount(2);
+			var logOne = logs.First();
+			var logTwo = logs.Last();
+
+			logOne.DataRecordId.Should().Be(dataRecord.Id);
+			logOne.DataRecordParentId.Should().Be(2);
+			logOne.DataRecordName.Should().Be(nameof(DataRecord));
+			logOne.DataType.Should().Be<string>();
+			logOne.PropertyName.Should().Be(nameof(DataRecord.RecordName));
+			logOne.Value.Should().Be(dataRecord.RecordName);
+
+			logTwo.DataRecordId.Should().Be(dataRecord.Id);
+			logTwo.DataRecordParentId.Should().Be(2);
+			logTwo.DataRecordName.Should().Be(nameof(DataRecord));
+			logTwo.DataType.Should().Be<string>();
+			logTwo.PropertyName.Should().Be(nameof(DataRecord.RecordVersion));
+			logTwo.Value.Should().Be(dataRecord.RecordVersion);
+			logTwo.Value.Should().BeNull();
 		}
 
 		[TestMethod]

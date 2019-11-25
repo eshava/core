@@ -86,7 +86,7 @@ namespace Eshava.Core.Logging
 				var valueToCompare = insert ? null : propertyInfo.GetValue(dataRecordToCompare);
 				var valueCurrent = propertyInfo.GetValue(dataRecord);
 
-				if (insert || !Equals(valueToCompare, valueCurrent))
+				if ((insert && valueCurrent != null) || !Equals(valueToCompare, valueCurrent))
 				{
 					logs.Add(new DataRecordLogProperty<P>
 					{

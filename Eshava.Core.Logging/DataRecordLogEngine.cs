@@ -147,14 +147,14 @@ namespace Eshava.Core.Logging
 		{
 			if (logEntry.Properties.ContainsKey(property.PropertyName))
 			{
-				logEntry.Properties[property.PropertyName].Value = convert(property.Value);
+				logEntry.Properties[property.PropertyName].Value = property.Value == null ? null : convert(property.Value);
 			}
 			else
 			{
 				logEntry.Properties.Add(property.PropertyName, new DataRecordField
 				{
 					Type = _typeToEnum[propertyType],
-					Value = convert(property.Value)
+					Value = property.Value == null ? null : convert(property.Value)
 				});
 			}
 		}
