@@ -124,6 +124,99 @@ namespace Eshava.Test.Core.Logging
 		}
 
 		[TestMethod]
+		public void ConvertWithNullValueTest()
+		{
+			// Arrange
+			var properties = new List<DataRecordLogProperty<int>>
+			{
+				new DataRecordLogProperty<int>
+				{
+					Action = DataRecordAction.Insert,
+					DataRecordId = 1,
+					DataRecordParentId = 11,
+					PropertyName = nameof(Alpha.Gamma),
+					DataRecordName = nameof(Alpha),
+					DataType = typeof(string),
+					LogEntryGroupId = 888,
+					UserId = 999,
+					Value = null,
+					Timestamp = DateTime.Today
+				},
+				new DataRecordLogProperty<int>
+				{
+					Action = DataRecordAction.Insert,
+					DataRecordId = 1,
+					DataRecordParentId = 11,
+					PropertyName = nameof(Alpha.Eta),
+					DataRecordName = nameof(Alpha),
+					DataType = typeof(decimal),
+					LogEntryGroupId = 888,
+					UserId = 999,
+					Value = 10.5m,
+					Timestamp = DateTime.Today
+				},
+				new DataRecordLogProperty<int>
+				{
+					Action = DataRecordAction.Update,
+					DataRecordId = 2,
+					DataRecordParentId = 22,
+					PropertyName = nameof(AdditionalInformation.Message),
+					DataRecordName = nameof(AdditionalInformation),
+					DataType = typeof(string),
+					LogEntryGroupId = 777,
+					UserId = 919,
+					Value = null,
+					Timestamp = DateTime.Today.AddDays(-1)
+				},
+				new DataRecordLogProperty<int>
+				{
+					Action = DataRecordAction.Update,
+					DataRecordId = 2,
+					DataRecordParentId = 22,
+					PropertyName = nameof(AdditionalInformation.Class),
+					DataRecordName = nameof(AdditionalInformation),
+					DataType = typeof(string),
+					LogEntryGroupId = 777,
+					UserId = 919,
+					Value = "MegaVolt",
+					Timestamp = DateTime.Today.AddDays(-1)
+				}
+			};
+
+			// Act
+			var logs = _classUnderTest.Convert(properties);
+
+			// Assert
+			logs.Should().HaveCount(2);
+			var logForInsert = logs.First();
+			var logForUpdate = logs.Last();
+
+			logForInsert.Action.Should().Be(DataRecordAction.Insert);
+			logForInsert.DataRecordId.Should().Be(1);
+			logForInsert.DataRecordParentId.Should().Be(11);
+			logForInsert.DataRecordName.Should().Be(nameof(Alpha));
+			logForInsert.LogEntryGroupId.Should().Be(888);
+			logForInsert.UserId.Should().Be(999);
+			logForInsert.Timestamp.Should().Be(DateTime.Today);
+			logForInsert.Properties[nameof(Alpha.Eta)].Value.Should().Be("10.5");
+			logForInsert.Properties[nameof(Alpha.Eta)].Type.Should().Be(FieldValueType.Decimal);
+			logForInsert.Properties[nameof(Alpha.Gamma)].Value.Should().BeNull();
+			logForInsert.Properties[nameof(Alpha.Gamma)].Type.Should().Be(FieldValueType.String);
+
+			logForUpdate.Action.Should().Be(DataRecordAction.Update);
+			logForUpdate.DataRecordId.Should().Be(2);
+			logForUpdate.DataRecordParentId.Should().Be(22);
+			logForUpdate.DataRecordName.Should().Be(nameof(AdditionalInformation));
+			logForUpdate.LogEntryGroupId.Should().Be(777);
+			logForUpdate.UserId.Should().Be(919);
+			logForUpdate.Timestamp.Should().Be(DateTime.Today.AddDays(-1));
+			logForUpdate.Properties[nameof(AdditionalInformation.Message)].Value.Should().BeNull();
+			logForUpdate.Properties[nameof(AdditionalInformation.Message)].Type.Should().Be(FieldValueType.String);
+			logForUpdate.Properties[nameof(AdditionalInformation.Class)].Value.Should().Be("MegaVolt");
+			logForUpdate.Properties[nameof(AdditionalInformation.Class)].Type.Should().Be(FieldValueType.String);
+		}
+
+		[TestMethod]
 		public void ConvertTwicePropertyTest()
 		{
 			// Arrange

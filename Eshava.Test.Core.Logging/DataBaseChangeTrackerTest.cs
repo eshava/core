@@ -63,6 +63,42 @@ namespace Eshava.Test.Core.Logging
 		}
 
 		[TestMethod]
+		public void CreateInsertLogsIgnoreNullValueTest()
+		{
+			// Arrange
+			var dataRecord = new DataRecord
+			{
+				Id = 1,
+				RecordName = null,
+				RecordValue = "MegaVolt",
+				RecordVersion = "1.0.0.0",
+				Timestamp = DateTime.UtcNow.Date
+			};
+
+			// Act
+			var logs = _classUnderTest.CreateInsertLogs(dataRecord, dataRecord.Id, 2).ToList();
+
+			// Assert
+			logs.Should().HaveCount(2);
+			var logOne = logs[0];
+			var logTwo = logs[1];
+
+			logOne.DataRecordId.Should().Be(dataRecord.Id);
+			logOne.DataRecordParentId.Should().Be(2);
+			logOne.DataRecordName.Should().Be("DataRecordTable");
+			logOne.DataType.Should().Be(typeof(int));
+			logOne.PropertyName.Should().Be("RecordIdColumn");
+			logOne.Value.Should().Be(dataRecord.Id);
+
+			logTwo.DataRecordId.Should().Be(dataRecord.Id);
+			logTwo.DataRecordParentId.Should().Be(2);
+			logTwo.DataRecordName.Should().Be("DataRecordTable");
+			logTwo.DataType.Should().Be<DateTime>();
+			logTwo.PropertyName.Should().Be("TimestampColumn");
+			logTwo.Value.Should().Be(dataRecord.Timestamp);
+		}
+
+		[TestMethod]
 		public void CreateUpdateLogsTest()
 		{
 			// Arrange
@@ -95,6 +131,42 @@ namespace Eshava.Test.Core.Logging
 			log.DataType.Should().Be<string>();
 			log.PropertyName.Should().Be("RecordNameColumn");
 			log.Value.Should().Be(dataRecord.RecordName);
+		}
+
+		[TestMethod]
+		public void CreateUpdateLogsNullValueTest()
+		{
+			// Arrange
+			var dataRecord = new DataRecord
+			{
+				Id = 1,
+				RecordName = null,
+				RecordValue = "MegaVolt",
+				RecordVersion = "1.0.0.0"
+			};
+
+			var dataRecordToCompare = new DataRecord
+			{
+				Id = 1,
+				RecordName = "Darkwing Duck",
+				RecordValue = "MegaVolt",
+				RecordVersion = "1.0.0.1"
+			};
+
+			// Act
+			var logs = _classUnderTest.CreateUpdateLogs(dataRecord, dataRecordToCompare, dataRecord.Id, 2);
+
+			// Assert
+			logs.Should().HaveCount(1);
+			var log = logs.Single();
+
+			log.DataRecordId.Should().Be(dataRecord.Id);
+			log.DataRecordParentId.Should().Be(2);
+			log.DataRecordName.Should().Be("DataRecordTable");
+			log.DataType.Should().Be<string>();
+			log.PropertyName.Should().Be("RecordNameColumn");
+			log.Value.Should().Be(dataRecord.RecordName);
+			log.Value.Should().BeNull();
 		}
 
 		[TestMethod]
