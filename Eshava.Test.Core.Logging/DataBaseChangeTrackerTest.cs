@@ -27,16 +27,18 @@ namespace Eshava.Test.Core.Logging
 				Id = 1,
 				RecordName = "Darkwing Duck",
 				RecordValue = "MegaVolt",
-				RecordVersion = "1.0.0.0"
+				RecordVersion = "1.0.0.0",
+				Timestamp = DateTime.UtcNow.Date
 			};
 
 			// Act
-			var logs = _classUnderTest.CreateInsertLogs(dataRecord, dataRecord.Id, 2);
+			var logs = _classUnderTest.CreateInsertLogs(dataRecord, dataRecord.Id, 2).ToList();
 
 			// Assert
-			logs.Should().HaveCount(2);
-			var logOne = logs.First();
-			var logTwo = logs.Last();
+			logs.Should().HaveCount(3);
+			var logOne = logs[0];
+			var logTwo = logs[1];
+			var logThree = logs[2];
 
 			logOne.DataRecordId.Should().Be(dataRecord.Id);
 			logOne.DataRecordParentId.Should().Be(2);
@@ -51,6 +53,13 @@ namespace Eshava.Test.Core.Logging
 			logTwo.DataType.Should().Be<string>();
 			logTwo.PropertyName.Should().Be("RecordNameColumn");
 			logTwo.Value.Should().Be(dataRecord.RecordName);
+
+			logThree.DataRecordId.Should().Be(dataRecord.Id);
+			logThree.DataRecordParentId.Should().Be(2);
+			logThree.DataRecordName.Should().Be("DataRecordTable");
+			logThree.DataType.Should().Be<DateTime>();
+			logThree.PropertyName.Should().Be("TimestampColumn");
+			logThree.Value.Should().Be(dataRecord.Timestamp);
 		}
 
 		[TestMethod]

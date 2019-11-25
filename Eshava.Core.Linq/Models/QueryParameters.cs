@@ -11,7 +11,7 @@ namespace Eshava.Core.Linq.Models
 		}
 
 		public string SearchTerm { get; set; }
-		public IEnumerable<WhereQueryProperty> WhereQueryProperties { get; set; }
-		public IEnumerable<SortingQueryProperty> SortingQueryProperties { get; set; }
+		public IList<WhereQueryProperty> WhereQueryProperties { get; set; }
+		public IList<SortingQueryProperty> SortingQueryProperties { get; set; }
 	}
 }

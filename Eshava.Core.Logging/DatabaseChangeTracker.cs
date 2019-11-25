@@ -106,7 +106,7 @@ namespace Eshava.Core.Logging
 						DataRecordName = tableName,
 						PropertyName = column,
 						Value = valueCurrent,
-						DataType = propertyInfo.PropertyType,
+						DataType = propertyInfo.PropertyType.GetDataType(),
 						DataRecordId = dataRecordId,
 						DataRecordParentId = dataRecordParentId
 					});

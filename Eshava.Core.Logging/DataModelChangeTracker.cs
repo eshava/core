@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
+using Eshava.Core.Extensions;
 using Eshava.Core.Logging.Enums;
 using Eshava.Core.Logging.Interfaces;
 using Eshava.Core.Logging.Models;
@@ -93,7 +94,7 @@ namespace Eshava.Core.Logging
 						DataRecordName = dataRecordType.Name,
 						PropertyName = propertyInfo.Name,
 						Value = valueCurrent,
-						DataType = propertyInfo.PropertyType,
+						DataType = propertyInfo.PropertyType.GetDataType(),
 						DataRecordId = dataRecordId,
 						DataRecordParentId = dataRecordParentId
 					});
