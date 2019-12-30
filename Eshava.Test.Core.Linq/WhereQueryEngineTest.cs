@@ -1131,7 +1131,7 @@ namespace Eshava.Test.Core.Linq
 				{
 					PropertyName = nameof(Alpha.Chi),
 					SearchTerm = Guid.NewGuid().ToString(),
-					Operator = CompareOperator.Equal
+					Operator = CompareOperator.Contains
 				}
 			};
 
@@ -1148,6 +1148,7 @@ namespace Eshava.Test.Core.Linq
 			// Assert
 			mappings.Keys.Should().HaveCount(1);
 			mappings.ContainsKey(nameof(Alpha.Delta)).Should().BeTrue();
+			queryProperties.First().Operator.Should().Be(CompareOperator.Equal);
 		}
 
 		[TestMethod]
