@@ -106,7 +106,7 @@ namespace Eshava.Core.Linq
 		}
 
 		/// <summary>
-		/// Removes all properties for which a GUID search term was passed
+		/// Removes all properties for which a GUID search term was passed and set the operator to equal
 		/// </summary>
 		/// <typeparam name="T">Data type</typeparam>
 		/// <param name="queryProperties">Properties which contains search term</param>
@@ -123,6 +123,8 @@ namespace Eshava.Core.Linq
 			{
 				if (mappings.ContainsKey(queryProperty.PropertyName) && Guid.TryParse(queryProperty.SearchTerm, out var _))
 				{
+					// The equals operator is the only working operator
+					queryProperty.Operator = CompareOperator.Equal;
 					mappings.Remove(queryProperty.PropertyName);
 				}
 			}
