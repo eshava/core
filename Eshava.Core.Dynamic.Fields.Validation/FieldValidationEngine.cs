@@ -11,7 +11,7 @@ using Eshava.Core.Validation.Models;
 
 namespace Eshava.Core.Dynamic.Fields.Validation
 {
-	public class FieldValidationEngine<FD, FA, FV, T, D> : IFieldValidationEngine<FD, FA, FV, T, D> where FD : IFieldDefinition<T> where FA : IFieldAssignment<T, D> where FV : IFieldValue<T>
+	public class FieldValidationEngine<FD, FA, FV, T, D> : IFieldValidationEngine<FD, FA, FV, T, D> where FD : IFieldDefinition<T> where FA : class, IFieldAssignment<T, D> where FV : IFieldValue<T>
 	{
 		private readonly List<Func<ValidationCheckParameters<FD, FA, FV, T, D>, ValidationCheckResult>> _validationMethods = new List<Func<ValidationCheckParameters<FD, FA, FV, T, D>, ValidationCheckResult>>
 		{

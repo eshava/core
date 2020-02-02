@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using Eshava.Core.Extensions;
+using Eshava.Test.Core.Models;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -228,6 +229,45 @@ namespace Eshava.Test.Core.Extensions
 
 			// Assert
 			result.Length.Should().Be(0);
+		}
+
+		[TestMethod]
+		public void GetEnumTypeByNameTest()
+		{
+			// Act 
+			var result = "Beta".GetEnumType(Alphabet.Alpha);
+
+			// Assert
+			result.Should().Be(Alphabet.Beta);
+		}
+
+		[TestMethod]
+		public void GetEnumTypeByValueTest()
+		{
+			// Act 
+			var result = "99".GetEnumType(Alphabet.Alpha);
+
+			// Assert
+			result.Should().Be(Alphabet.Gamma);
+		}
+
+		[TestMethod]
+		public void GetEnumTypeByNameUnknownTest()
+		{
+			// Act 
+			var result = "Omega".GetEnumType(Alphabet.Alpha);
+
+			// Assert
+			result.Should().Be(Alphabet.Alpha);
+		}
+		[TestMethod]
+		public void GetEnumTypeByValueUnknownTest()
+		{
+			// Act 
+			var result = "9966666".GetEnumType(Alphabet.Alpha);
+
+			// Assert
+			result.Should().Be(Alphabet.Alpha);
 		}
 	}
 }

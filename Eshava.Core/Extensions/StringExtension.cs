@@ -113,7 +113,7 @@ namespace Eshava.Core.Extensions
 		{
 			foreach (var enumMember in (T[])Enum.GetValues(typeof(T)))
 			{
-				if (enumMember.ToString() == typeValue)
+				if (enumMember.ToString() == typeValue || (Int32.TryParse(typeValue, out var typeValueAsInt) && typeValueAsInt == Convert.ToInt32(enumMember)))
 				{
 					return enumMember;
 				}
