@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using Eshava.Core.Extensions;
 using Eshava.Core.Validation.Enums;
@@ -69,8 +70,8 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 		private static ValidationCheckResult CheckRangeFloat(ValidationCheckParameters parameters, RangeAttribute range)
 		{
-			var maximum = Convert.ToDouble(range.Maximum);
-			var minimum = Convert.ToDouble(range.Minimum);
+			var maximum = Convert.ToDouble(range.Maximum, CultureInfo.InvariantCulture);
+			var minimum = Convert.ToDouble(range.Minimum, CultureInfo.InvariantCulture);
 			var valueFloat = (float)parameters.PropertyValue;
 
 			if (valueFloat < minimum || valueFloat > maximum)
@@ -83,8 +84,8 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 		private static ValidationCheckResult CheckRangeDouble(ValidationCheckParameters parameters, RangeAttribute range)
 		{
-			var maximum = Convert.ToDouble(range.Maximum);
-			var minimum = Convert.ToDouble(range.Minimum);
+			var maximum = Convert.ToDouble(range.Maximum, CultureInfo.InvariantCulture);
+			var minimum = Convert.ToDouble(range.Minimum, CultureInfo.InvariantCulture);
 			var valueDouble = (double)parameters.PropertyValue;
 
 			if (valueDouble < minimum || valueDouble > maximum)
@@ -97,8 +98,8 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 		private static ValidationCheckResult CheckRangeDecimal(ValidationCheckParameters parameters, RangeAttribute range)
 		{
-			var maximum = Convert.ToDecimal(range.Maximum);
-			var minimum = Convert.ToDecimal(range.Minimum);
+			var maximum = Convert.ToDecimal(range.Maximum, CultureInfo.InvariantCulture);
+			var minimum = Convert.ToDecimal(range.Minimum, CultureInfo.InvariantCulture);
 			var valueDecimal = (decimal)parameters.PropertyValue;
 
 			if (valueDecimal < minimum || valueDecimal > maximum)

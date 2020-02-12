@@ -9,7 +9,7 @@
 		<PackageProjectUrl>https://github.com/eshava/core</PackageProjectUrl>
 		<Description>Collection of methods, classes and helpers to simplify recurring standard actions</Description>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-		<Version>1.0.2.4</Version>
+		<Version>1.0.2.5</Version>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 	</PropertyGroup>
 

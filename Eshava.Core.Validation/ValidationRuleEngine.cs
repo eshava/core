@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Eshava.Core.Extensions;
@@ -240,8 +241,8 @@ namespace Eshava.Core.Validation
 				rules.Add(new ValidationRule
 				{
 					Rule = "Range",
-					Minimum = Convert.ToDecimal(attRange.Minimum),
-					Maximum = Convert.ToDecimal(attRange.Maximum)
+					Minimum = Convert.ToDecimal(attRange.Minimum, CultureInfo.InvariantCulture),
+					Maximum = Convert.ToDecimal(attRange.Maximum, CultureInfo.InvariantCulture)
 				});
 			}
 		}

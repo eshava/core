@@ -40,5 +40,9 @@ namespace Eshava.Test.Core.Validation.Models
 
 		[DropDownList]
 		public int? Ny { get; set; }
+
+		[DecimalPlaces(3)]
+		[Range(typeof(decimal), "0.001", "1.001")]
+		public decimal? Xi { get; set; }
 	}
 }

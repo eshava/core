@@ -168,7 +168,7 @@ namespace Eshava.Test.Core.Validation
 			var rules = _classUnderTest.CalculateValidationRules<DataTypeProperties>();
 
 			// Assert
-			rules.Should().HaveCount(13);
+			rules.Should().HaveCount(14);
 			var alpha = rules.Single(r => r.PropertyName == nameof(DataTypeProperties.Alpha));
 			alpha.DataType.Should().Be("number");
 			alpha.Rules.Should().HaveCount(3);
@@ -242,6 +242,14 @@ namespace Eshava.Test.Core.Validation
 			ny.Rules.Should().HaveCount(2);
 			ny.Rules.Single(r => r.Rule == "DecimalPlaces").Value.Should().Be(0);
 			ny.Rules.SingleOrDefault(r => r.Rule == "Number").Should().NotBeNull();
+
+			var xi = rules.Single(r => r.PropertyName == nameof(DataTypeProperties.Xi));
+			xi.DataType.Should().Be("number");
+			xi.Rules.Should().HaveCount(3);
+			xi.Rules.Single(r => r.Rule == "DecimalPlaces").Value.Should().Be(3);
+			xi.Rules.Single(r => r.Rule == "Range").Minimum.Should().Be(0.001m);
+			xi.Rules.Single(r => r.Rule == "Range").Maximum.Should().Be(1.001m);
+			xi.Rules.SingleOrDefault(r => r.Rule == "Number").Should().NotBeNull();
 		}
 
 		[TestMethod]
