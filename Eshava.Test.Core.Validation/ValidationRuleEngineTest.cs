@@ -251,7 +251,7 @@ namespace Eshava.Test.Core.Validation
 			var rules = _classUnderTest.CalculateValidationRules<ComplexData>();
 
 			// Assert
-			rules.Should().HaveCount(6);
+			rules.Should().HaveCount(4);
 
 			var alpha = rules.Single(r => r.PropertyName == nameof(ComplexData.Alpha));
 			alpha.DataType.Should().Be("string");
@@ -265,21 +265,15 @@ namespace Eshava.Test.Core.Validation
 			var camelCaseNameProperties = rules.Where(r => r.PropertyName == nameof(BasicRules.CamelCaseName));
 			var justAnotherPropertyProperties = rules.Where(r => r.PropertyName == nameof(BasicRules.JustAnotherProperty));
 
-			camelCaseNameProperties.Should().HaveCount(2);
-			camelCaseNameProperties.First().DataType.Should().Be("string");
-			camelCaseNameProperties.First().Rules.Should().HaveCount(1);
-			camelCaseNameProperties.First().Rules.Single().Rule.Should().Be("Required");
-			camelCaseNameProperties.Last().DataType.Should().Be("string");
-			camelCaseNameProperties.Last().Rules.Should().HaveCount(1);
-			camelCaseNameProperties.Last().Rules.Single().Rule.Should().Be("Required");
-
-			justAnotherPropertyProperties.Should().HaveCount(2);
-			justAnotherPropertyProperties.First().DataType.Should().Be("string");
-			justAnotherPropertyProperties.First().Rules.Should().HaveCount(1);
-			justAnotherPropertyProperties.First().Rules.Single().Rule.Should().Be("Custom");
-			justAnotherPropertyProperties.Last().DataType.Should().Be("string");
-			justAnotherPropertyProperties.Last().Rules.Should().HaveCount(1);
-			justAnotherPropertyProperties.Last().Rules.Single().Rule.Should().Be("Custom");
+			camelCaseNameProperties.Should().HaveCount(1);
+			camelCaseNameProperties.Single().DataType.Should().Be("string");
+			camelCaseNameProperties.Single().Rules.Should().HaveCount(1);
+			camelCaseNameProperties.Single().Rules.Single().Rule.Should().Be("Required");
+			
+			justAnotherPropertyProperties.Should().HaveCount(1);
+			justAnotherPropertyProperties.Single().DataType.Should().Be("string");
+			justAnotherPropertyProperties.Single().Rules.Should().HaveCount(1);
+			justAnotherPropertyProperties.Single().Rules.Single().Rule.Should().Be("Custom");
 		}		
 	}
 }

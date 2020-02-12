@@ -54,30 +54,42 @@ namespace Eshava.Core.Validation
 					var e = propertyInfo.PropertyType.GetDataTypeFromIEnumerable();
 					if (e.IsComplexDataType())
 					{
-						validationProperties.AddRange(CalculateValidationRules(e));
+						TryAddValidationProperties(validationProperties, CalculateValidationRules(e));
 					}
 					else
 					{
-						CalculateValidationProperty(validationProperties, propertyInfo);
+						TryAddValidationProperty(validationProperties, CalculateValidationProperty(propertyInfo));
 					}
 				}
 				else if (propertyInfo.PropertyType.IsComplexDataType())
 				{
-					validationProperties.AddRange(CalculateValidationRules(propertyInfo.PropertyType));
+					TryAddValidationProperties(validationProperties, CalculateValidationRules(propertyInfo.PropertyType));
 				}
 				else
 				{
-					CalculateValidationProperty(validationProperties, propertyInfo);
+					TryAddValidationProperty(validationProperties, CalculateValidationProperty(propertyInfo));
 				}
 			}
 
 			return validationProperties;
 		}
 
-		private void CalculateValidationProperty(List<ValidationPropertyInfo> validationProperties, PropertyInfo propertyInfo)
+		private void TryAddValidationProperties(List<ValidationPropertyInfo> validationProperties, IEnumerable<ValidationPropertyInfo> validationPropertiesToAdd)
 		{
-			var validationProperty = CalculateValidationProperty(propertyInfo);
-			if (validationProperty != null)
+			if (validationPropertiesToAdd == null)
+			{
+				return;
+			}
+
+			foreach (var validationProperty in validationPropertiesToAdd)
+			{
+				TryAddValidationProperty(validationProperties, validationProperty);
+			}
+		}
+
+		private void TryAddValidationProperty(List<ValidationPropertyInfo> validationProperties, ValidationPropertyInfo validationProperty)
+		{
+			if (validationProperty != null && validationProperties.All(property => property.PropertyName != validationProperty.PropertyName))
 			{
 				validationProperties.Add(validationProperty);
 			}
@@ -114,7 +126,7 @@ namespace Eshava.Core.Validation
 			{
 				return attJsonProperty.PropertyName;
 			}
-			
+
 			return propertyInfo.Name.FormatToJsonPropertyName();
 		}
 
