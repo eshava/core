@@ -22,7 +22,7 @@ namespace Eshava.Core.Linq
 		private static readonly ConstantExpression _constantExpressionObjectNull = Expression.Constant(null, _typeObject);
 		private static readonly MethodInfo _methodInfoStringContains = _typeString.GetMethod("Contains", new[] { _typeString });
 
-		private static readonly Dictionary<Type, Func<string, Type, CompareOperator, ConstantExpression>> _constantExpressions = new Dictionary<Type, Func<string, Type, CompareOperator, ConstantExpression>>
+		private static readonly Dictionary<Type, Func<string, Type, CompareOperator, WhereQueryEngineOptions, ConstantExpression>> _constantExpressions = new Dictionary<Type, Func<string, Type, CompareOperator, WhereQueryEngineOptions, ConstantExpression>>
 		{
 			{ typeof(Guid), GetConstantGuid },
 			{ typeof(string), GetConstantString },
@@ -45,6 +45,13 @@ namespace Eshava.Core.Linq
 			{ CompareOperator.LessThanOrEqual, Expression.LessThanOrEqual },
 			{ CompareOperator.Contains, GetContainsExpression },
 		};
+
+		private readonly WhereQueryEngineOptions _options;
+
+		public WhereQueryEngine(WhereQueryEngineOptions options)
+		{
+			_options = options;
+		}
 
 		/// <summary>
 		/// Creates a list of where expression based on passed query parameters
@@ -214,7 +221,7 @@ namespace Eshava.Core.Linq
 				Member = memberExpression,
 				Parameter = mappingExpression.Parameters.First(),
 				Operator = property.Operator,
-				ConstantValue = _constantExpressions[memberType.GetDataType()](property.SearchTerm, memberType, property.Operator)
+				ConstantValue = _constantExpressions[memberType.GetDataType()](property.SearchTerm, memberType, property.Operator, _options)
 			};
 
 			return GetConditionComparableByMemberExpression<T>(data);
@@ -239,13 +246,13 @@ namespace Eshava.Core.Linq
 				PropertyInfo = propertyInfo,
 				Parameter = parameterExpression,
 				Operator = property.Operator,
-				ConstantValue = _constantExpressions[propertyType.GetDataType()](property.SearchTerm, propertyType, property.Operator)
+				ConstantValue = _constantExpressions[propertyType.GetDataType()](property.SearchTerm, propertyType, property.Operator, _options)
 			};
 
 			return GetConditionComparableByProperty<T>(data);
 		}
 
-		private static ConstantExpression GetConstantGuid(string value, Type dataType, CompareOperator compareOperator)
+		private static ConstantExpression GetConstantGuid(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
 			if (!Guid.TryParse(value, out var valueGuid) || compareOperator == CompareOperator.None)
 			{
@@ -255,7 +262,7 @@ namespace Eshava.Core.Linq
 			return Expression.Constant(valueGuid, dataType);
 		}
 
-		private static ConstantExpression GetConstantString(string value, Type dataType, CompareOperator compareOperator)
+		private static ConstantExpression GetConstantString(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
 			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
 			{
@@ -265,7 +272,7 @@ namespace Eshava.Core.Linq
 			return Expression.Constant(value, dataType);
 		}
 
-		private static ConstantExpression GetConstantBoolean(string value, Type dataType, CompareOperator compareOperator)
+		private static ConstantExpression GetConstantBoolean(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
 			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
 			{
@@ -277,7 +284,7 @@ namespace Eshava.Core.Linq
 			return Expression.Constant(boolean, dataType);
 		}
 
-		private static ConstantExpression GetConstantDecimal(string value, Type dataType, CompareOperator compareOperator)
+		private static ConstantExpression GetConstantDecimal(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
 			if (!Decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var valueDecimal) || compareOperator == CompareOperator.None)
 			{
@@ -287,7 +294,7 @@ namespace Eshava.Core.Linq
 			return Expression.Constant(valueDecimal, dataType);
 		}
 
-		private static ConstantExpression GetConstantDouble(string value, Type dataType, CompareOperator compareOperator)
+		private static ConstantExpression GetConstantDouble(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
 			if (!Double.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var valueDouble) || compareOperator == CompareOperator.None)
 			{
@@ -297,7 +304,7 @@ namespace Eshava.Core.Linq
 			return Expression.Constant(valueDouble, dataType);
 		}
 
-		private static ConstantExpression GetConstantFloat(string value, Type dataType, CompareOperator compareOperator)
+		private static ConstantExpression GetConstantFloat(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
 			if (!Single.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var valueFloat) || compareOperator == CompareOperator.None)
 			{
@@ -307,7 +314,7 @@ namespace Eshava.Core.Linq
 			return Expression.Constant(valueFloat, dataType);
 		}
 
-		private static ConstantExpression GetConstantInteger(string value, Type dataType, CompareOperator compareOperator)
+		private static ConstantExpression GetConstantInteger(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
 			if (!Int32.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var valueInt) || compareOperator == CompareOperator.None)
 			{
@@ -317,7 +324,7 @@ namespace Eshava.Core.Linq
 			return Expression.Constant(valueInt, dataType);
 		}
 
-		private static ConstantExpression GetConstantLong(string value, Type dataType, CompareOperator compareOperator)
+		private static ConstantExpression GetConstantLong(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
 			if (!Int64.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var valueLong) || compareOperator == CompareOperator.None)
 			{
@@ -327,7 +334,7 @@ namespace Eshava.Core.Linq
 			return Expression.Constant(valueLong, dataType);
 		}
 
-		private static ConstantExpression GetConstantDateTime(string value, Type dataType, CompareOperator compareOperator)
+		private static ConstantExpression GetConstantDateTime(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
 			if (compareOperator == CompareOperator.None)
 			{
@@ -341,6 +348,11 @@ namespace Eshava.Core.Linq
 				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ssK", CultureInfo.InvariantCulture, DateTimeStyles.None, out valueDateTime)
 				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out valueDateTime))
 			{
+				if (options.UseUtcDateTime)
+				{
+					valueDateTime = valueDateTime.ToUniversalTime();
+				}
+
 				return Expression.Constant(valueDateTime, dataType);
 			}
 
