@@ -22,7 +22,10 @@ namespace Eshava.Test.Core.Linq
 		[TestInitialize]
 		public void Setup()
 		{
-			_classUnderTest = new WhereQueryEngine();
+			_classUnderTest = new WhereQueryEngine(new WhereQueryEngineOptions
+			{
+				UseUtcDateTime = true
+			});
 		}
 
 		[TestMethod, ExpectedException(typeof(ArgumentNullException))]
