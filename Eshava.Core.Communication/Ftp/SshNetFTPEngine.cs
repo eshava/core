@@ -28,7 +28,7 @@ namespace Eshava.Core.Communication.Ftp
 				directoryInfo.Create();
 			}
 
-			var connectionInfo = CreatConnectionInfo(settings);
+			var connectionInfo = CreateConnectionInfo(settings);
 
 			using (var sftp = new SftpClient(connectionInfo))
 			{
@@ -56,7 +56,7 @@ namespace Eshava.Core.Communication.Ftp
 		/// <returns></returns>
 		public async Task<bool> UploadAsync(FTPSettings settings, string fileName, string fullFileName)
 		{
-			var connectionInfo = CreatConnectionInfo(settings);
+			var connectionInfo = CreateConnectionInfo(settings);
 
 			using (var sftp = new SftpClient(connectionInfo))
 			{
@@ -83,7 +83,7 @@ namespace Eshava.Core.Communication.Ftp
 		/// <returns></returns>
 		public Task<bool> DeleteAsync(FTPSettings settings, string directoryOrFileName)
 		{
-			var connectionInfo = CreatConnectionInfo(settings);
+			var connectionInfo = CreateConnectionInfo(settings);
 			var directoryOrFilePath = GetServerPath(settings.ServerPath);
 			if (!directoryOrFilePath.EndsWith("/"))
 			{
@@ -110,7 +110,7 @@ namespace Eshava.Core.Communication.Ftp
 		/// <returns></returns>
 		public async Task<IEnumerable<string>> GetFileNamesAsync(FTPSettings settings, bool recursive)
 		{
-			var connectionInfo = CreatConnectionInfo(settings);
+			var connectionInfo = CreateConnectionInfo(settings);
 			var fileNames = new List<string>();
 			var directoryNames = new List<string>();
 
@@ -196,7 +196,7 @@ namespace Eshava.Core.Communication.Ftp
 			return serverPath;
 		}
 
-		private ConnectionInfo CreatConnectionInfo(FTPSettings settings)
+		private ConnectionInfo CreateConnectionInfo(FTPSettings settings)
 		{
 			if (settings.ServerUrl.ToLower().StartsWith("sftp://"))
 			{
