@@ -111,6 +111,12 @@ namespace Eshava.Core.Storage.Sql
 				return new StorageResponse<bool> { IsFaulty = true, Exception = new ArgumentNullException(nameof(userData.Username)) };
 			}
 
+			var killResult = await KillUserConncetionsAsync(userData.Server, userData.Username);
+			if (killResult.IsFaulty)
+			{
+				return killResult;
+			}
+
 			try
 			{
 				await ExecuteNonQueryAsync(userData.Server, $"{ConstantsMsSql.DROP} {ConstantsMsSql.LOGIN} [{userData.Username}]", ConstantsMsSql.MASTER);
@@ -336,6 +342,27 @@ namespace Eshava.Core.Storage.Sql
 				sqlCommand.AppendLine($"{ConstantsMsSql.SELECT} @kill = @kill + 'kill ' + {ConstantsMsSql.CONVERT}(varchar(5), session_id) + ';' ");
 				sqlCommand.AppendLine($"{ConstantsMsSql.FROM} sys.dm_exec_sessions");
 				sqlCommand.AppendLine($"{ConstantsMsSql.WHERE} database_id  = db_id('{server.DatabaseName}')");
+				sqlCommand.AppendLine($"{ConstantsMsSql.EXEC}(@kill);");
+
+				await ExecuteNonQueryAsync(server, sqlCommand.ToString(), ConstantsMsSql.MASTER);
+			}
+			catch (Exception ex)
+			{
+				return new StorageResponse<bool> { IsFaulty = true, Exception = ex };
+			}
+
+			return new StorageResponse<bool> { Data = true };
+		}
+
+		private async Task<StorageResponse<bool>> KillUserConncetionsAsync(DatabaseConnectionOptions server, string username)
+		{
+			try
+			{
+				var sqlCommand = new StringBuilder();
+				sqlCommand.AppendLine($"{ConstantsMsSql.DECLARE}  @kill varchar(8000) = '';");
+				sqlCommand.AppendLine($"{ConstantsMsSql.SELECT} @kill = @kill + 'kill ' + {ConstantsMsSql.CONVERT}(varchar(5), session_id) + ';' ");
+				sqlCommand.AppendLine($"{ConstantsMsSql.FROM} sys.dm_exec_sessions");
+				sqlCommand.AppendLine($"{ConstantsMsSql.WHERE} login_name  = '{username}'");
 				sqlCommand.AppendLine($"{ConstantsMsSql.EXEC}(@kill);");
 
 				await ExecuteNonQueryAsync(server, sqlCommand.ToString(), ConstantsMsSql.MASTER);
