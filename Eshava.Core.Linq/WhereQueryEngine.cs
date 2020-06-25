@@ -21,6 +21,8 @@ namespace Eshava.Core.Linq
 		private static readonly ConstantExpression _constantExpressionStringNull = Expression.Constant(null, _typeString);
 		private static readonly ConstantExpression _constantExpressionObjectNull = Expression.Constant(null, _typeObject);
 		private static readonly MethodInfo _methodInfoStringContains = _typeString.GetMethod("Contains", new[] { _typeString });
+		private static readonly MethodInfo _methodInfoStringStartsWith = _typeString.GetMethod("StartsWith", new[] { _typeString });
+		private static readonly MethodInfo _methodInfoStringEndsWith = _typeString.GetMethod("EndsWith", new[] { _typeString });
 
 		private static readonly Dictionary<Type, Func<string, Type, CompareOperator, WhereQueryEngineOptions, ConstantExpression>> _constantExpressions = new Dictionary<Type, Func<string, Type, CompareOperator, WhereQueryEngineOptions, ConstantExpression>>
 		{
@@ -44,6 +46,9 @@ namespace Eshava.Core.Linq
 			{ CompareOperator.LessThan, Expression.LessThan },
 			{ CompareOperator.LessThanOrEqual, Expression.LessThanOrEqual },
 			{ CompareOperator.Contains, GetContainsExpression },
+			{ CompareOperator.ContainsNot, GetContainsNotExpression },
+			{ CompareOperator.StartsWith, GetStartsWithExpression },
+			{ CompareOperator.EndsWith, GetEndsWithExpression },
 		};
 
 		private readonly WhereQueryEngineOptions _options;
@@ -293,7 +298,7 @@ namespace Eshava.Core.Linq
 				}
 			}
 
-			return  expression;
+			return expression;
 		}
 
 		private static ConstantExpression GetConstantGuid(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
@@ -502,6 +507,45 @@ namespace Eshava.Core.Linq
 			}
 
 			throw new NotSupportedException("The data type of the property has to be of type string or must implement 'IList'");
+		}
+
+		private static Expression GetContainsNotExpression(MemberExpression member, ConstantExpression constant)
+		{
+			if (member.Type == _typeString)
+			{
+				return Expression.OrElse(Expression.Equal(member, _constantExpressionStringNull), Expression.Not(Expression.Call(member, _methodInfoStringContains, constant)));
+			}
+
+			if (member.Type.ImplementsIEnumerable() && member.Type.ImplementsInterface(_typeIList))
+			{
+				var genericType = member.Type.GetDataTypeFromIEnumerable();
+				var nullCheckExpression = Expression.Equal(member, _constantExpressionObjectNull);
+				var enumerableContainsExpression = Expression.Call(member, member.Type.GetMethod("Contains", new[] { genericType }), constant);
+
+				return Expression.OrElse(nullCheckExpression, Expression.Not(enumerableContainsExpression));
+			}
+
+			throw new NotSupportedException("The data type of the property has to be of type string or must implement 'IList'");
+		}
+
+		private static Expression GetStartsWithExpression(MemberExpression member, ConstantExpression constant)
+		{
+			if (member.Type == _typeString)
+			{
+				return Expression.AndAlso(Expression.NotEqual(member, _constantExpressionStringNull), Expression.Call(member, _methodInfoStringStartsWith, constant));
+			}
+
+			throw new NotSupportedException("The data type of the property has to be of type string");
+		}
+
+		private static Expression GetEndsWithExpression(MemberExpression member, ConstantExpression constant)
+		{
+			if (member.Type == _typeString)
+			{
+				return Expression.AndAlso(Expression.NotEqual(member, _constantExpressionStringNull), Expression.Call(member, _methodInfoStringEndsWith, constant));
+			}
+
+			throw new NotSupportedException("The data type of the property has to be of type string");
 		}
 	}
 }

@@ -22,6 +22,12 @@ namespace Eshava.Core.Linq.Enums
 		[EnumMember(Value = nameof(LessThanOrEqual))]
 		LessThanOrEqual = 6,
 		[EnumMember(Value = nameof(Contains))]
-		Contains = 7
+		Contains = 7,
+		[EnumMember(Value = nameof(StartsWith))]
+		StartsWith = 8,
+		[EnumMember(Value = nameof(EndsWith))]
+		EndsWith = 9,
+		[EnumMember(Value = nameof(ContainsNot))]
+		ContainsNot = 10
 	}
 }

@@ -200,6 +200,175 @@ namespace Eshava.Test.Core.Linq
 			resultWhere.First().Beta.Should().Be(2);
 		}
 
+		[TestMethod]
+		public void BuildQueryExpressionsStringContainsNotPropertyTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new Alpha
+				{
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QuackFu worse than KungFu"
+				},
+				new Alpha
+				{
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Delta = "QuackFu better than KungFu"
+				},
+				new Alpha
+				{
+					Beta = 3,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu"
+				},
+				new Alpha
+				{
+					Beta = 4,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu is the worst"
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.ContainsNot,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "QuackFu"
+					},
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.ContainsNot,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "worst"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
+
+			// Assert
+			result.Should().HaveCount(2);
+			
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+			resultWhere.First().Beta.Should().Be(3);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringStartsWithPropertyTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new Alpha
+				{
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QuackFu worse than KungFu"
+				},
+				new Alpha
+				{
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Delta = "QuackFu better than KungFu"
+				},
+				new Alpha
+				{
+					Beta = 3,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu"
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.StartsWith,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "KungFu"
+					}
+				}
+			};
+
+			Expression<Func<Alpha, bool>> expectedResultDelta = p => p.Delta != null && p.Delta.StartsWith("KungFu");
+			
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
+
+			// Assert
+			result.Should().HaveCount(1);
+			result.Single().Should().BeEquivalentTo(expectedResultDelta);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+			resultWhere.First().Beta.Should().Be(3);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringEndsWithPropertyTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new Alpha
+				{
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QuackFu worse than KungFu"
+				},
+				new Alpha
+				{
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Delta = "QuackFu better than KungFu"
+				},
+				new Alpha
+				{
+					Beta = 3,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu is the best"
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.EndsWith,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "KungFu"
+					}
+				}
+			};
+
+			Expression<Func<Alpha, bool>> expectedResultDelta = p => p.Delta != null && p.Delta.EndsWith("KungFu");
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
+
+			// Assert
+			result.Should().HaveCount(1);
+			result.Single().Should().BeEquivalentTo(expectedResultDelta);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Beta.Should().Be(1);
+			resultWhere.Last().Beta.Should().Be(2);
+		}
+
 		[DataTestMethod]
 		[DataRow(false, DisplayName = "Deactivated split option")]
 		[DataRow(true, DisplayName = "Activated split option")]
