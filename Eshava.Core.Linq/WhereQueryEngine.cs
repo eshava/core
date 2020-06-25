@@ -21,6 +21,8 @@ namespace Eshava.Core.Linq
 		private static readonly ConstantExpression _constantExpressionStringNull = Expression.Constant(null, _typeString);
 		private static readonly ConstantExpression _constantExpressionObjectNull = Expression.Constant(null, _typeObject);
 		private static readonly MethodInfo _methodInfoStringContains = _typeString.GetMethod("Contains", new[] { _typeString });
+		private static readonly MethodInfo _methodInfoStringStartsWith = _typeString.GetMethod("StartsWith", new[] { _typeString });
+		private static readonly MethodInfo _methodInfoStringEndsWith = _typeString.GetMethod("EndsWith", new[] { _typeString });
 
 		private static readonly Dictionary<Type, Func<string, Type, CompareOperator, WhereQueryEngineOptions, ConstantExpression>> _constantExpressions = new Dictionary<Type, Func<string, Type, CompareOperator, WhereQueryEngineOptions, ConstantExpression>>
 		{
@@ -44,6 +46,9 @@ namespace Eshava.Core.Linq
 			{ CompareOperator.LessThan, Expression.LessThan },
 			{ CompareOperator.LessThanOrEqual, Expression.LessThanOrEqual },
 			{ CompareOperator.Contains, GetContainsExpression },
+			{ CompareOperator.ContainsNot, GetContainsNotExpression },
+			{ CompareOperator.StartsWith, GetStartsWithExpression },
+			{ CompareOperator.EndsWith, GetEndsWithExpression },
 		};
 
 		private readonly WhereQueryEngineOptions _options;
@@ -138,36 +143,36 @@ namespace Eshava.Core.Linq
 
 			return this;
 		}
-		
+
 		private IEnumerable<Expression<Func<T, bool>>> BuildPropertyQueryConditions<T>(BuildQueryContainer<T> queryContainer) where T : class
 		{
 			var where = new List<Expression<Func<T, bool>>>();
 
 			foreach (var property in queryContainer.QueryParameters.WhereQueryProperties)
 			{
-				Expression<Func<T, bool>> condition = null;
+				var conditions = new List<Expression<Func<T, bool>>>();
 
 				if (queryContainer.Mappings.ContainsKey(property.PropertyName))
 				{
-					var members = queryContainer.Mappings[property.PropertyName].Select(m => GetMappingCondition(property, m)).Where(e => e != null).ToList();
+					var members = queryContainer.Mappings[property.PropertyName].Select(m => JoinAndExpressions(GetMappingCondition(property, m))).Where(e => e != null).ToList();
 
 					if (members.Count == 1)
 					{
-						condition = members.Single();
+						conditions.Add(members.Single());
 					}
 					else if (members.Count > 1)
 					{
-						condition = JoinOrExpressions(members);
+						conditions.Add(JoinOrExpressions(members));
 					}
 				}
 				else
 				{
-					condition = GetPropertyCondition<T>(property, queryContainer.PropertyInfos, queryContainer.Parameter);
+					conditions.AddRange(GetPropertyCondition<T>(property, queryContainer.PropertyInfos, queryContainer.Parameter));
 				}
 
-				if (condition != null)
+				if (conditions.Any())
 				{
-					where.Add(condition);
+					where.AddRange(conditions);
 				}
 			}
 
@@ -177,37 +182,53 @@ namespace Eshava.Core.Linq
 		private Expression<Func<T, bool>> BuildGlobalQueryCondition<T>(BuildQueryContainer<T> queryContainer) where T : class
 		{
 			var where = new List<Expression<Func<T, bool>>>();
-			var property = new WhereQueryProperty { Operator = CompareOperator.Contains, SearchTerm = queryContainer.QueryParameters.SearchTerm };
 
-			foreach (var propertyInfo in queryContainer.PropertyInfos)
+			var searchTermParts = new[] { queryContainer.QueryParameters.SearchTerm };
+			if (_options.ContainsSearchSplitBySpace)
 			{
-				property.PropertyName = propertyInfo.Name;
+				searchTermParts = queryContainer.QueryParameters.SearchTerm.Split(' ').Where(t => !t.IsNullOrEmpty()).ToArray();
+			}
 
-				if (queryContainer.Mappings.ContainsKey(propertyInfo.Name))
-				{
-					where.AddRange(queryContainer.Mappings[propertyInfo.Name].Select(m => GetMappingCondition(property, m, _typeString)).Where(e => e != null).ToList());
-				}
-				else if (propertyInfo.PropertyType == _typeString && propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() == null)
-				{
-					var condition = GetPropertyCondition<T>(property, queryContainer.PropertyInfos, queryContainer.Parameter);
+			var andExpressions = new List<Expression<Func<T, bool>>>();
+			foreach (var searchTermPart in searchTermParts)
+			{
+				var property = new WhereQueryProperty { Operator = CompareOperator.Contains, SearchTerm = searchTermPart };
+				var orExpressions = new List<Expression<Func<T, bool>>>();
 
-					if (condition != null)
+				foreach (var propertyInfo in queryContainer.PropertyInfos)
+				{
+					property.PropertyName = propertyInfo.Name;
+
+					if (queryContainer.Mappings.ContainsKey(propertyInfo.Name))
 					{
-						where.Add(condition);
+						orExpressions.AddRange(queryContainer.Mappings[propertyInfo.Name].SelectMany(m => GetMappingCondition(property, m, _typeString)).Where(e => e != null).ToList());
 					}
+					else if (propertyInfo.PropertyType == _typeString && propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() == null)
+					{
+						var conditions = GetPropertyCondition<T>(property, queryContainer.PropertyInfos, queryContainer.Parameter);
+						if (conditions.Any())
+						{
+							orExpressions.AddRange(conditions);
+						}
+					}
+				}
+
+				if (orExpressions.Count > 0)
+				{
+					andExpressions.Add(JoinOrExpressions(orExpressions));
 				}
 			}
 
-			return where.Any() ? JoinOrExpressions(where) : null;
+			return JoinAndExpressions(andExpressions);
 		}
 
-		private Expression<Func<T, bool>> GetMappingCondition<T>(WhereQueryProperty property, Expression<Func<T, object>> mappingExpression, Type expectedDataType = null) where T : class
+		private IList<Expression<Func<T, bool>>> GetMappingCondition<T>(WhereQueryProperty property, Expression<Func<T, object>> mappingExpression, Type expectedDataType = null) where T : class
 		{
 			var memberExpression = GetMemberExpression(mappingExpression);
 
 			if (memberExpression == null || (expectedDataType != null && memberExpression.Type != expectedDataType))
 			{
-				return null;
+				return Array.Empty<Expression<Func<T, bool>>>();
 			}
 
 			var memberType = memberExpression.Type;
@@ -216,23 +237,35 @@ namespace Eshava.Core.Linq
 				memberType = memberType.GetDataTypeFromIEnumerable();
 			}
 
-			var data = new ExpressionDataContainer
+			var expression = new List<Expression<Func<T, bool>>>();
+			var searchTermParts = new[] { property.SearchTerm };
+			if (_options.ContainsSearchSplitBySpace && memberType == _typeString && property.Operator == CompareOperator.Contains)
 			{
-				Member = memberExpression,
-				Parameter = mappingExpression.Parameters.First(),
-				Operator = property.Operator,
-				ConstantValue = _constantExpressions[memberType.GetDataType()](property.SearchTerm, memberType, property.Operator, _options)
-			};
+				searchTermParts = property.SearchTerm.Split(' ').Where(t => !t.IsNullOrEmpty()).ToArray();
+			}
 
-			return GetConditionComparableByMemberExpression<T>(data);
+			foreach (var searchTermPart in searchTermParts)
+			{
+				var data = new ExpressionDataContainer
+				{
+					Member = memberExpression,
+					Parameter = mappingExpression.Parameters.First(),
+					Operator = property.Operator,
+					ConstantValue = _constantExpressions[memberType.GetDataType()](searchTermPart, memberType, property.Operator, _options)
+				};
+
+				expression.Add(GetConditionComparableByMemberExpression<T>(data));
+			}
+
+			return expression;
 		}
 
-		private Expression<Func<T, bool>> GetPropertyCondition<T>(WhereQueryProperty property, IEnumerable<PropertyInfo> propertyInfos, ParameterExpression parameterExpression) where T : class
+		private IEnumerable<Expression<Func<T, bool>>> GetPropertyCondition<T>(WhereQueryProperty property, IEnumerable<PropertyInfo> propertyInfos, ParameterExpression parameterExpression) where T : class
 		{
 			var propertyInfo = propertyInfos.SingleOrDefault(p => p.Name.Equals(property.PropertyName));
 			if (propertyInfo == null || propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() != null)
 			{
-				return null;
+				return Array.Empty<Expression<Func<T, bool>>>();
 			}
 
 			var propertyType = propertyInfo.PropertyType;
@@ -241,15 +274,31 @@ namespace Eshava.Core.Linq
 				propertyType = propertyInfo.PropertyType.GetDataTypeFromIEnumerable();
 			}
 
-			var data = new ExpressionDataContainer
+			var expression = new List<Expression<Func<T, bool>>>();
+			var searchTermParts = new[] { property.SearchTerm };
+			if (_options.ContainsSearchSplitBySpace && propertyType == _typeString && property.Operator == CompareOperator.Contains)
 			{
-				PropertyInfo = propertyInfo,
-				Parameter = parameterExpression,
-				Operator = property.Operator,
-				ConstantValue = _constantExpressions[propertyType.GetDataType()](property.SearchTerm, propertyType, property.Operator, _options)
-			};
+				searchTermParts = property.SearchTerm.Split(' ').Where(t => !t.IsNullOrEmpty()).ToArray();
+			}
 
-			return GetConditionComparableByProperty<T>(data);
+			foreach (var searchTermPart in searchTermParts)
+			{
+				var data = new ExpressionDataContainer
+				{
+					PropertyInfo = propertyInfo,
+					Parameter = parameterExpression,
+					Operator = property.Operator,
+					ConstantValue = _constantExpressions[propertyType.GetDataType()](searchTermPart, propertyType, property.Operator, _options)
+				};
+
+				var condition = GetConditionComparableByProperty<T>(data);
+				if (condition != null)
+				{
+					expression.Add(condition);
+				}
+			}
+
+			return expression;
 		}
 
 		private static ConstantExpression GetConstantGuid(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
@@ -406,6 +455,34 @@ namespace Eshava.Core.Linq
 			return Expression.Lambda<Func<T, bool>>(joinedExpressions, parameter);
 		}
 
+		private Expression<Func<T, bool>> JoinAndExpressions<T>(IList<Expression<Func<T, bool>>> where) where T : class
+		{
+			if (where.Count <= 1)
+			{
+				return where.SingleOrDefault();
+			}
+
+			BinaryExpression joinedExpressions = null;
+			var parameter = Expression.Parameter(typeof(T), "p");
+
+			for (var index = 1; index < where.Count; index++)
+			{
+				var currentCondition = ChangeParameterExpression(where[index], parameter);
+
+				if (joinedExpressions == null)
+				{
+					var previousCondition = ChangeParameterExpression(where[index - 1], parameter);
+					joinedExpressions = Expression.And(previousCondition, currentCondition);
+				}
+				else
+				{
+					joinedExpressions = Expression.And(joinedExpressions, currentCondition);
+				}
+			}
+
+			return Expression.Lambda<Func<T, bool>>(joinedExpressions, parameter);
+		}
+
 		private Expression ChangeParameterExpression<T>(Expression<Func<T, bool>> condition, ParameterExpression parameter)
 		{
 			var previousVisitor = new ReplaceExpressionVisitor(condition.Parameters.First(), parameter);
@@ -430,6 +507,45 @@ namespace Eshava.Core.Linq
 			}
 
 			throw new NotSupportedException("The data type of the property has to be of type string or must implement 'IList'");
+		}
+
+		private static Expression GetContainsNotExpression(MemberExpression member, ConstantExpression constant)
+		{
+			if (member.Type == _typeString)
+			{
+				return Expression.OrElse(Expression.Equal(member, _constantExpressionStringNull), Expression.Not(Expression.Call(member, _methodInfoStringContains, constant)));
+			}
+
+			if (member.Type.ImplementsIEnumerable() && member.Type.ImplementsInterface(_typeIList))
+			{
+				var genericType = member.Type.GetDataTypeFromIEnumerable();
+				var nullCheckExpression = Expression.Equal(member, _constantExpressionObjectNull);
+				var enumerableContainsExpression = Expression.Call(member, member.Type.GetMethod("Contains", new[] { genericType }), constant);
+
+				return Expression.OrElse(nullCheckExpression, Expression.Not(enumerableContainsExpression));
+			}
+
+			throw new NotSupportedException("The data type of the property has to be of type string or must implement 'IList'");
+		}
+
+		private static Expression GetStartsWithExpression(MemberExpression member, ConstantExpression constant)
+		{
+			if (member.Type == _typeString)
+			{
+				return Expression.AndAlso(Expression.NotEqual(member, _constantExpressionStringNull), Expression.Call(member, _methodInfoStringStartsWith, constant));
+			}
+
+			throw new NotSupportedException("The data type of the property has to be of type string");
+		}
+
+		private static Expression GetEndsWithExpression(MemberExpression member, ConstantExpression constant)
+		{
+			if (member.Type == _typeString)
+			{
+				return Expression.AndAlso(Expression.NotEqual(member, _constantExpressionStringNull), Expression.Call(member, _methodInfoStringEndsWith, constant));
+			}
+
+			throw new NotSupportedException("The data type of the property has to be of type string");
 		}
 	}
 }

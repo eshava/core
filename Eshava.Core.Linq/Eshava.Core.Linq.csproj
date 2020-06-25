@@ -9,7 +9,7 @@
     <Authors>Eshava</Authors>
     <Company>Eshava</Company>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.0.0.5</Version>
+    <Version>1.0.1.0</Version>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>
 
