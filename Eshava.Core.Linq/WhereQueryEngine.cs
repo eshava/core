@@ -17,12 +17,14 @@ namespace Eshava.Core.Linq
 	{
 		private static readonly Type _typeString = typeof(string);
 		private static readonly Type _typeObject = typeof(object);
+		private static readonly Type _typeEnum = typeof(Enum);
 		private static readonly Type _typeIList = typeof(IList);
 		private static readonly ConstantExpression _constantExpressionStringNull = Expression.Constant(null, _typeString);
 		private static readonly ConstantExpression _constantExpressionObjectNull = Expression.Constant(null, _typeObject);
 		private static readonly MethodInfo _methodInfoStringContains = _typeString.GetMethod("Contains", new[] { _typeString });
 		private static readonly MethodInfo _methodInfoStringStartsWith = _typeString.GetMethod("StartsWith", new[] { _typeString });
 		private static readonly MethodInfo _methodInfoStringEndsWith = _typeString.GetMethod("EndsWith", new[] { _typeString });
+		private static readonly ConstantExpression _constantExpressionCompareTo = Expression.Constant(0, typeof(int));
 
 		private static readonly Dictionary<Type, Func<string, Type, CompareOperator, WhereQueryEngineOptions, ConstantExpression>> _constantExpressions = new Dictionary<Type, Func<string, Type, CompareOperator, WhereQueryEngineOptions, ConstantExpression>>
 		{
@@ -34,7 +36,8 @@ namespace Eshava.Core.Linq
 			{ typeof(decimal), GetConstantDecimal },
 			{ typeof(double), GetConstantDouble },
 			{ typeof(float), GetConstantFloat },
-			{ typeof(DateTime), GetConstantDateTime }
+			{ typeof(DateTime), GetConstantDateTime },
+			{ typeof(Enum), GetConstantEnum }
 		};
 
 		private static readonly Dictionary<CompareOperator, Func<MemberExpression, ConstantExpression, Expression>> _compareOperatorExpressions = new Dictionary<CompareOperator, Func<MemberExpression, ConstantExpression, Expression>>
@@ -49,6 +52,17 @@ namespace Eshava.Core.Linq
 			{ CompareOperator.ContainsNot, GetContainsNotExpression },
 			{ CompareOperator.StartsWith, GetStartsWithExpression },
 			{ CompareOperator.EndsWith, GetEndsWithExpression },
+			{ CompareOperator.ContainedIn, GetContainedInExpression },
+		};
+
+		private static readonly Dictionary<CompareOperator, ExpressionType> _compareOperatorExpressionType = new Dictionary<CompareOperator, ExpressionType>
+		{
+			{ CompareOperator.Equal, ExpressionType.Equal },
+			{ CompareOperator.NotEqual, ExpressionType.NotEqual },
+			{ CompareOperator.GreaterThan, ExpressionType.GreaterThan },
+			{ CompareOperator.GreaterThanOrEqual, ExpressionType.GreaterThanOrEqual },
+			{ CompareOperator.LessThan, ExpressionType.LessThan },
+			{ CompareOperator.LessThanOrEqual, ExpressionType.LessThanOrEqual }
 		};
 
 		private readonly WhereQueryEngineOptions _options;
@@ -283,12 +297,18 @@ namespace Eshava.Core.Linq
 
 			foreach (var searchTermPart in searchTermParts)
 			{
+				var dataType = propertyType.GetDataType();
+				if (dataType.IsEnum)
+				{
+					dataType = _typeEnum;
+				}
+
 				var data = new ExpressionDataContainer
 				{
 					PropertyInfo = propertyInfo,
 					Parameter = parameterExpression,
 					Operator = property.Operator,
-					ConstantValue = _constantExpressions[propertyType.GetDataType()](searchTermPart, propertyType, property.Operator, _options)
+					ConstantValue = _constantExpressions[dataType](searchTermPart, propertyType, property.Operator, _options)
 				};
 
 				var condition = GetConditionComparableByProperty<T>(data);
@@ -303,7 +323,26 @@ namespace Eshava.Core.Linq
 
 		private static ConstantExpression GetConstantGuid(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
-			if (!Guid.TryParse(value, out var valueGuid) || compareOperator == CompareOperator.None)
+			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
+			{
+				return null;
+			}
+
+			if (compareOperator == CompareOperator.ContainedIn)
+			{
+				var values = new List<Guid>();
+				foreach (var item in value.Split('|'))
+				{
+					if (Guid.TryParse(item, out var valueItemGuid))
+					{
+						values.Add(valueItemGuid);
+					}
+				}
+
+				return Expression.Constant(values, values.GetType());
+			}
+
+			if (!Guid.TryParse(value, out var valueGuid))
 			{
 				return null;
 			}
@@ -316,6 +355,13 @@ namespace Eshava.Core.Linq
 			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
 			{
 				return null;
+			}
+
+			if (compareOperator == CompareOperator.ContainedIn)
+			{
+				var values = value.Split('|').ToList();
+
+				return Expression.Constant(values, values.GetType());
 			}
 
 			return Expression.Constant(value, dataType);
@@ -335,7 +381,26 @@ namespace Eshava.Core.Linq
 
 		private static ConstantExpression GetConstantDecimal(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
-			if (!Decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var valueDecimal) || compareOperator == CompareOperator.None)
+			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
+			{
+				return null;
+			}
+
+			if (compareOperator == CompareOperator.ContainedIn)
+			{
+				var values = new List<decimal>();
+				foreach (var item in value.Split('|'))
+				{
+					if (Decimal.TryParse(item, NumberStyles.Number, CultureInfo.InvariantCulture, out var valueItemDecimal))
+					{
+						values.Add(valueItemDecimal);
+					}
+				}
+
+				return Expression.Constant(values, values.GetType());
+			}
+
+			if (!Decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var valueDecimal))
 			{
 				return null;
 			}
@@ -345,7 +410,26 @@ namespace Eshava.Core.Linq
 
 		private static ConstantExpression GetConstantDouble(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
-			if (!Double.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var valueDouble) || compareOperator == CompareOperator.None)
+			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
+			{
+				return null;
+			}
+
+			if (compareOperator == CompareOperator.ContainedIn)
+			{
+				var values = new List<double>();
+				foreach (var item in value.Split('|'))
+				{
+					if (Double.TryParse(item, NumberStyles.Number, CultureInfo.InvariantCulture, out var valueItemDouble))
+					{
+						values.Add(valueItemDouble);
+					}
+				}
+
+				return Expression.Constant(values, values.GetType());
+			}
+
+			if (!Double.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var valueDouble))
 			{
 				return null;
 			}
@@ -355,7 +439,26 @@ namespace Eshava.Core.Linq
 
 		private static ConstantExpression GetConstantFloat(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
-			if (!Single.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var valueFloat) || compareOperator == CompareOperator.None)
+			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
+			{
+				return null;
+			}
+
+			if (compareOperator == CompareOperator.ContainedIn)
+			{
+				var values = new List<float>();
+				foreach (var item in value.Split('|'))
+				{
+					if (Single.TryParse(item, NumberStyles.Float, CultureInfo.InvariantCulture, out var valueItemFloat))
+					{
+						values.Add(valueItemFloat);
+					}
+				}
+
+				return Expression.Constant(values, values.GetType());
+			}
+
+			if (!Single.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var valueFloat))
 			{
 				return null;
 			}
@@ -365,7 +468,26 @@ namespace Eshava.Core.Linq
 
 		private static ConstantExpression GetConstantInteger(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
-			if (!Int32.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var valueInt) || compareOperator == CompareOperator.None)
+			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
+			{
+				return null;
+			}
+
+			if (compareOperator == CompareOperator.ContainedIn)
+			{
+				var values = new List<int>();
+				foreach (var item in value.Split('|'))
+				{
+					if (Int32.TryParse(item, NumberStyles.Integer, CultureInfo.InvariantCulture, out var valueItemInteger))
+					{
+						values.Add(valueItemInteger);
+					}
+				}
+
+				return Expression.Constant(values, values.GetType());
+			}
+
+			if (!Int32.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var valueInt))
 			{
 				return null;
 			}
@@ -375,7 +497,26 @@ namespace Eshava.Core.Linq
 
 		private static ConstantExpression GetConstantLong(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
-			if (!Int64.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var valueLong) || compareOperator == CompareOperator.None)
+			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
+			{
+				return null;
+			}
+
+			if (compareOperator == CompareOperator.ContainedIn)
+			{
+				var values = new List<long>();
+				foreach (var item in value.Split('|'))
+				{
+					if (Int64.TryParse(item, NumberStyles.Integer, CultureInfo.InvariantCulture, out var valueItemLong))
+					{
+						values.Add(valueItemLong);
+					}
+				}
+
+				return Expression.Constant(values, values.GetType());
+			}
+
+			if (!Int64.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var valueLong))
 			{
 				return null;
 			}
@@ -383,30 +524,85 @@ namespace Eshava.Core.Linq
 			return Expression.Constant(valueLong, dataType);
 		}
 
-		private static ConstantExpression GetConstantDateTime(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
+		private static ConstantExpression GetConstantEnum(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
-			if (compareOperator == CompareOperator.None)
+			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
 			{
 				return null;
 			}
 
-			DateTime valueDateTime;
-			if (DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.None, out valueDateTime)
-				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out valueDateTime)
-				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out valueDateTime)
-				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ssK", CultureInfo.InvariantCulture, DateTimeStyles.None, out valueDateTime)
-				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out valueDateTime))
+			if (compareOperator == CompareOperator.ContainedIn)
 			{
-				if (options.UseUtcDateTime)
+				var values = value.Split('|').Select(v => Enum.Parse(dataType, v)).ToList();
+				try
 				{
-					valueDateTime = valueDateTime.ToUniversalTime();
+					return Expression.Constant(values, values.GetType());
 				}
-
-				return Expression.Constant(valueDateTime, dataType);
+				catch
+				{
+					return null;
+				}
 			}
 
-			return null;
+			try
+			{
+				return Expression.Constant(Enum.Parse(dataType, value), dataType);
+			}
+			catch
+			{
+				return null;
+			}
 		}
+
+		private static ConstantExpression GetConstantDateTime(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
+		{
+			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
+			{
+				return null;
+			}
+
+			if (compareOperator == CompareOperator.ContainedIn)
+			{
+				var values = new List<DateTime>();
+				foreach (var item in value.Split('|'))
+				{
+					if (TryParseDateTime(item, options, out var valueItemDateTime))
+					{
+						values.Add(valueItemDateTime);
+					}
+				}
+
+				return Expression.Constant(values, values.GetType());
+			}
+
+			if (!TryParseDateTime(value, options, out var valueDateTime))
+			{
+				return null;
+			}
+
+			return Expression.Constant(valueDateTime, dataType);
+		}
+
+		private static bool TryParseDateTime(string value, WhereQueryEngineOptions options, out DateTime result)
+		{
+			if (DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.None, out result)
+				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out result)
+				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out result)
+				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ssK", CultureInfo.InvariantCulture, DateTimeStyles.None, out result)
+				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out result))
+			{
+
+				if (options.UseUtcDateTime)
+				{
+					result = result.ToUniversalTime();
+				}
+
+				return true;
+			}
+
+			return false;
+		}
+
 
 		private Expression<Func<T, bool>> GetConditionComparableByProperty<T>(ExpressionDataContainer data) where T : class
 		{
@@ -420,6 +616,14 @@ namespace Eshava.Core.Linq
 			if (data.ConstantValue == null || !_compareOperatorExpressions.ContainsKey(data.Operator))
 			{
 				return null;
+			}
+
+			if (data.Member.Type.IsEnum && _compareOperatorExpressionType.ContainsKey(data.Operator))
+			{
+				var enumCompareToExpression = Expression.Call(data.Member, data.Member.Type.GetMethod("CompareTo", new[] { data.Member.Type }), Expression.Convert(data.ConstantValue, _typeObject));
+				var binaryExpression = Expression.MakeBinary(_compareOperatorExpressionType[data.Operator], enumCompareToExpression, _constantExpressionCompareTo);
+
+				return Expression.Lambda<Func<T, bool>>(binaryExpression, data.Parameter);
 			}
 
 			var expression = _compareOperatorExpressions[data.Operator](data.Member, data.ConstantValue);
@@ -546,6 +750,23 @@ namespace Eshava.Core.Linq
 			}
 
 			throw new NotSupportedException("The data type of the property has to be of type string");
+		}
+
+		private static Expression GetContainedInExpression(MemberExpression member, ConstantExpression constant)
+		{
+			var enumerableMemberMethod = constant.Type.GetMethod("Contains", new[] { member.Type });
+			Expression memberExpression;
+
+			if (member.Type.IsEnum)
+			{
+				memberExpression = Expression.Convert(member, _typeObject);
+			}
+			else
+			{
+				memberExpression = member;
+			}
+
+			return Expression.Call(constant, enumerableMemberMethod, memberExpression);
 		}
 	}
 }

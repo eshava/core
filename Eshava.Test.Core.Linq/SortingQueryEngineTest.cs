@@ -176,7 +176,7 @@ namespace Eshava.Test.Core.Linq
 			result.Should().BeNull();
 		}
 
-		[TestMethod, ExpectedException(typeof(NullReferenceException))]
+		[TestMethod, ExpectedException(typeof(ArgumentNullException))]
 		public void ApplySortingNullQueryTest()
 		{
 			// Act
@@ -322,6 +322,157 @@ namespace Eshava.Test.Core.Linq
 			result[1].Rho.Should().Be(1);
 			result[2].Rho.Should().Be(4);
 			result[3].Rho.Should().Be(2);
+		}
+
+		[TestMethod]
+		public void AddOrderByDescendingEnumTest()
+		{
+			// Arrange
+			var elements = new List<Omega>
+			{
+				new Omega {
+					Sigma = 1,
+					Number = Number.One
+				},
+				new Omega {
+					Sigma = 2,
+					Number = Number.Two
+				},
+				new Omega {
+					Sigma = 3,
+					Number = Number.Three
+				},
+				new Omega {
+					Sigma = 4,
+					Number = Number.Four
+				}
+			};
+
+			var query = elements.AsQueryable();
+			var condition = _classUnderTest.BuildSortCondition<Omega>(SortOrder.Descending, p => p.Number);
+
+			// Act
+			var result = _classUnderTest.AddOrder(query, condition).ToList();
+
+			// Assert
+			result[0].Number.Should().Be(Number.Four);
+			result[1].Number.Should().Be(Number.Three);
+			result[2].Number.Should().Be(Number.Two);
+			result[3].Number.Should().Be(Number.One);
+		}
+
+		[TestMethod]
+		public void AddOrderByEnumTest()
+		{
+			// Arrange
+			var elements = new List<Omega>
+			{
+				new Omega {
+					Sigma = 1,
+					Number = Number.Two
+				},
+				new Omega {
+					Sigma = 2,
+					Number = Number.Four
+				},
+				new Omega {
+					Sigma = 3,
+					Number = Number.Three
+				},
+				new Omega {
+					Sigma = 4,
+					Number = Number.One
+				}
+			};
+
+			var query = elements.AsQueryable();
+			var condition = _classUnderTest.BuildSortCondition<Omega>(SortOrder.Ascending, p => p.Number);
+
+			// Act
+			var result = _classUnderTest.AddOrder(query, condition).ToList();
+
+			// Assert
+			result[0].Number.Should().Be(Number.One);
+			result[1].Number.Should().Be(Number.Two);
+			result[2].Number.Should().Be(Number.Three);
+			result[3].Number.Should().Be(Number.Four);
+		}
+
+		[TestMethod]
+		public void AddOrderThenByDescendingEnumTest()
+		{
+			// Arrange
+			var elements = new List<Omega>
+			{
+				new Omega {
+					Sigma = 4,
+					Number = Number.One
+				},
+				new Omega {
+					Sigma = 2,
+					Number = Number.Two
+				},
+				new Omega {
+					Sigma = 4,
+					Number = Number.Three
+				},
+				new Omega {
+					Sigma = 2,
+					Number = Number.Four
+				}
+			};
+
+			var firstCondition = _classUnderTest.BuildSortCondition<Omega>(SortOrder.Descending, p => p.Sigma);
+			var secondCondition = _classUnderTest.BuildSortCondition<Omega>(SortOrder.Descending, p => p.Number);
+			var query = _classUnderTest.AddOrder(elements.AsQueryable(), firstCondition);
+
+			// Act
+			var result = _classUnderTest.AddOrderThen(query, secondCondition).ToList();
+
+
+			// Assert
+			result[0].Number.Should().Be(Number.Three);
+			result[1].Number.Should().Be(Number.One);
+			result[2].Number.Should().Be(Number.Four);
+			result[3].Number.Should().Be(Number.Two);
+		}
+
+		[TestMethod]
+		public void AddOrderThenByEnumTest()
+		{
+			// Arrange
+			var elements = new List<Omega>
+			{
+				new Omega {
+					Sigma = 4,
+					Number = Number.Two
+				},
+				new Omega {
+					Sigma = 2,
+					Number = Number.Four
+				},
+				new Omega {
+					Sigma = 2,
+					Number = Number.Three
+				},
+				new Omega {
+					Sigma = 4,
+					Number = Number.One
+				}
+			};
+
+			var firstCondition = _classUnderTest.BuildSortCondition<Omega>(SortOrder.Ascending, p => p.Sigma);
+			var secondCondition = _classUnderTest.BuildSortCondition<Omega>(SortOrder.Ascending, p => p.Number);
+			var query = _classUnderTest.AddOrder(elements.AsQueryable(), firstCondition);
+
+			// Act
+			var result = _classUnderTest.AddOrderThen(query, secondCondition).ToList();
+
+			// Assert
+			result[0].Number.Should().Be(Number.Three);
+			result[1].Number.Should().Be(Number.Four);
+			result[2].Number.Should().Be(Number.One);
+			result[3].Number.Should().Be(Number.Two);
 		}
 	}
 }

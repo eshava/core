@@ -256,7 +256,7 @@ namespace Eshava.Test.Core.Linq
 
 			// Assert
 			result.Should().HaveCount(2);
-			
+
 			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Beta.Should().Be(3);
@@ -302,7 +302,7 @@ namespace Eshava.Test.Core.Linq
 			};
 
 			Expression<Func<Alpha, bool>> expectedResultDelta = p => p.Delta != null && p.Delta.StartsWith("KungFu");
-			
+
 			// Act
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
@@ -1517,6 +1517,306 @@ namespace Eshava.Test.Core.Linq
 
 			// Act
 			_classUnderTest.RemovePropertyMappings(null, mappings);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsEnumPropertyTest()
+		{
+			// Arrange
+			var exampleList = new List<Omega>
+			{
+				new Omega
+				{
+					Sigma = 1,
+					Number = Number.Four
+				},
+				new Omega
+				{
+					Sigma = 2,
+					Number = Number.One
+				},
+				new Omega
+				{
+					Sigma = 3,
+					Number = Number.Three
+				},
+				new Omega
+				{
+					Sigma = 4,
+					Number = Number.One
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.Equal,
+						PropertyName = nameof(Omega.Number),
+						SearchTerm = "One"
+					},
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.Equal,
+						PropertyName = nameof(Omega.Number),
+						SearchTerm = "1"
+					}
+				}
+			};
+
+			Expression<Func<Omega, bool>> expectedResultNumber = p => p.Number == Number.One;
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Omega>(queryParameter);
+
+			// Assert
+			result.Should().HaveCount(2);
+			result.First().Should().BeEquivalentTo(expectedResultNumber);
+			result.Last().Should().BeEquivalentTo(expectedResultNumber);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Sigma.Should().Be(2);
+			resultWhere.Last().Sigma.Should().Be(4);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsEnumGreaterAndLessPropertyTest()
+		{
+			// Arrange
+			var exampleList = new List<Omega>
+			{
+				new Omega
+				{
+					Sigma = 1,
+					Number = Number.Four
+				},
+				new Omega
+				{
+					Sigma = 2,
+					Number = Number.One
+				},
+				new Omega
+				{
+					Sigma = 3,
+					Number = Number.Three
+				},
+				new Omega
+				{
+					Sigma = 4,
+					Number = Number.One
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.GreaterThan,
+						PropertyName = nameof(Omega.Number),
+						SearchTerm = "One"
+					},
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.LessThan,
+						PropertyName = nameof(Omega.Number),
+						SearchTerm = "4"
+					}
+				}
+			};
+
+			Expression<Func<Omega, bool>> expectedResultGreaterNumber = p => p.Number > Number.One;
+			Expression<Func<Omega, bool>> expectedResultLessNumber = p => p.Number < Number.One;
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Omega>(queryParameter);
+
+			// Assert
+			result.Should().HaveCount(2);
+			result.First().Should().BeEquivalentTo(expectedResultGreaterNumber);
+			result.Last().Should().BeEquivalentTo(expectedResultLessNumber);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+			resultWhere.First().Sigma.Should().Be(3);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsEnumContainsPropertyTest()
+		{
+			// Arrange
+			var exampleList = new List<Omega>
+			{
+				new Omega
+				{
+					Sigma = 1,
+					Numbers = new List<Number> { Number.One, Number.Two }
+				},
+				new Omega
+				{
+					Sigma = 2,
+					Numbers = new List<Number> { Number.Four, Number.Two, Number.Three }
+				},
+				new Omega
+				{
+					Sigma = 3,
+					Numbers = new List<Number> { Number.Four }
+				},
+				new Omega
+				{
+					Sigma = 4,
+					Numbers = new List<Number> { Number.Three }
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.Contains,
+						PropertyName = nameof(Omega.Numbers),
+						SearchTerm = "Two"
+					},
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.ContainsNot,
+						PropertyName = nameof(Omega.Numbers),
+						SearchTerm = "4"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Omega>(queryParameter);
+
+			// Assert
+			result.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+			resultWhere.First().Sigma.Should().Be(1);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsEnumContainedInPropertyTest()
+		{
+			// Arrange
+			var exampleList = new List<Omega>
+			{
+				new Omega
+				{
+					Sigma = 1,
+					Number = Number.Four
+				},
+				new Omega
+				{
+					Sigma = 2,
+					Number = Number.One
+				},
+				new Omega
+				{
+					Sigma = 3,
+					Number = Number.Three
+				},
+				new Omega
+				{
+					Sigma = 4,
+					Number = Number.Two
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.ContainedIn,
+						PropertyName = nameof(Omega.Number),
+						SearchTerm = "Two|Four"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Omega>(queryParameter);
+
+			// Assert
+			result.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Sigma.Should().Be(1);
+			resultWhere.Last().Sigma.Should().Be(4);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsContainedInPropertyTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new Alpha
+				{
+					Beta = 1,
+					Gamma = "DD",
+					Lambda = 11
+				},
+				new Alpha
+				{
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Lambda = 22
+				},
+				new Alpha
+				{
+					Beta = 3,
+					Gamma = "Darkwing",
+					Lambda = 22
+				},
+				new Alpha
+				{
+					Beta = 4,
+					Gamma = "Darkwing Duck",
+					Lambda = 44
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.ContainedIn,
+						PropertyName = nameof(Alpha.Gamma),
+						SearchTerm = "Darkwing Duck|DD"
+					},
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.ContainedIn,
+						PropertyName = nameof(Alpha.Lambda),
+						SearchTerm = "11|44"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
+
+			// Assert
+			result.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Beta.Should().Be(1);
+			resultWhere.Last().Beta.Should().Be(4);
 		}
 	}
 }
