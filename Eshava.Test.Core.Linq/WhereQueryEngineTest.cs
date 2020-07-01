@@ -1702,5 +1702,121 @@ namespace Eshava.Test.Core.Linq
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Sigma.Should().Be(1);
 		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsEnumContainedInPropertyTest()
+		{
+			// Arrange
+			var exampleList = new List<Omega>
+			{
+				new Omega
+				{
+					Sigma = 1,
+					Number = Number.Four
+				},
+				new Omega
+				{
+					Sigma = 2,
+					Number = Number.One
+				},
+				new Omega
+				{
+					Sigma = 3,
+					Number = Number.Three
+				},
+				new Omega
+				{
+					Sigma = 4,
+					Number = Number.Two
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.ContainedIn,
+						PropertyName = nameof(Omega.Number),
+						SearchTerm = "Two|Four"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Omega>(queryParameter);
+
+			// Assert
+			result.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Sigma.Should().Be(1);
+			resultWhere.Last().Sigma.Should().Be(4);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsContainedInPropertyTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new Alpha
+				{
+					Beta = 1,
+					Gamma = "DD",
+					Lambda = 11
+				},
+				new Alpha
+				{
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Lambda = 22
+				},
+				new Alpha
+				{
+					Beta = 3,
+					Gamma = "Darkwing",
+					Lambda = 22
+				},
+				new Alpha
+				{
+					Beta = 4,
+					Gamma = "Darkwing Duck",
+					Lambda = 44
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.ContainedIn,
+						PropertyName = nameof(Alpha.Gamma),
+						SearchTerm = "Darkwing Duck|DD"
+					},
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.ContainedIn,
+						PropertyName = nameof(Alpha.Lambda),
+						SearchTerm = "11|44"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
+
+			// Assert
+			result.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Beta.Should().Be(1);
+			resultWhere.Last().Beta.Should().Be(4);
+		}
 	}
 }

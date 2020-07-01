@@ -28,6 +28,8 @@ namespace Eshava.Core.Linq.Enums
 		[EnumMember(Value = nameof(EndsWith))]
 		EndsWith = 9,
 		[EnumMember(Value = nameof(ContainsNot))]
-		ContainsNot = 10
+		ContainsNot = 10,
+		[EnumMember(Value = nameof(ContainedIn))]
+		ContainedIn = 11
 	}
 }
