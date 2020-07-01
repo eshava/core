@@ -1,4 +1,6 @@
-﻿namespace Eshava.Test.Core.Linq.Models
+﻿using System.Collections.Generic;
+
+namespace Eshava.Test.Core.Linq.Models
 {
 	public class Omega
 	{
@@ -8,5 +10,6 @@
 		public int? Sigma { get; set; }
 
 		public Number Number { get; set; }
+		public List<Number> Numbers { get; set; }
 	}
 }

@@ -17,12 +17,14 @@ namespace Eshava.Core.Linq
 	{
 		private static readonly Type _typeString = typeof(string);
 		private static readonly Type _typeObject = typeof(object);
+		private static readonly Type _typeEnum = typeof(Enum);
 		private static readonly Type _typeIList = typeof(IList);
 		private static readonly ConstantExpression _constantExpressionStringNull = Expression.Constant(null, _typeString);
 		private static readonly ConstantExpression _constantExpressionObjectNull = Expression.Constant(null, _typeObject);
 		private static readonly MethodInfo _methodInfoStringContains = _typeString.GetMethod("Contains", new[] { _typeString });
 		private static readonly MethodInfo _methodInfoStringStartsWith = _typeString.GetMethod("StartsWith", new[] { _typeString });
 		private static readonly MethodInfo _methodInfoStringEndsWith = _typeString.GetMethod("EndsWith", new[] { _typeString });
+		private static readonly ConstantExpression _constantExpressionCompareTo = Expression.Constant(0, typeof(int));
 
 		private static readonly Dictionary<Type, Func<string, Type, CompareOperator, WhereQueryEngineOptions, ConstantExpression>> _constantExpressions = new Dictionary<Type, Func<string, Type, CompareOperator, WhereQueryEngineOptions, ConstantExpression>>
 		{
@@ -34,7 +36,8 @@ namespace Eshava.Core.Linq
 			{ typeof(decimal), GetConstantDecimal },
 			{ typeof(double), GetConstantDouble },
 			{ typeof(float), GetConstantFloat },
-			{ typeof(DateTime), GetConstantDateTime }
+			{ typeof(DateTime), GetConstantDateTime },
+			{ typeof(Enum), GetConstantEnum }
 		};
 
 		private static readonly Dictionary<CompareOperator, Func<MemberExpression, ConstantExpression, Expression>> _compareOperatorExpressions = new Dictionary<CompareOperator, Func<MemberExpression, ConstantExpression, Expression>>
@@ -49,6 +52,16 @@ namespace Eshava.Core.Linq
 			{ CompareOperator.ContainsNot, GetContainsNotExpression },
 			{ CompareOperator.StartsWith, GetStartsWithExpression },
 			{ CompareOperator.EndsWith, GetEndsWithExpression },
+		};
+
+		private static readonly Dictionary<CompareOperator, ExpressionType> _compareOperatorExpressionType = new Dictionary<CompareOperator, ExpressionType>
+		{
+			{ CompareOperator.Equal, ExpressionType.Equal },
+			{ CompareOperator.NotEqual, ExpressionType.NotEqual },
+			{ CompareOperator.GreaterThan, ExpressionType.GreaterThan },
+			{ CompareOperator.GreaterThanOrEqual, ExpressionType.GreaterThanOrEqual },
+			{ CompareOperator.LessThan, ExpressionType.LessThan },
+			{ CompareOperator.LessThanOrEqual, ExpressionType.LessThanOrEqual }
 		};
 
 		private readonly WhereQueryEngineOptions _options;
@@ -283,12 +296,18 @@ namespace Eshava.Core.Linq
 
 			foreach (var searchTermPart in searchTermParts)
 			{
+				var dataType = propertyType.GetDataType();
+				if (dataType.IsEnum)
+				{
+					dataType = _typeEnum;
+				}
+
 				var data = new ExpressionDataContainer
 				{
 					PropertyInfo = propertyInfo,
 					Parameter = parameterExpression,
 					Operator = property.Operator,
-					ConstantValue = _constantExpressions[propertyType.GetDataType()](searchTermPart, propertyType, property.Operator, _options)
+					ConstantValue = _constantExpressions[dataType](searchTermPart, propertyType, property.Operator, _options)
 				};
 
 				var condition = GetConditionComparableByProperty<T>(data);
@@ -383,9 +402,26 @@ namespace Eshava.Core.Linq
 			return Expression.Constant(valueLong, dataType);
 		}
 
+		private static ConstantExpression GetConstantEnum(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
+		{
+			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
+			{
+				return null;
+			}
+
+			try
+			{
+				return  Expression.Constant(Enum.Parse(dataType, value), dataType);
+			}
+			catch
+			{
+				return null;
+			}
+		}
+
 		private static ConstantExpression GetConstantDateTime(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
 		{
-			if (compareOperator == CompareOperator.None)
+			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
 			{
 				return null;
 			}
@@ -420,6 +456,14 @@ namespace Eshava.Core.Linq
 			if (data.ConstantValue == null || !_compareOperatorExpressions.ContainsKey(data.Operator))
 			{
 				return null;
+			}
+
+			if (data.Member.Type.IsEnum && _compareOperatorExpressionType.ContainsKey(data.Operator))
+			{
+				var enumCompareToExpression = Expression.Call(data.Member, data.Member.Type.GetMethod("CompareTo", new[] { data.Member.Type }), Expression.Convert(data.ConstantValue, _typeObject));
+				var binaryExpression = Expression.MakeBinary(_compareOperatorExpressionType[data.Operator], enumCompareToExpression, _constantExpressionCompareTo);
+				
+				return Expression.Lambda<Func<T, bool>>(binaryExpression, data.Parameter);
 			}
 
 			var expression = _compareOperatorExpressions[data.Operator](data.Member, data.ConstantValue);
