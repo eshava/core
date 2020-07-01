@@ -6,5 +6,7 @@
 
 		public string Chi { get; set; }
 		public int? Sigma { get; set; }
+
+		public Number Number { get; set; }
 	}
 }

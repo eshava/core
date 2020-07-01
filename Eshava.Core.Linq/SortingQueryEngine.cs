@@ -84,124 +84,48 @@ namespace Eshava.Core.Linq
 		{
 			if (condition.SortOrder == SortOrder.Ascending)
 			{
-				return AddOrderBy(query, condition.Member, condition.Parameter);
+				return AddOrderBy(query, SortingType.OrderBy, condition.Member, condition.Parameter);
 			}
 
-			return AddOrderByDescending(query, condition.Member, condition.Parameter);
+			return AddOrderBy(query, SortingType.OrderByDescending, condition.Member, condition.Parameter);
 		}
 
 		public IOrderedQueryable<T> AddOrderThen<T>(IOrderedQueryable<T> query, OrderByCondition condition) where T : class
 		{
 			if (condition.SortOrder == SortOrder.Ascending)
 			{
-				return AddOrderThenBy(query, condition.Member, condition.Parameter);
+				return AddOrderBy(query, SortingType.OrderThenBy, condition.Member, condition.Parameter);
 			}
 
-			return AddOrderThenByDescending(query, condition.Member, condition.Parameter);
+			return AddOrderBy(query, SortingType.OrderThenByDescending, condition.Member, condition.Parameter);
 		}
 
-		private IOrderedQueryable<T> AddOrderBy<T>(IQueryable<T> source, MemberExpression expression, ParameterExpression parameter) where T : class
+		private IOrderedQueryable<T> AddOrderBy<T>(IQueryable<T> source, SortingType type, MemberExpression expression, ParameterExpression parameter) where T : class
 		{
-			var dataTypeMappings = new Dictionary<Type, Func<IQueryable<T>, MemberExpression, ParameterExpression, IOrderedQueryable<T>>>
+			var command = default(string);
+			switch (type)
 			{
-				{ typeof(string), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, string>>(m, p)) },
-				{ typeof(bool), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, bool>>(m, p)) },
-				{ typeof(bool?), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, bool?>>(m, p)) },
-				{ typeof(int), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, int>>(m, p)) },
-				{ typeof(int?), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, int?>>(m, p)) },
-				{ typeof(long), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, long>>(m, p)) },
-				{ typeof(long?), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, long?>>(m, p)) },
-				{ typeof(decimal), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, decimal>>(m, p)) },
-				{ typeof(decimal?), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, decimal?>>(m, p)) },
-				{ typeof(double), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, double>>(m, p)) },
-				{ typeof(double?), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, double?>>(m, p)) },
-				{ typeof(float), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, float>>(m, p)) },
-				{ typeof(float?), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, float?>>(m, p)) },
-				{ typeof(DateTime), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, DateTime>>(m, p)) },
-				{ typeof(DateTime?), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, DateTime?>>(m, p)) },
-				{ typeof(Guid), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, Guid>>(m, p)) },
-				{ typeof(Guid?), (s, m, p) => s.OrderBy(Expression.Lambda<Func<T, Guid?>>(m, p)) }
-			};
+				case SortingType.OrderBy:
+					command = nameof(Queryable.OrderBy);
+					break;
+				case SortingType.OrderThenBy:
+					command = nameof(Queryable.ThenBy);
+					break;
+				case SortingType.OrderByDescending:
+					command = nameof(Queryable.OrderByDescending);
+					break;
+				case SortingType.OrderThenByDescending:
+					command = nameof(Queryable.ThenByDescending);
+					break;
+				default:
+					throw new NotSupportedException();
+			}
 
-			return dataTypeMappings[expression.Type](source, expression, parameter);
-		}
+			var orderByExpression = Expression.Lambda(expression, parameter);
+			var typeArguments = new Type[] { typeof(T), expression.Type };
+			var resultExpression = Expression.Call(typeof(Queryable), command, typeArguments, source.Expression, Expression.Quote(orderByExpression));
 
-		private IOrderedQueryable<T> AddOrderByDescending<T>(IQueryable<T> source, MemberExpression expression, ParameterExpression parameter) where T : class
-		{
-			var dataTypeMappings = new Dictionary<Type, Func<IQueryable<T>, MemberExpression, ParameterExpression, IOrderedQueryable<T>>>
-			{
-				{ typeof(string), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, string>>(m, p)) },
-				{ typeof(bool), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, bool>>(m, p)) },
-				{ typeof(bool?), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, bool?>>(m, p)) },
-				{ typeof(int), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, int>>(m, p)) },
-				{ typeof(int?), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, int?>>(m, p)) },
-				{ typeof(long), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, long>>(m, p)) },
-				{ typeof(long?), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, long?>>(m, p)) },
-				{ typeof(decimal), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, decimal>>(m, p)) },
-				{ typeof(decimal?), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, decimal?>>(m, p)) },
-				{ typeof(double), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, double>>(m, p)) },
-				{ typeof(double?), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, double?>>(m, p)) },
-				{ typeof(float), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, float>>(m, p)) },
-				{ typeof(float?), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, float?>>(m, p)) },
-				{ typeof(DateTime), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, DateTime>>(m, p)) },
-				{ typeof(DateTime?), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, DateTime?>>(m, p)) },
-				{ typeof(Guid), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, Guid>>(m, p)) },
-				{ typeof(Guid?), (s, m, p) => s.OrderByDescending(Expression.Lambda<Func<T, Guid?>>(m, p)) }
-			};
-
-			return dataTypeMappings[expression.Type](source, expression, parameter);
-		}
-
-		private IOrderedQueryable<T> AddOrderThenBy<T>(IOrderedQueryable<T> source, MemberExpression expression, ParameterExpression parameter) where T : class
-		{
-			var dataTypeMappings = new Dictionary<Type, Func<IOrderedQueryable<T>, MemberExpression, ParameterExpression, IOrderedQueryable<T>>>
-			{
-				{ typeof(string), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, string>>(m, p)) },
-				{ typeof(bool), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, bool>>(m, p)) },
-				{ typeof(bool?), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, bool?>>(m, p)) },
-				{ typeof(int), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, int>>(m, p)) },
-				{ typeof(int?), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, int?>>(m, p)) },
-				{ typeof(long), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, long>>(m, p)) },
-				{ typeof(long?), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, long?>>(m, p)) },
-				{ typeof(decimal), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, decimal>>(m, p)) },
-				{ typeof(decimal?), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, decimal?>>(m, p)) },
-				{ typeof(double), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, double>>(m, p)) },
-				{ typeof(double?), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, double?>>(m, p)) },
-				{ typeof(float), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, float>>(m, p)) },
-				{ typeof(float?), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, float?>>(m, p)) },
-				{ typeof(DateTime), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, DateTime>>(m, p)) },
-				{ typeof(DateTime?), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, DateTime?>>(m, p)) },
-				{ typeof(Guid), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, Guid>>(m, p)) },
-				{ typeof(Guid?), (s, m, p) => s.ThenBy(Expression.Lambda<Func<T, Guid?>>(m, p)) }
-			};
-
-			return dataTypeMappings[expression.Type](source, expression, parameter);
-		}
-
-		private IOrderedQueryable<T> AddOrderThenByDescending<T>(IOrderedQueryable<T> source, MemberExpression expression, ParameterExpression parameter) where T : class
-		{
-			var dataTypeMappings = new Dictionary<Type, Func<IOrderedQueryable<T>, MemberExpression, ParameterExpression, IOrderedQueryable<T>>>
-			{
-				{ typeof(string), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, string>>(m, p)) },
-				{ typeof(bool), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, bool>>(m, p)) },
-				{ typeof(bool?), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, bool?>>(m, p)) },
-				{ typeof(int), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, int>>(m, p)) },
-				{ typeof(int?), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, int?>>(m, p)) },
-				{ typeof(long), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, long>>(m, p)) },
-				{ typeof(long?), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, long?>>(m, p)) },
-				{ typeof(decimal), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, decimal>>(m, p)) },
-				{ typeof(decimal?), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, decimal?>>(m, p)) },
-				{ typeof(double), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, double>>(m, p)) },
-				{ typeof(double?), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, double?>>(m, p)) },
-				{ typeof(float), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, float>>(m, p)) },
-				{ typeof(float?), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, float?>>(m, p)) },
-				{ typeof(DateTime), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, DateTime>>(m, p)) },
-				{ typeof(DateTime?), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, DateTime?>>(m, p)) },
-				{ typeof(Guid), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, Guid>>(m, p)) },
-				{ typeof(Guid?), (s, m, p) => s.ThenByDescending(Expression.Lambda<Func<T, Guid?>>(m, p)) }
-			};
-
-			return dataTypeMappings[expression.Type](source, expression, parameter);
+			return source.Provider.CreateQuery<T>(resultExpression) as IOrderedQueryable<T>;
 		}
 
 		private (MemberExpression Expression, ParameterExpression Parameter) GetMemberExpressionAndParameter<T>(Expression<Func<T, object>> sortingExpression) where T : class
