@@ -57,8 +57,6 @@ namespace Eshava.Core.Linq
 
 		private static readonly Dictionary<CompareOperator, ExpressionType> _compareOperatorExpressionType = new Dictionary<CompareOperator, ExpressionType>
 		{
-			{ CompareOperator.Equal, ExpressionType.Equal },
-			{ CompareOperator.NotEqual, ExpressionType.NotEqual },
 			{ CompareOperator.GreaterThan, ExpressionType.GreaterThan },
 			{ CompareOperator.GreaterThanOrEqual, ExpressionType.GreaterThanOrEqual },
 			{ CompareOperator.LessThan, ExpressionType.LessThan },
