@@ -1583,6 +1583,86 @@ namespace Eshava.Test.Core.Linq
 		}
 
 		[TestMethod]
+		public void BuildQueryExpressionsEnumPropertyMappingTest()
+		{
+			// Arrange
+			var exampleList = new List<Omega>
+			{
+				new Omega
+				{
+					Sigma = 1,
+					Number = Number.One,
+					InnerOmega = new Omega
+					{
+						Number = Number.Four
+					}
+				},
+				new Omega
+				{
+					Sigma = 2,
+					Number = Number.One,
+					InnerOmega = new Omega
+					{
+						Number = Number.One
+					}
+				},
+				new Omega
+				{
+					Sigma = 3,
+					Number = Number.One,
+					InnerOmega = new Omega
+					{
+						Number = Number.Three
+					}
+				},
+				new Omega
+				{
+					Sigma = 4,
+					Number = Number.One,
+					InnerOmega = new Omega
+					{
+						Number = Number.One
+					}
+				}
+			};
+
+			var mappings = new Dictionary<string, List<Expression<Func<Omega, object>>>>
+			{
+				{  "InnerOmegaNumber",  new List<Expression<Func<Omega, object>>> { v => v.InnerOmega.Number } }
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.Equal,
+						PropertyName =  "InnerOmegaNumber",
+						SearchTerm = "One"
+					},
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.Equal,
+						PropertyName =  "InnerOmegaNumber",
+						SearchTerm = "1"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Omega>(queryParameter, mappings);
+
+			// Assert
+			result.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Sigma.Should().Be(2);
+			resultWhere.Last().Sigma.Should().Be(4);
+		}
+
+		[TestMethod]
 		public void BuildQueryExpressionsEnumGreaterAndLessPropertyTest()
 		{
 			// Arrange
