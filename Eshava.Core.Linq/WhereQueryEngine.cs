@@ -258,12 +258,18 @@ namespace Eshava.Core.Linq
 
 			foreach (var searchTermPart in searchTermParts)
 			{
+				var dataType = memberType.GetDataType();
+				if (dataType.IsEnum)
+				{
+					dataType = _typeEnum;
+				}
+
 				var data = new ExpressionDataContainer
 				{
 					Member = memberExpression,
 					Parameter = mappingExpression.Parameters.First(),
 					Operator = property.Operator,
-					ConstantValue = _constantExpressions[memberType.GetDataType()](searchTermPart, memberType, property.Operator, _options)
+					ConstantValue = _constantExpressions[dataType](searchTermPart, memberType, property.Operator, _options)
 				};
 
 				expression.Add(GetConditionComparableByMemberExpression<T>(data));

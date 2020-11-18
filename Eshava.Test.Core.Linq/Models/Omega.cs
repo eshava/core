@@ -11,5 +11,7 @@ namespace Eshava.Test.Core.Linq.Models
 
 		public Number Number { get; set; }
 		public List<Number> Numbers { get; set; }
+
+		public Omega InnerOmega { get; set; }
 	}
 }
