@@ -81,7 +81,7 @@ namespace Eshava.Test.Core.Linq
 			// Assert
 			result.Should().HaveCount(1);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.First().Compile()).ToList();
 			resultWhere.Should().HaveCount(properties.Count - propertyCountQueryIgnore);
 			propertyCountQueryIgnore.Should().Be(1);
 		}
@@ -1897,6 +1897,50 @@ namespace Eshava.Test.Core.Linq
 			resultWhere.Should().HaveCount(2);
 			resultWhere.First().Beta.Should().Be(1);
 			resultWhere.Last().Beta.Should().Be(4);
+		}
+
+		[TestMethod]
+		public void BuildGlobalQueryConditionForMappings()
+		{
+			// Arrange
+			var queryParameter = new QueryParameters
+			{
+				SearchTerm = "Darkwing Duck"
+			};
+
+			var typeString = typeof(string);
+			var properties = typeof(Alpha).GetProperties().Where(p => p.PropertyType == typeString && p.CanWrite).ToList();
+
+			var mappings = new Dictionary<string, List<Expression<Func<Alpha, object>>>>
+			{
+				{ "virtual", new List<Expression<Func<Alpha, object>>> { t => t.Kappa.Chi } }
+			};
+
+			var exampleList = new List<Alpha>();
+			var alphaOne = new Alpha
+			{
+				Kappa = new Omega
+				{
+					Chi = queryParameter.SearchTerm
+				}
+			};
+			var alphaTwo = new Alpha
+			{
+				DeltaTwo = queryParameter.SearchTerm,
+				Kappa = new Omega()
+			};
+
+			exampleList.Add(alphaOne);
+			exampleList.Add(alphaTwo);
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions(queryParameter, mappings);
+
+			// Assert
+			result.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
 		}
 	}
 }
