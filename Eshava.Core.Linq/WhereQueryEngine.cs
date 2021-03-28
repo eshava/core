@@ -225,6 +225,16 @@ namespace Eshava.Core.Linq
 					}
 				}
 
+				foreach (var mapping in queryContainer.Mappings)
+				{
+					if (queryContainer.PropertyInfos.Any(propertyInfo => propertyInfo.Name == mapping.Key))
+					{
+						continue;
+					}
+
+					orExpressions.AddRange(mapping.Value.SelectMany(m => GetMappingCondition(property, m, _typeString)).Where(e => e != null).ToList());
+				}
+
 				if (orExpressions.Count > 0)
 				{
 					andExpressions.Add(JoinOrExpressions(orExpressions));
