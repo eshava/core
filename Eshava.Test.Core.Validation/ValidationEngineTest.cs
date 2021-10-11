@@ -1156,11 +1156,17 @@ namespace Eshava.Test.Core.Validation
 		[DataRow("Darkwing Duck", false, DisplayName = "Invalid url (1)")]
 		[DataRow("http://www.eshava", false, DisplayName = "Invalid url (2)")]
 		[DataRow("http://www.esh@ava.de", false, DisplayName = "Invalid url (2)")]
-		[DataRow("http://www.eshava.de/", true, DisplayName = "Valid url with schema (http)")]
-		[DataRow("https://www.eshava.de/", true, DisplayName = "Valid url with schema (https)")]
+		[DataRow("http://www.eshava.de/", true, DisplayName = "Valid url with schema (http) and www")]
+		[DataRow("https://www.eshava.de/", true, DisplayName = "Valid url with schema (https) and www")]
+		[DataRow("http://eshava.de/", true, DisplayName = "Valid url with schema (http)")]
+		[DataRow("https://eshava.de/", true, DisplayName = "Valid url with schema (https)")]
 		[DataRow("https://www.develop.eshava.de/", true, DisplayName = "Valid url with schema (https) and sub domain")]
-		[DataRow("www.eshava.de/", true, DisplayName = "Valid url without schema (www)")]
+		[DataRow("www.eshava.de/", true, DisplayName = "Valid url without schema and with www")]
 		[DataRow("eshava.de/", true, DisplayName = "Valid url without schema")]
+		[DataRow("http://localhost:5000", true, DisplayName = "Valid url localhost")]
+		[DataRow("http://192.168.1.1:5000", true, DisplayName = "Valid url IPv4")]
+		[DataRow("[2001:0db8:85a3:08d3::0370:7344]", true, DisplayName = "Valid url IPv6 without schema")]
+		[DataRow("http://[2001:0db8:85a3:08d3::0370:7344]:8080/", true, DisplayName = "Valid url IPv6 with schema and port")]
 		public void ValidateUrlTest(string url, bool isValid)
 		{
 			// Arrange

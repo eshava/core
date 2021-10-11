@@ -31,14 +31,24 @@ namespace Eshava.Core.Validation.Extension
 			{
 				value = "http://" + value;
 			}
+						
+			if (!Uri.TryCreate(value, UriKind.Absolute, out var outputUri) || value.Length > 2048)
+			{
+				return false;
+			}
 
-			var isValid = Uri.TryCreate(value, UriKind.Absolute, out var outputUri) &&
-						  outputUri.Host.Replace("www.", "").Split('.').Length > 1 &&
-						  outputUri.HostNameType == UriHostNameType.Dns &&
-						  outputUri.Host.Length > outputUri.Host.LastIndexOf(".", StringComparison.Ordinal) + 1 &&
-						  255 >= value.Length;
+			if (outputUri.HostNameType == UriHostNameType.Dns && outputUri.Host.ToLower() == "localhost")
+			{
+				return true;
+			}
 
-			return isValid;
+			if (outputUri.HostNameType == UriHostNameType.IPv4 || outputUri.HostNameType == UriHostNameType.IPv6)
+			{
+				return true;
+			}
+
+			return outputUri.Host.Replace("www.", "").Split('.').Length > 1
+				&& outputUri.Host.Length > outputUri.Host.LastIndexOf(".", StringComparison.Ordinal) + 1;
 		}
 
 		public static string FormatToJsonPropertyName(this string propertyName)
