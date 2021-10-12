@@ -132,6 +132,9 @@ namespace Eshava.Test.Core.Validation.Models
 		public string Phi { get; }
 
 		public Guid? Chi { get; set; }
+
+		[Required]
+		public Guid ChiNotNull { get; set; }
 		public DateTime? Psi { get; set; }
 		
 		[RangeTo("OmegaFloatTo", false)]

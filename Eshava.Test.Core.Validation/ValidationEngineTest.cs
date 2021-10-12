@@ -42,12 +42,18 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
-			result.ValidationErrors.Should().HaveCount(14);
+			result.ValidationErrors.Should().HaveCount(15);
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.Required
 				&& error.ErrorType == ValidationErrorType.IsNull
 				&& error.PropertyName == nameof(Alpha.Gamma))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required
+				&& error.ErrorType == ValidationErrorType.IsEmpty
+				&& error.PropertyName == nameof(Alpha.ChiNotNull))
 			.Should().BeTrue();
 
 			result.ValidationErrors.Any(error =>
@@ -158,7 +164,8 @@ namespace Eshava.Test.Core.Validation
 				Rho = 3,
 				Sigma = new List<int> { 1 },
 				OmegaIntegerNotEqual = 1,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -195,7 +202,7 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
-			result.ValidationErrors.Should().HaveCount(6);
+			result.ValidationErrors.Should().HaveCount(7);
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.Required
@@ -226,6 +233,13 @@ namespace Eshava.Test.Core.Validation
 				&& error.ErrorType == ValidationErrorType.IsNull
 				&& error.PropertyName == nameof(Alpha.Psi))
 			.Should().Be(2);
+			
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required
+				&& error.ErrorType == ValidationErrorType.IsEmpty
+				&& error.PropertyName == nameof(Alpha.ChiNotNull))
+			.Should().BeTrue();
+
 		}
 
 		[TestMethod]
@@ -250,7 +264,8 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongEqualOne = 1L,
 				OmegaLongEqualTwo = 2L,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -318,7 +333,8 @@ namespace Eshava.Test.Core.Validation
 				LambdaLongNullable = 1L,
 				Ny = 1,
 				Omikron = Alphabet.A,
-				Sigma = new List<int> { 1 }
+				Sigma = new List<int> { 1 },
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -404,7 +420,8 @@ namespace Eshava.Test.Core.Validation
 				Rho = 7,
 				Sigma = new List<int> { 1 },
 				OmegaIntegerNotEqual = 1,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -436,7 +453,8 @@ namespace Eshava.Test.Core.Validation
 				TauIEnumerable = new List<Omega> { new Omega { Psi = "Darkwing Duck" } },
 				Ypsilon = new List<string> { "Darkwing", "Duck" },
 				OmegaIntegerNotEqual = 1,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -485,7 +503,8 @@ namespace Eshava.Test.Core.Validation
 				TauIEnumerable = new List<Omega> { new Omega { Chi = "Launchpad McQuack in action", Psi = "Darkwing Duck" } },
 				Ypsilon = new List<string> { "Darkwing", "Launchpad McQuack in action" },
 				OmegaIntegerNotEqual = 1,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -547,7 +566,8 @@ namespace Eshava.Test.Core.Validation
 				Rho = 3,
 				Sigma = new List<int> { 1 },
 				OmegaIntegerNotEqual = 1,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -616,7 +636,8 @@ namespace Eshava.Test.Core.Validation
 				Rho = 3,
 				Sigma = new List<int> { 1 },
 				OmegaIntegerNotEqual = 1,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -683,7 +704,8 @@ namespace Eshava.Test.Core.Validation
 				Rho = 3,
 				Sigma = new List<int> { 1 },
 				OmegaIntegerNotEqual = 1,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -726,7 +748,8 @@ namespace Eshava.Test.Core.Validation
 				Rho = 3,
 				Sigma = new List<int> { 1 },
 				OmegaIntegerNotEqual = 1,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -765,7 +788,8 @@ namespace Eshava.Test.Core.Validation
 				Rho = 3,
 				Sigma = new List<int> { 1 },
 				OmegaIntegerNotEqual = 1,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -797,7 +821,8 @@ namespace Eshava.Test.Core.Validation
 				Rho = 3,
 				Sigma = new List<int> { 1 },
 				OmegaIntegerNotEqual = 1,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -851,7 +876,8 @@ namespace Eshava.Test.Core.Validation
 				OmegaDateTime = DateTime.Today.AddDays(-1),
 				OmegaDateTimeTo = DateTime.Today.AddDays(1),
 				OmegaIntegerNotEqual = 1,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -946,7 +972,8 @@ namespace Eshava.Test.Core.Validation
 				OmegaDateTime = DateTime.Today.AddDays(2),
 				OmegaDateTimeTo = DateTime.Today.AddDays(1),
 				OmegaIntegerNotEqual = 1,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -1185,7 +1212,8 @@ namespace Eshava.Test.Core.Validation
 				Rho = 3,
 				Sigma = new List<int> { 1 },
 				OmegaIntegerNotEqual = 1,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act
@@ -1232,7 +1260,8 @@ namespace Eshava.Test.Core.Validation
 				Rho = 3,
 				Sigma = new List<int> { 1 },
 				OmegaIntegerNotEqual = 1,
-				OmegaLongNotEqual = 1L
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid()
 			};
 
 			// Act

@@ -30,6 +30,17 @@ namespace Eshava.Core.Validation.ValidationMethods
 					}
 				}
 
+				if (parameters.PropertyInfo.PropertyType == typeof(Guid))
+				{
+					var valueGuid = parameters.PropertyValue as Guid?;
+
+					if (!valueGuid.HasValue || valueGuid.Value == Guid.Empty)
+					{
+						return GetErrorResult(ValidationErrorType.IsEmpty, parameters.PropertyInfo.Name);
+					}
+				}
+
+
 				if (parameters.PropertyInfo.PropertyType.ImplementsIEnumerable())
 				{
 					var elements = parameters.PropertyValue as IEnumerable;
