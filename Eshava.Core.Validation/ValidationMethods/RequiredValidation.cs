@@ -40,6 +40,15 @@ namespace Eshava.Core.Validation.ValidationMethods
 					}
 				}
 
+				if (parameters.PropertyInfo.PropertyType == typeof(DateTime))
+				{
+					var valueGuid = parameters.PropertyValue as DateTime?;
+
+					if (!valueGuid.HasValue || valueGuid.Value == DateTime.MinValue)
+					{
+						return GetErrorResult(ValidationErrorType.IsEmpty, parameters.PropertyInfo.Name);
+					}
+				}
 
 				if (parameters.PropertyInfo.PropertyType.ImplementsIEnumerable())
 				{
