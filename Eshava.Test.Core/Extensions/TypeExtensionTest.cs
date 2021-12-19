@@ -77,6 +77,19 @@ namespace Eshava.Test.Core.Extensions
 		}
 
 		[TestMethod]
+		public void GetDataTypeFromArrayTest()
+		{
+			// Arrange
+			var source = typeof(string[]);
+
+			// Act
+			var result = source.GetDataTypeFromIEnumerable();
+
+			// Assert
+			result.Should().Be(typeof(string));
+		}
+
+		[TestMethod]
 		public void GetDataTypeFromIEnumerableNoEnumerableInputTest()
 		{
 			// Arrange
