@@ -42,7 +42,9 @@ namespace Eshava.Core.Extensions
 
 			if (type.ImplementsIEnumerable())
 			{
-				type = type.GetGenericArguments()[0];
+				type = type.IsArray
+					? type.GetElementType()
+					: type.GetGenericArguments()[0];
 			}
 
 			return type;
@@ -77,7 +79,7 @@ namespace Eshava.Core.Extensions
 				throw new ArgumentNullException(nameof(type));
 			}
 
-			return type.IsGenericType && ImplementsInterface(type, typeof(IEnumerable));
+			return (type.IsGenericType && ImplementsInterface(type, typeof(IEnumerable))) || type.IsArray;
 		}
 
 		/// <summary>
