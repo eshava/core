@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Eshava.Core.Extensions;
 using Eshava.Core.Linq;
 using Eshava.Test.Core.Linq.Enums;
 using Eshava.Test.Core.Linq.Models;
@@ -503,6 +504,72 @@ namespace Eshava.Test.Core.Linq
 			var result = list.Where(targetExpression.Compile()).ToList();
 
 			result.Should().HaveCount(1);
+		}
+
+		[TestMethod]
+		public void TransformMemberExpressionDomainModelToDataModelTest()
+		{
+			// Arrange
+			new TestTransformProfile();
+
+			Expression<Func<DomainModel, object>> sourcExpression = s => s.Sub.SubId;
+			var sourceMemberExpression = (sourcExpression.Body as UnaryExpression).Operand as MemberExpression;
+
+			var list = new List<DataModel>
+			{
+				new DataModel { Id = 1, Name = "Test", IAmAString = "5", Date = DateTime.Today, Sub = new SubDataModel { SubId = 5 } },
+				new DataModel { Id = 5, Name = "Test", IAmAnInteger = 2, Date = DateTime.Today, Sub = new SubDataModel { SubId = 0 } },
+				new DataModel { Id = 5, Name = "Test A",IAmAnDecimal = 8.25m, Date = DateTime.Today, Sub = new SubDataModel { SubId = 0 } },
+				new DataModel { Id = 5, Name = "Test", Date = DateTime.Today, Sub = new SubDataModel { SubId = 0 } }
+			};
+
+			// Act
+			var targetMemberExpression = _classUnderTest.TransformMemberExpression<DomainModel, DataModel>(sourceMemberExpression, true);
+
+			// Assert
+			var query = list.AsQueryable();
+
+			var orderByExpression = Expression.Lambda(targetMemberExpression.Member, targetMemberExpression.Parameter);
+			var typeArguments = new Type[] { typeof(DataModel), targetMemberExpression.Member.Type };
+			var resultExpression = Expression.Call(typeof(Queryable), nameof(Queryable.OrderBy), typeArguments, query.Expression, Expression.Quote(orderByExpression));
+
+			var result = query.Provider.CreateQuery<DataModel>(resultExpression).ToList();
+
+			result.First().Sub.SubId.Should().Be(0);
+			result.Last().Sub.SubId.Should().Be(5);
+		}
+
+		[TestMethod]
+		public void TransformMemberExpressionDomainModelToDataModelWithProfileTest()
+		{
+			// Arrange
+			new TestTransformProfile();
+
+			Expression<Func<DomainModel, object>> sourcExpression = s => s.Sub.Sub.SubId;
+			var sourceMemberExpression = (sourcExpression.Body as UnaryExpression).Operand as MemberExpression;
+
+			var list = new List<DataModel>
+			{
+				new DataModel { Id = 1, Name = "Test", IAmAString = "5", Date = DateTime.Today, Sub = new SubDataModel { SubId = 5 } },
+				new DataModel { Id = 5, Name = "Test", IAmAnInteger = 2, Date = DateTime.Today, Sub = new SubDataModel { SubId = 0 } },
+				new DataModel { Id = 5, Name = "Test A",IAmAnDecimal = 8.25m, Date = DateTime.Today, Sub = new SubDataModel { SubId = 0 } },
+				new DataModel { Id = 5, Name = "Test", Date = DateTime.Today, Sub = new SubDataModel { SubId = 0 } }
+			};
+
+			// Act
+			var targetMemberExpression = _classUnderTest.TransformMemberExpression<DomainModel, DataModel>(sourceMemberExpression);
+
+			// Assert
+			var query = list.AsQueryable();
+
+			var orderByExpression = Expression.Lambda(targetMemberExpression.Member, targetMemberExpression.Parameter);
+			var typeArguments = new Type[] { typeof(DataModel), targetMemberExpression.Member.Type };
+			var resultExpression = Expression.Call(typeof(Queryable), nameof(Queryable.OrderBy), typeArguments, query.Expression, Expression.Quote(orderByExpression));
+
+			var result = query.Provider.CreateQuery<DataModel>(resultExpression).ToList();
+
+			result.First().Sub.SubId.Should().Be(0);
+			result.Last().Sub.SubId.Should().Be(5);
 		}
 
 		public class TestTransformProfile : TransformProfile

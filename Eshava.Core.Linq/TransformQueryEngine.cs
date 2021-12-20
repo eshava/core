@@ -54,6 +54,30 @@ namespace Eshava.Core.Linq
 			return Expression.Lambda<Func<Target, bool>>(result, parameterExpression);
 		}
 
+		public (MemberExpression Member, ParameterExpression Parameter) TransformMemberExpression<Source, Target>(MemberExpression memberExpression)
+		{
+			return TransformMemberExpression<Source, Target>(memberExpression, false);
+		}
+
+		/// <summary>
+		/// For test purpose only
+		/// </summary>
+		public (MemberExpression Member, ParameterExpression Parameter) TransformMemberExpression<Source, Target>(MemberExpression memberExpression, bool ignoreMappings)
+		{
+			var targetType = typeof(Target);
+			var sourceType = typeof(Source);
+
+			var mappings = ignoreMappings
+				? default(IMappingExpression)
+				: MappingStore.Mappings.FirstOrDefault(m => m.SourceType == sourceType && m.TargetType == targetType);
+
+			var parameterExpression = Expression.Parameter(targetType, "p");
+
+			var result = ProcessExpression<Target>(memberExpression, mappings, parameterExpression) as MemberExpression;
+
+			return (result, parameterExpression);
+		}
+
 		private Expression ProcessExpression<Target>(Expression expression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
 			var unaryExpression = expression as UnaryExpression;
