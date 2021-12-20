@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Eshava.Core.Extensions;
 using Eshava.Core.Linq.Extensions;
+using Eshava.Core.Linq.Interfaces;
+using Eshava.Core.Linq.Models;
 
 namespace Eshava.Core.Linq
 {
-	public class TransformQueryEngine
+	public class TransformQueryEngine : ITransformQueryEngine
 	{
 		private static readonly Type _dateTimeType = typeof(DateTime);
 		private static readonly Type _typeObject = typeof(object);
@@ -18,33 +21,56 @@ namespace Eshava.Core.Linq
 		private const string METHOD_ANY = "any";
 		private const string METHOD_COMPARETO = "compareto";
 
+		/// <summary>
+		/// Transforms an expression from source to target data type
+		/// </summary>
+		/// <typeparam name="Source"></typeparam>
+		/// <typeparam name="Target"></typeparam>
+		/// <param name="expression"></param>
+		/// <param name="ignoreMappings"></param>
+		/// <returns></returns>
+		/// 
 		public Expression<Func<Target, bool>> Transform<Source, Target>(Expression<Func<Source, bool>> expression)
 		{
-			var type = typeof(Target);
-			var parameterExpression = Expression.Parameter(type, "p");
+			return Transform<Source, Target>(expression, false);
+		}
 
-			var result = ProcessExpression<Target>(expression.Body, parameterExpression);
+		/// <summary>
+		/// For test purpose only
+		/// </summary>
+		public Expression<Func<Target, bool>> Transform<Source, Target>(Expression<Func<Source, bool>> expression, bool ignoreMappings)
+		{
+			var targetType = typeof(Target);
+			var sourceType = typeof(Source);
+
+			var mappings = ignoreMappings
+				? default(IMappingExpression)
+				: MappingStore.Mappings.FirstOrDefault(m => m.SourceType == sourceType && m.TargetType == targetType);
+
+			var parameterExpression = Expression.Parameter(targetType, "p");
+
+			var result = ProcessExpression<Target>(expression.Body, mappings, parameterExpression);
 
 			return Expression.Lambda<Func<Target, bool>>(result, parameterExpression);
 		}
 
-		private Expression ProcessExpression<Target>(Expression expression, params ParameterExpression[] parameterExpression)
+		private Expression ProcessExpression<Target>(Expression expression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
 			var unaryExpression = expression as UnaryExpression;
 			if (unaryExpression != default && expression.NodeType == ExpressionType.Not)
 			{
-				return ProcessUnaryExpressionNot<Target>(unaryExpression, parameterExpression);
+				return ProcessUnaryExpressionNot<Target>(unaryExpression, mappingExpression, parameterExpression);
 			}
 
 			if (unaryExpression != default && expression.NodeType == ExpressionType.Convert)
 			{
-				return ProcessUnaryExpressionConvert<Target>(unaryExpression, parameterExpression);
+				return ProcessUnaryExpressionConvert<Target>(unaryExpression, mappingExpression, parameterExpression);
 			}
 
 			var binaryExpression = expression as BinaryExpression;
 			if (binaryExpression != default)
 			{
-				return ProcessBinaryExpression<Target>(binaryExpression, parameterExpression);
+				return ProcessBinaryExpression<Target>(binaryExpression, mappingExpression, parameterExpression);
 			}
 
 			var memberExpression = expression as MemberExpression;
@@ -52,14 +78,14 @@ namespace Eshava.Core.Linq
 			{
 				if (memberExpression.Expression == default)
 				{
-					return ProcessExpressionlessMemberExpression<Target>(memberExpression, parameterExpression);
+					return ProcessExpressionlessMemberExpression<Target>(memberExpression, mappingExpression, parameterExpression);
 				}
 				else if (memberExpression.Expression.NodeType == ExpressionType.Constant)
 				{
-					return ProcessDisplayClassConstantExpression<Target>(memberExpression, parameterExpression);
+					return ProcessDisplayClassConstantExpression<Target>(memberExpression, mappingExpression, parameterExpression);
 				}
 
-				return ProcessMemberExpression<Target>(memberExpression, parameterExpression);
+				return ProcessMemberExpression<Target>(memberExpression, mappingExpression, parameterExpression);
 			}
 
 			var constantExpression = expression as ConstantExpression;
@@ -71,40 +97,33 @@ namespace Eshava.Core.Linq
 			var methodCallExpression = expression as MethodCallExpression;
 			if (methodCallExpression != default)
 			{
-				return ProcessMethodCallExpression<Target>(methodCallExpression, parameterExpression);
+				return ProcessMethodCallExpression<Target>(methodCallExpression, mappingExpression, parameterExpression);
 			}
 
 			if (expression.NodeType == ExpressionType.Parameter)
 			{
-				return ChangeParameterExpression(expression, parameterExpression.First(p => p.Type == expression.Type));
+				return expression.ChangeParameterExpression(parameterExpression.First(p => p.Type == expression.Type));
 			}
 
 			return expression;
 		}
 
-		private Expression ChangeParameterExpression(Expression condition, ParameterExpression newParameter)
+		private UnaryExpression ProcessUnaryExpressionNot<Target>(UnaryExpression unaryExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
-			var previousVisitor = new ReplaceExpressionVisitor(condition, newParameter);
-
-			return previousVisitor.Visit(condition);
-		}
-
-		private UnaryExpression ProcessUnaryExpressionNot<Target>(UnaryExpression unaryExpression, params ParameterExpression[] parameterExpression)
-		{
-			var expressionResult = ProcessExpression<Target>(unaryExpression.Operand, parameterExpression);
+			var expressionResult = ProcessExpression<Target>(unaryExpression.Operand, mappingExpression, parameterExpression);
 
 			return Expression.Not(expressionResult);
 		}
 
-		private Expression ProcessUnaryExpressionConvert<Target>(UnaryExpression unaryExpression, params ParameterExpression[] parameterExpression)
+		private Expression ProcessUnaryExpressionConvert<Target>(UnaryExpression unaryExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
-			return ProcessExpression<Target>(unaryExpression.Operand, parameterExpression);
+			return ProcessExpression<Target>(unaryExpression.Operand, mappingExpression, parameterExpression);
 		}
 
-		private Expression ProcessBinaryExpression<Target>(BinaryExpression binaryExpression, params ParameterExpression[] parameterExpression)
+		private Expression ProcessBinaryExpression<Target>(BinaryExpression binaryExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
-			var left = ProcessExpression<Target>(binaryExpression.Left, parameterExpression);
-			var right = ProcessExpression<Target>(binaryExpression.Right, parameterExpression);
+			var left = ProcessExpression<Target>(binaryExpression.Left, mappingExpression, parameterExpression);
+			var right = ProcessExpression<Target>(binaryExpression.Right, mappingExpression, parameterExpression);
 
 			if (left.NodeType == ExpressionType.MemberAccess && left is MemberExpression)
 			{
@@ -162,20 +181,20 @@ namespace Eshava.Core.Linq
 			return null;
 		}
 
-		private Expression ProcessExpressionlessMemberExpression<Target>(MemberExpression memberExpression, params ParameterExpression[] parameterExpression)
+		private Expression ProcessExpressionlessMemberExpression<Target>(MemberExpression memberExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
 			if (memberExpression.Type == _dateTimeType)
 			{
 				var value = GetValueFromDisplayClass(memberExpression.Member, null);
 				var newConstantExpression = Expression.Constant(value, memberExpression.Type);
 
-				return ProcessExpression<Target>(newConstantExpression, parameterExpression);
+				return ProcessExpression<Target>(newConstantExpression, mappingExpression, parameterExpression);
 			}
 
 			return memberExpression;
 		}
 
-		private Expression ProcessDisplayClassConstantExpression<Target>(MemberExpression memberExpression, params ParameterExpression[] parameterExpression)
+		private Expression ProcessDisplayClassConstantExpression<Target>(MemberExpression memberExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
 			var constantExpression = memberExpression.Expression as ConstantExpression;
 			if (constantExpression.Value == default)
@@ -186,15 +205,21 @@ namespace Eshava.Core.Linq
 			var value = GetValueFromDisplayClass(memberExpression.Member, constantExpression);
 			constantExpression = Expression.Constant(value, memberExpression.Type);
 
-			return ProcessExpression<Target>(constantExpression, parameterExpression);
+			return ProcessExpression<Target>(constantExpression, mappingExpression, parameterExpression);
 		}
 
-		private MemberExpression ProcessMemberExpression<Target>(MemberExpression memberExpression, params ParameterExpression[] parameterExpression)
+		private Expression ProcessMemberExpression<Target>(MemberExpression memberExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
+			var targetType = typeof(Target);
+			var mapping = mappingExpression?.GetMapping(memberExpression, parameterExpression.First(p => p.Type == targetType)) ?? (false, null);
+			if (mapping.HasMapping)
+			{
+				return mapping.Expression;
+			}
+
 			var property = memberExpression.Member.Name;
 			if (memberExpression.Expression is ParameterExpression)
 			{
-				var targetType = typeof(Target);
 				var targetPropertyInfo = targetType.GetProperties().FirstOrDefault(p => p.Name == property);
 
 				return Expression.MakeMemberAccess(parameterExpression.First(p => p.Type == targetType), targetPropertyInfo);
@@ -203,7 +228,7 @@ namespace Eshava.Core.Linq
 			if (memberExpression.Expression is MemberExpression)
 			{
 				var parentMemberExpression = memberExpression.Expression as MemberExpression;
-				var parent = ProcessMemberExpression<Target>(parentMemberExpression, parameterExpression);
+				var parent = ProcessMemberExpression<Target>(parentMemberExpression, mappingExpression, parameterExpression);
 				var targetPropertyInfo = default(PropertyInfo);
 
 				if (memberExpression.Expression.Type.IsDataTypeNullable())
@@ -228,35 +253,35 @@ namespace Eshava.Core.Linq
 			return memberExpression;
 		}
 
-		private Expression ProcessMethodCallExpression<Target>(MethodCallExpression methodCallExpression, params ParameterExpression[] parameterExpression)
+		private Expression ProcessMethodCallExpression<Target>(MethodCallExpression methodCallExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
 			var method = methodCallExpression.Method.Name.ToLower();
 			if (method == METHOD_ANY)
 			{
-				return ProcessMethodCallExpressionAny<Target>(methodCallExpression, parameterExpression);
+				return ProcessMethodCallExpressionAny<Target>(methodCallExpression, mappingExpression, parameterExpression);
 			}
 
 			if (method == METHOD_CONTAINS && methodCallExpression.Arguments.Count == 2)
 			{
-				return ProcessMethodCallExpressionContainedIn<Target>(methodCallExpression, parameterExpression);
+				return ProcessMethodCallExpressionContainedIn<Target>(methodCallExpression, mappingExpression, parameterExpression);
 			}
 
 			if (method == METHOD_COMPARETO)
 			{
-				return ProcessMethodCallExpressionCompareTo<Target>(methodCallExpression, parameterExpression);
+				return ProcessMethodCallExpressionCompareTo<Target>(methodCallExpression, mappingExpression, parameterExpression);
 			}
 
-			var memberExpression = ProcessExpression<Target>(methodCallExpression.Object, parameterExpression);
-			var valueExpression = ProcessExpression<Target>(methodCallExpression.Arguments.First(), parameterExpression);
+			var memberExpression = ProcessExpression<Target>(methodCallExpression.Object, mappingExpression, parameterExpression);
+			var valueExpression = ProcessExpression<Target>(methodCallExpression.Arguments.First(), mappingExpression, parameterExpression);
 
 			return Expression.Call(memberExpression, methodCallExpression.Method, valueExpression);
 		}
 
-		private Expression ProcessMethodCallExpressionContainedIn<Target>(MethodCallExpression methodCallExpression, params ParameterExpression[] parameterExpression)
+		private Expression ProcessMethodCallExpressionContainedIn<Target>(MethodCallExpression methodCallExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
 			//DisplayClass
-			var valueExpression = ProcessExpression<Target>(methodCallExpression.Arguments.First(), parameterExpression);
-			var memberExpression = ProcessExpression<Target>(methodCallExpression.Arguments.Last(), parameterExpression);
+			var valueExpression = ProcessExpression<Target>(methodCallExpression.Arguments.First(), mappingExpression, parameterExpression);
+			var memberExpression = ProcessExpression<Target>(methodCallExpression.Arguments.Last(), mappingExpression, parameterExpression);
 
 			if ((valueExpression.Type.GetDataTypeFromIEnumerable().IsDataTypeNullable() && !memberExpression.Type.IsDataTypeNullable())
 				|| (!valueExpression.Type.GetDataTypeFromIEnumerable().IsDataTypeNullable() && memberExpression.Type.IsDataTypeNullable()))
@@ -278,11 +303,11 @@ namespace Eshava.Core.Linq
 			return Expression.Call(enumerableMemberMethod, valueExpression, memberExpression);
 		}
 
-		private Expression ProcessMethodCallExpressionCompareTo<Target>(MethodCallExpression methodCallExpression, params ParameterExpression[] parameterExpression)
+		private Expression ProcessMethodCallExpressionCompareTo<Target>(MethodCallExpression methodCallExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
 			//DisplayClass
-			var valueExpression = ProcessExpression<Target>(methodCallExpression.Arguments.First(), parameterExpression);
-			var memberExpression = ProcessExpression<Target>(methodCallExpression.Object, parameterExpression);
+			var valueExpression = ProcessExpression<Target>(methodCallExpression.Arguments.First(), mappingExpression, parameterExpression);
+			var memberExpression = ProcessExpression<Target>(methodCallExpression.Object, mappingExpression, parameterExpression);
 
 			var compareToMethod = memberExpression.Type.GetDataType()
 				.GetMethods()
@@ -299,7 +324,7 @@ namespace Eshava.Core.Linq
 			return Expression.Call(valueExpression, compareToMethod, memberExpression);
 		}
 
-		private Expression ProcessMethodCallExpressionAny<Target>(MethodCallExpression methodCallExpression, params ParameterExpression[] parameterExpression)
+		private Expression ProcessMethodCallExpressionAny<Target>(MethodCallExpression methodCallExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
 			// Display Class
 			var memberExpression = methodCallExpression.Arguments.First() as MemberExpression;
@@ -315,7 +340,7 @@ namespace Eshava.Core.Linq
 
 			// Inner function expression
 			var lambdaExpression = methodCallExpression.Arguments.Last() as LambdaExpression;
-			var lambdaAsQuery = ProcessExpression<Target>(lambdaExpression.Body, parameterExpressions.ToArray());
+			var lambdaAsQuery = ProcessExpression<Target>(lambdaExpression.Body, mappingExpression, parameterExpressions.ToArray());
 			lambdaExpression = Expression.Lambda(lambdaAsQuery, innerParameterExpression);
 
 			var valueArray = GetValueFromDisplayClass(memberExpression.Member, constantExpression);
@@ -346,13 +371,20 @@ namespace Eshava.Core.Linq
 
 			return expression;
 		}
-		
+
 		private Expression CheckAndTransformExpressionDataType(Expression expression, MemberExpression memberExpression)
 		{
 			if (expression is ConstantExpression)
 			{
 				var c = expression as ConstantExpression;
-				if (memberExpression.Type.IsDataTypeNullable())
+
+				if (expression.Type.GetDataType() != memberExpression.Type.GetDataType())
+				{
+					var convertedValue = Convert.ChangeType(c.Value, memberExpression.Type, CultureInfo.InvariantCulture);
+
+					expression = Expression.Constant(convertedValue, memberExpression.Type);
+				}
+				else if (memberExpression.Type.IsDataTypeNullable())
 				{
 					expression = Expression.Constant(c.Value, memberExpression.Type);
 				}
@@ -410,7 +442,7 @@ namespace Eshava.Core.Linq
 				}
 				else
 				{
-					targetArray.SetValue(Convert.ChangeType(newItem, targetDataType), index);
+					targetArray.SetValue(Convert.ChangeType(newItem, targetDataType, CultureInfo.InvariantCulture), index);
 				}
 
 				index++;
