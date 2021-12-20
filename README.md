@@ -67,9 +67,6 @@ public enum CustomTransformProfile : TransformProfile
 }
 ```
 
-
-
-
 ## core.logging
 Extension to collect logging information
 
