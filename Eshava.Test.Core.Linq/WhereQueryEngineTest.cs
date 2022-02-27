@@ -1942,5 +1942,165 @@ namespace Eshava.Test.Core.Linq
 			var resultWhere = exampleList.Where(result.First().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringPropertyByFilterObjectTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new Alpha
+				{
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QuackFu better than KungFu"
+				},
+				new Alpha
+				{
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Delta = "QuackFu better than KungFu"
+				},
+				new Alpha
+				{
+					Beta = 3,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu"
+				}
+			};
+
+			var filter = new FilterModel
+			{
+				Gamma = new SpecialFilterField
+				{
+					Operator = CompareOperator.Equal,
+					SearchTerm = "Darkwing Duck"
+				},
+				Delta = new FilterField
+				{
+					Operator = CompareOperator.Contains,
+					SearchTerm = "QuackFu"
+				}
+			};
+
+			Expression<Func<Alpha, bool>> expectedResultGamma = p => p.Gamma == "Darkwing Duck";
+			Expression<Func<Alpha, bool>> expectedResultDelta = p => p.Delta != null && p.Delta.Contains("QuackFu");
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(filter, null);
+
+			// Assert
+			result.Should().HaveCount(2);
+			result.First().Should().BeEquivalentTo(expectedResultGamma);
+			result.Last().Should().BeEquivalentTo(expectedResultDelta);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+			resultWhere.First().Beta.Should().Be(2);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsGlobalSearchTermByFilterObjectTest()
+		{
+			// Arrange
+			var filter = new FilterModel
+			{
+				SearchTerm = "Darkwing Duck"
+			};
+
+			var typeString = typeof(string);
+			var properties = typeof(Alpha).GetProperties().Where(p => p.PropertyType == typeString && p.CanWrite).ToList();
+			var propertyCountQueryIgnore = 0;
+
+			var exampleList = new List<Alpha>();
+			foreach (var propertyInfo in properties)
+			{
+				var alpha = new Alpha();
+				propertyInfo.SetValue(alpha, filter.SearchTerm);
+				exampleList.Add(alpha);
+
+				if (propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() != null)
+				{
+					propertyCountQueryIgnore++;
+				}
+			}
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(filter, filter.SearchTerm);
+
+			// Assert
+			result.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.First().Compile()).ToList();
+			resultWhere.Should().HaveCount(properties.Count - propertyCountQueryIgnore);
+			propertyCountQueryIgnore.Should().Be(1);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsPropertyMappingByFilterObjectTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new Alpha
+				{
+					Beta = 1,
+					Kappa = new Omega
+					{
+						Psi = ""
+					}
+				},
+				new Alpha
+				{
+					Beta = 2,
+					Kappa = new Omega
+					{
+						Psi = null
+					}
+				},
+				new Alpha
+				{
+					Beta = 3,
+					Kappa = new Omega
+					{
+						Psi = "Darkwing Duck"
+					}
+				},
+				new Alpha
+				{
+					Beta = 4,
+					Kappa = new Omega
+					{
+						Psi = "QuackFu"
+					}
+				}
+			};
+
+			var mappings = new Dictionary<string, List<Expression<Func<Alpha, object>>>>
+			{
+				{ nameof(Alpha.Chi), new List<Expression<Func<Alpha, object>>> { p => p.Kappa.Psi } }
+			};
+
+			var filter = new FilterModel
+			{
+				Chi = new SpecialFilterField
+				{
+					Operator = CompareOperator.Equal,
+					SearchTerm = "Darkwing Duck"
+				}
+			};
+
+			Expression<Func<Alpha, bool>> expectedResultEqual = p => p.Kappa.Psi == "Darkwing Duck";
+			
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions(filter, null, mappings);
+
+			// Assert
+			result.Should().HaveCount(1);
+			result.First().Should().BeEquivalentTo(expectedResultEqual);
+			
+			exampleList.Where(result.First().Compile()).Single().Beta.Should().Be(3);
+		}
+
 	}
 }

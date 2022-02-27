@@ -11,6 +11,8 @@ namespace Eshava.Core.Linq
 {
 	public class SortingQueryEngine : AbstractQueryEngine, ISortingQueryEngine
 	{
+		private static readonly Type _sortField = typeof(SortField);
+
 		public OrderByCondition BuildSortCondition<T>(SortOrder sortOrder, Expression<Func<T, object>> expression) where T : class
 		{
 			var member = GetMemberExpressionAndParameter(expression);
@@ -23,11 +25,62 @@ namespace Eshava.Core.Linq
 			return null;
 		}
 
+		public IEnumerable<OrderByCondition> BuildSortConditions<T>(object sortings, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
+		{
+			if (sortings == null)
+			{
+				throw new ArgumentNullException(nameof(sortings));
+			}
+
+			var sortFields = new List<(string Property, SortField field)>();
+			foreach (var sortField in sortings.GetType().GetProperties())
+			{
+				if (sortField.PropertyType != _sortField && !sortField.PropertyType.IsSubclassOf(_sortField))
+				{
+					continue;
+				}
+
+				var field = sortField.GetValue(sortings) as SortField;
+				if (field == null)
+				{
+					continue;
+				}
+
+				sortFields.Add((sortField.Name, field));
+			}
+
+			var sortQueryProperties = sortFields
+				.OrderBy(field => field.field.SortIndex)
+				.Select(field => new SortingQueryProperty
+				{
+					PropertyName = field.Property,
+					SortOrder = field.field.SortOrder
+				})
+				.ToList();
+
+			return BuildSortConditions(sortQueryProperties, mappings);
+		}
+
 		public IEnumerable<OrderByCondition> BuildSortConditions<T>(QueryParameters queryParameters, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
+		{
+			if (queryParameters == null)
+			{
+				throw new ArgumentNullException(nameof(queryParameters));
+			}
+
+			if (!(queryParameters.SortingQueryProperties?.Any() ?? false))
+			{
+				return new List<OrderByCondition>();
+			}
+
+			return BuildSortConditions(queryParameters.SortingQueryProperties, mappings);
+		}
+
+		public IEnumerable<OrderByCondition> BuildSortConditions<T>(IEnumerable<SortingQueryProperty> sortingQueryProperties, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
 		{
 			var sortingConditions = new List<OrderByCondition>();
 
-			if (!(queryParameters?.SortingQueryProperties?.Any() ?? false))
+			if (!(sortingQueryProperties?.Any() ?? false))
 			{
 				return sortingConditions;
 			}
@@ -41,7 +94,7 @@ namespace Eshava.Core.Linq
 				mappings = new Dictionary<string, List<Expression<Func<T, object>>>>();
 			}
 
-			foreach (var property in queryParameters.SortingQueryProperties)
+			foreach (var property in sortingQueryProperties)
 			{
 				if (mappings.ContainsKey(property.PropertyName))
 				{
@@ -131,7 +184,7 @@ namespace Eshava.Core.Linq
 		private (MemberExpression Expression, ParameterExpression Parameter) GetMemberExpressionAndParameter<T>(Expression<Func<T, object>> sortingExpression) where T : class
 		{
 			var memberExpression = GetMemberExpression(sortingExpression);
-			
+
 			return (memberExpression, sortingExpression.Parameters.First());
 		}
 

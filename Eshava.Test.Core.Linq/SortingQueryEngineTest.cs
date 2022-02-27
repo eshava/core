@@ -63,21 +63,24 @@ namespace Eshava.Test.Core.Linq
 			result.Parameter.Name.Should().Be("p");
 		}
 
-		[TestMethod]
+		[TestMethod, ExpectedException(typeof(ArgumentNullException))]
 		public void BuildSortConditionsNoParameterTest()
 		{
-			// Act
-			var result = _classUnderTest.BuildSortConditions<Alpha>(null);
+			// Arrange
+			var queryParameters = default(QueryParameters);
 
-			// Assert
-			result.Should().HaveCount(0);
+			// Act
+			_classUnderTest.BuildSortConditions<Alpha>(queryParameters);
 		}
 
 		[TestMethod]
 		public void BuildSortConditionsEmptyParameterTest()
 		{
+			// Arrange
+			var queryParameters = new QueryParameters();
+
 			// Act
-			var result = _classUnderTest.BuildSortConditions<Alpha>(new QueryParameters());
+			var result = _classUnderTest.BuildSortConditions<Alpha>(queryParameters);
 
 			// Assert
 			result.Should().HaveCount(0);
@@ -180,7 +183,7 @@ namespace Eshava.Test.Core.Linq
 		public void ApplySortingNullQueryTest()
 		{
 			// Act
-			_classUnderTest.ApplySorting<Alpha>(null, new List<OrderByCondition> { new OrderByCondition() } );
+			_classUnderTest.ApplySorting<Alpha>(null, new List<OrderByCondition> { new OrderByCondition() });
 		}
 
 		[TestMethod]
@@ -210,7 +213,7 @@ namespace Eshava.Test.Core.Linq
 					Gamma = "B"
 				}
 			};
-			
+
 			var query = elements.AsQueryable();
 			var parameter = new QueryParameters
 			{
@@ -313,7 +316,7 @@ namespace Eshava.Test.Core.Linq
 			var firstCondition = _classUnderTest.BuildSortCondition<Alpha>(SortOrder.Descending, p => p.Beta);
 			var secondCondition = _classUnderTest.BuildSortCondition<Alpha>(SortOrder.Ascending, p => p.OmegaDateTime);
 			var query = _classUnderTest.AddOrder(elements.AsQueryable(), firstCondition);
-			
+
 			// Act
 			var result = _classUnderTest.AddOrderThen(query, secondCondition).ToList();
 
@@ -473,6 +476,170 @@ namespace Eshava.Test.Core.Linq
 			result[1].Number.Should().Be(Number.Four);
 			result[2].Number.Should().Be(Number.One);
 			result[3].Number.Should().Be(Number.Two);
+		}
+
+		[TestMethod, ExpectedException(typeof(ArgumentNullException))]
+		public void NoSortingObjectTest()
+		{
+			// Arrange
+			var sortings = default(SortingModel);
+
+			// Act
+			_classUnderTest.BuildSortConditions<Alpha>(sortings);
+		}
+
+		[TestMethod]
+		public void BuildSortConditionsBySortingObjectTest()
+		{
+			// Arrange
+			var sortings = new SortingModel
+			{
+				Beta = new SpecialSortField
+				{
+					SortIndex = 0,
+					SortOrder = SortOrder.Ascending
+				},
+				Sigma = new SortField
+				{
+					SortIndex = 1,
+					SortOrder = SortOrder.Descending
+				},
+				Kappa = new SortField
+				{
+					SortIndex = 2,
+					SortOrder = SortOrder.Descending
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildSortConditions<Alpha>(sortings);
+
+			// Assert
+			result.Should().HaveCount(3);
+			var resultItem = result.First();
+			resultItem.SortOrder.Should().Be(SortOrder.Ascending);
+			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Beta));
+			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
+			resultItem.Parameter.Name.Should().Be("p");
+
+			resultItem = result.Skip(1).First();
+			resultItem.SortOrder.Should().Be(SortOrder.Descending);
+			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Sigma));
+			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
+			resultItem.Parameter.Name.Should().Be("p");
+
+			resultItem = result.Skip(2).First();
+			resultItem.SortOrder.Should().Be(SortOrder.Descending);
+			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Kappa));
+			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
+			resultItem.Parameter.Name.Should().Be("p");
+		}
+
+		[TestMethod]
+		public void BuildSortConditionsMappingBSortingObjectTest()
+		{
+			// Arrange
+			var mappings = new Dictionary<string, List<Expression<Func<Alpha, object>>>>
+			{
+				{ nameof(Alpha.Rho), new List<Expression<Func<Alpha, object>>> { p => p.Kappa.Psi } }
+			};
+
+			var sortings = new SortingModel
+			{
+				Rho = new SortField
+				{
+					SortIndex = 0,
+					SortOrder = SortOrder.Ascending
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildSortConditions(sortings, mappings);
+
+			// Assert
+			result.Should().HaveCount(1);
+			var resultItem = result.First();
+			resultItem.SortOrder.Should().Be(SortOrder.Ascending);
+			resultItem.Member.Member.Name.Should().Be(nameof(Omega.Psi));
+			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Omega));
+			resultItem.Parameter.Name.Should().Be("p");
+		}
+
+		[TestMethod]
+		public void BuildSortConditionsBySortingListTest()
+		{
+			// Arrange
+			var sortingQueryProperties = new List<SortingQueryProperty>
+			{
+				new SortingQueryProperty
+				{
+					PropertyName = nameof(Alpha.Beta),
+					SortOrder = SortOrder.Ascending
+				},
+				new SortingQueryProperty
+				{
+					PropertyName = nameof(Alpha.Sigma),
+					SortOrder = SortOrder.Descending
+				},
+				new SortingQueryProperty
+				{
+					PropertyName = nameof(Alpha.Kappa),
+					SortOrder = SortOrder.Descending
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildSortConditions<Alpha>(sortingQueryProperties);
+
+			// Assert
+			result.Should().HaveCount(3);
+			var resultItem = result.First();
+			resultItem.SortOrder.Should().Be(SortOrder.Ascending);
+			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Beta));
+			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
+			resultItem.Parameter.Name.Should().Be("p");
+
+			resultItem = result.Skip(1).First();
+			resultItem.SortOrder.Should().Be(SortOrder.Descending);
+			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Sigma));
+			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
+			resultItem.Parameter.Name.Should().Be("p");
+
+			resultItem = result.Skip(2).First();
+			resultItem.SortOrder.Should().Be(SortOrder.Descending);
+			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Kappa));
+			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
+			resultItem.Parameter.Name.Should().Be("p");
+		}
+
+		[TestMethod]
+		public void BuildSortConditionsMappingBySortingListTest()
+		{
+			// Arrange
+			var mappings = new Dictionary<string, List<Expression<Func<Alpha, object>>>>
+			{
+				{ nameof(Alpha.Rho), new List<Expression<Func<Alpha, object>>> { p => p.Kappa.Psi } }
+			};
+
+			var sortingQueryProperties = new List<SortingQueryProperty>
+			{
+				new SortingQueryProperty
+				{
+					PropertyName = nameof(Alpha.Rho),
+					SortOrder = SortOrder.Ascending
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildSortConditions(sortingQueryProperties, mappings);
+
+			// Assert
+			result.Should().HaveCount(1);
+			var resultItem = result.First();
+			resultItem.SortOrder.Should().Be(SortOrder.Ascending);
+			resultItem.Member.Member.Name.Should().Be(nameof(Omega.Psi));
+			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Omega));
+			resultItem.Parameter.Name.Should().Be("p");
 		}
 	}
 }

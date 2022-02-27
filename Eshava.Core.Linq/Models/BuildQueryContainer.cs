@@ -7,7 +7,8 @@ namespace Eshava.Core.Linq.Models
 {
 	internal class BuildQueryContainer<T> where T : class
 	{
-		public QueryParameters QueryParameters { get; set; }
+		public string GlobalSearchTerm { get; set; }
+		public IEnumerable<WhereQueryProperty> WhereQueryProperties { get; set; }
 		public PropertyInfo[] PropertyInfos { get; set; }
 		public Dictionary<string, List<Expression<Func<T, object>>>> Mappings { get; set; }
 		public ParameterExpression Parameter { get; set; }
