@@ -19,6 +19,7 @@ namespace Eshava.Core.Linq
 		private static readonly Type _typeObject = typeof(object);
 		private static readonly Type _typeEnum = typeof(Enum);
 		private static readonly Type _typeIList = typeof(IList);
+		private static readonly Type _filterField = typeof(FilterField);
 		private static readonly ConstantExpression _constantExpressionStringNull = Expression.Constant(null, _typeString);
 		private static readonly ConstantExpression _constantExpressionObjectNull = Expression.Constant(null, _typeObject);
 		private static readonly MethodInfo _methodInfoStringContains = _typeString.GetMethod("Contains", new[] { _typeString });
@@ -71,6 +72,47 @@ namespace Eshava.Core.Linq
 		}
 
 		/// <summary>
+		///  Creates a list of where expression based on passed filter object
+		///  Hint: Only properties of type <see cref="FilterField"/> are considered
+		/// </summary>
+		/// <typeparam name="T">Target class data type</typeparam>
+		/// <param name="filter">Filter object</param>
+		/// <param name="globalSearchTerm">Search termn, will apply on all string properties</param>
+		/// <param name="mappings">Mappings for foreign key properties</param>
+		/// <returns></returns>
+		public IEnumerable<Expression<Func<T, bool>>> BuildQueryExpressions<T>(object filter, string globalSearchTerm, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
+		{
+			if (filter == null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			var whereQueryProperties = new List<WhereQueryProperty>();
+			foreach (var filterField in filter.GetType().GetProperties())
+			{
+				if (filterField.PropertyType != _filterField && !filterField.PropertyType.IsSubclassOf(_filterField))
+				{
+					continue;
+				}
+
+				var field = filterField.GetValue(filter) as FilterField;
+				if (field == null)
+				{
+					continue;
+				}
+
+				whereQueryProperties.Add(new WhereQueryProperty
+				{
+					PropertyName = filterField.Name,
+					Operator = field.Operator,
+					SearchTerm = field.SearchTerm
+				});
+			}
+
+			return BuildQueryExpressions(whereQueryProperties, globalSearchTerm, mappings);
+		}
+
+		/// <summary>
 		/// Creates a list of where expression based on passed query parameters
 		/// </summary>
 		/// <remarks>
@@ -98,6 +140,28 @@ namespace Eshava.Core.Linq
 				return where;
 			}
 
+			return BuildQueryExpressions(queryParameters.WhereQueryProperties, queryParameters.SearchTerm, mappings);
+		}
+
+		/// <summary>
+		/// Creates a list of where expression based on passed where query properties and search term
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="whereQueryProperties">filter statements</param>
+		/// <param name="globalSearchTerm">Search termn, will apply on all string properties</param>
+		/// <param name="mappings"></param>
+		/// <returns></returns>
+		public IEnumerable<Expression<Func<T, bool>>> BuildQueryExpressions<T>(IEnumerable<WhereQueryProperty> whereQueryProperties, string globalSearchTerm, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
+		{
+			var where = new List<Expression<Func<T, bool>>>();
+			var hasPropertyQueries = whereQueryProperties?.Any() ?? false;
+			var hasGlobalSearchTerm = !globalSearchTerm.IsNullOrEmpty();
+
+			if (!hasPropertyQueries && !hasGlobalSearchTerm)
+			{
+				return where;
+			}
+
 			if (mappings == null)
 			{
 				mappings = new Dictionary<string, List<Expression<Func<T, object>>>>();
@@ -109,7 +173,8 @@ namespace Eshava.Core.Linq
 				Mappings = mappings,
 				Parameter = Expression.Parameter(type, "p"),
 				PropertyInfos = type.GetProperties(),
-				QueryParameters = queryParameters
+				GlobalSearchTerm = globalSearchTerm,
+				WhereQueryProperties = whereQueryProperties ?? new List<WhereQueryProperty>()
 			};
 
 			if (hasPropertyQueries)
@@ -160,7 +225,7 @@ namespace Eshava.Core.Linq
 		{
 			var where = new List<Expression<Func<T, bool>>>();
 
-			foreach (var property in queryContainer.QueryParameters.WhereQueryProperties)
+			foreach (var property in queryContainer.WhereQueryProperties)
 			{
 				var conditions = new List<Expression<Func<T, bool>>>();
 
@@ -195,10 +260,10 @@ namespace Eshava.Core.Linq
 		{
 			var where = new List<Expression<Func<T, bool>>>();
 
-			var searchTermParts = new[] { queryContainer.QueryParameters.SearchTerm };
+			var searchTermParts = new[] { queryContainer.GlobalSearchTerm };
 			if (_options.ContainsSearchSplitBySpace)
 			{
-				searchTermParts = queryContainer.QueryParameters.SearchTerm.Split(' ').Where(t => !t.IsNullOrEmpty()).ToArray();
+				searchTermParts = queryContainer.GlobalSearchTerm.Split(' ').Where(t => !t.IsNullOrEmpty()).ToArray();
 			}
 
 			var andExpressions = new List<Expression<Func<T, bool>>>();
