@@ -729,8 +729,8 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			// Assert
 			result.IsValid.Should().BeFalse();
 			result.ValidationErrors.Should().HaveCount(1);
-			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.DataTypeDecimal);
-			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween);
+			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.DataTypeDecimal.ToString());
+			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween.ToString());
 		}
 
 		[TestMethod]
@@ -785,8 +785,8 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			// Assert
 			result.IsValid.Should().BeFalse();
 			result.ValidationErrors.Should().HaveCount(1);
-			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.DataTypeDecimal);
-			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween);
+			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.DataTypeDecimal.ToString());
+			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween.ToString());
 		}
 
 		[TestMethod]
@@ -1005,8 +1005,8 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			// Assert
 			result.IsValid.Should().BeFalse();
 			result.ValidationErrors.Should().HaveCount(1);
-			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.DataTypeDateTime);
-			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween);
+			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.DataTypeDateTime.ToString());
+			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween.ToString());
 		}
 
 		[TestMethod]
@@ -1061,8 +1061,8 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			// Assert
 			result.IsValid.Should().BeFalse();
 			result.ValidationErrors.Should().HaveCount(1);
-			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.DataTypeDateTime);
-			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween);
+			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.DataTypeDateTime.ToString());
+			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween.ToString());
 		}
 
 		[TestMethod]
@@ -1282,8 +1282,8 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			// Assert
 			result.IsValid.Should().BeFalse();
 			result.ValidationErrors.Should().HaveCount(1);
-			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween);
-			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.PropertyNotFoundFrom);
+			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween.ToString());
+			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.PropertyNotFoundFrom.ToString());
 			result.ValidationErrors.Single().PropertyNameFrom.Should().Be(nameof(FieldType.DateTime) + "LaunchpadMcQuack");
 			result.ValidationErrors.Single().PropertyNameTo.Should().Be(nameof(FieldType.DateTime) + "ValueTo");
 			result.ValidationErrors.Single().PropertyName.Should().Be(nameof(FieldType.DateTime) + "Value");
@@ -1342,8 +1342,8 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			// Assert
 			result.IsValid.Should().BeFalse();
 			result.ValidationErrors.Should().HaveCount(1);
-			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween);
-			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.PropertyNotFoundTo);
+			result.ValidationErrors.Single().MethodType.Should().Be(ValidationMethodType.RangeBetween.ToString());
+			result.ValidationErrors.Single().ErrorType.Should().Be(ValidationErrorType.PropertyNotFoundTo.ToString());
 			result.ValidationErrors.Single().PropertyNameFrom.Should().Be(nameof(FieldType.DateTime) + "ValueFrom");
 			result.ValidationErrors.Single().PropertyNameTo.Should().Be(nameof(FieldType.DateTime) + "LaunchpadMcQuack");
 			result.ValidationErrors.Single().PropertyName.Should().Be(nameof(FieldType.DateTime) + "Value");
@@ -1402,13 +1402,13 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			// Assert
 			result.IsValid.Should().BeFalse();
 			result.ValidationErrors.Should().HaveCount(2);
-			result.ValidationErrors.First().MethodType.Should().Be(ValidationMethodType.RangeBetween);
-			result.ValidationErrors.First().ErrorType.Should().Be(ValidationErrorType.PropertyNotFoundFrom);
+			result.ValidationErrors.First().MethodType.Should().Be(ValidationMethodType.RangeBetween.ToString());
+			result.ValidationErrors.First().ErrorType.Should().Be(ValidationErrorType.PropertyNotFoundFrom.ToString());
 			result.ValidationErrors.First().PropertyNameFrom.Should().Be(nameof(FieldType.DateTime) + "MorganaMacawber");
 			result.ValidationErrors.First().PropertyNameTo.Should().Be(nameof(FieldType.DateTime) + "LaunchpadMcQuack");
 			result.ValidationErrors.First().PropertyName.Should().Be(nameof(FieldType.DateTime) + "Value");
-			result.ValidationErrors.Last().MethodType.Should().Be(ValidationMethodType.RangeBetween);
-			result.ValidationErrors.Last().ErrorType.Should().Be(ValidationErrorType.PropertyNotFoundTo);
+			result.ValidationErrors.Last().MethodType.Should().Be(ValidationMethodType.RangeBetween.ToString());
+			result.ValidationErrors.Last().ErrorType.Should().Be(ValidationErrorType.PropertyNotFoundTo.ToString());
 			result.ValidationErrors.Last().PropertyNameFrom.Should().Be(nameof(FieldType.DateTime) + "MorganaMacawber");
 			result.ValidationErrors.Last().PropertyNameTo.Should().Be(nameof(FieldType.DateTime) + "LaunchpadMcQuack");
 			result.ValidationErrors.Last().PropertyName.Should().Be(nameof(FieldType.DateTime) + "Value");
@@ -1545,8 +1545,8 @@ namespace Eshava.Test.Core.Dynamic.Fields.Validation
 			// Assert
 			result.IsValid.Should().BeFalse();
 			result.ValidationErrors.Should().HaveCount(errorCount);
-			result.ValidationErrors.All(error => error.MethodType == (equal ?ValidationMethodType.Equals : ValidationMethodType.NotEquals)).Should().BeTrue();
-			result.ValidationErrors.All(error => error.ErrorType == ValidationErrorType.PropertyNotFoundTo).Should().BeTrue();
+			result.ValidationErrors.All(error => error.MethodType == (equal ?ValidationMethodType.Equals : ValidationMethodType.NotEquals).ToString()).Should().BeTrue();
+			result.ValidationErrors.All(error => error.ErrorType == ValidationErrorType.PropertyNotFoundTo.ToString()).Should().BeTrue();
 		}
 	}
 }

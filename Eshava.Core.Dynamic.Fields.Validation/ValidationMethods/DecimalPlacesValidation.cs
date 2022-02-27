@@ -4,6 +4,7 @@ using System.Linq;
 using Eshava.Core.Dynamic.Fields.Enums;
 using Eshava.Core.Dynamic.Fields.Interfaces;
 using Eshava.Core.Dynamic.Fields.Validation.Models;
+using Eshava.Core.Models;
 using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 
@@ -68,12 +69,12 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 		{
 			return new ValidationCheckResult
 			{
-				ValidationErrors = new List<ValidationCheckResultEntry>
+				ValidationErrors = new List<ValidationError>
 				{
-					new ValidationCheckResultEntry
+					new ValidationError
 					{
-						MethodType = ValidationMethodType.DecimalPlaces,
-						ErrorType = errorType,
+						MethodType = ValidationMethodType.DecimalPlaces.ToString(),
+						ErrorType = errorType.ToString(),
 						PropertyName = fieldId
 					}
 				}

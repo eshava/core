@@ -6,6 +6,7 @@ using Eshava.Core.Dynamic.Fields.Models;
 using Eshava.Core.Dynamic.Fields.Validation.Interfaces;
 using Eshava.Core.Dynamic.Fields.Validation.Models;
 using Eshava.Core.Dynamic.Fields.Validation.ValidationMethods;
+using Eshava.Core.Models;
 using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 
@@ -34,12 +35,12 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 			{
 				return new ValidationCheckResult
 				{
-					ValidationErrors = new List<ValidationCheckResultEntry>
+					ValidationErrors = new List<ValidationError>
 					{
-						new ValidationCheckResultEntry
+						new ValidationError
 						{
-							MethodType = ValidationMethodType.Input,
-							ErrorType =  ValidationErrorType.IsNull
+							MethodType = ValidationMethodType.Input.ToString(),
+							ErrorType =  ValidationErrorType.IsNull.ToString()
 						}
 					}
 				};
@@ -55,13 +56,13 @@ namespace Eshava.Core.Dynamic.Fields.Validation
 				{
 					results.Add(new ValidationCheckResult
 					{
-						ValidationErrors = new List<ValidationCheckResultEntry>
+						ValidationErrors = new List<ValidationError>
 						{
-							new ValidationCheckResultEntry
+							new ValidationError
 							{
 								 PropertyName = fieldValue.Id.ToString(),
-								 ErrorType = ValidationErrorType.IsNull,
-								 MethodType = ValidationMethodType.Input,
+								 ErrorType = ValidationErrorType.IsNull.ToString(),
+								 MethodType = ValidationMethodType.Input.ToString(),
 								 PropertyNameFrom = nameof(IFieldDefinition<T>) + ": " + (fieldDefinition == null ? "missing" : fieldDefinition.Id.ToString()),
 								 PropertyNameTo = nameof(IFieldAssignment<T, D>) + ": " + (fieldAssignment == null ? "missing" : fieldAssignment.Id.ToString())
 							}

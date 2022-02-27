@@ -6,6 +6,7 @@ using Eshava.Core.Dynamic.Fields.Models;
 using Eshava.Core.Dynamic.Fields.Validation.Extensions;
 using Eshava.Core.Dynamic.Fields.Validation.Models;
 using Eshava.Core.Extensions;
+using Eshava.Core.Models;
 using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 
@@ -103,12 +104,12 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 		{
 			return new ValidationCheckResult
 			{
-				ValidationErrors = new List<ValidationCheckResultEntry>
+				ValidationErrors = new List<ValidationError>
 				{
-					new ValidationCheckResultEntry
+					new ValidationError
 					{
-						MethodType = parameters.NotEquals ? ValidationMethodType.NotEquals : ValidationMethodType.Equals,
-						ErrorType = errorType,
+						MethodType = (parameters.NotEquals ? ValidationMethodType.NotEquals : ValidationMethodType.Equals).ToString(),
+						ErrorType = errorType.ToString(),
 						PropertyName = parameters.Field.Id,
 						PropertyNameTo = fieldToEqualsId
 					}

@@ -5,6 +5,7 @@ using Eshava.Core.Dynamic.Fields.Interfaces;
 using Eshava.Core.Dynamic.Fields.Validation.Extensions;
 using Eshava.Core.Dynamic.Fields.Validation.Models;
 using Eshava.Core.Extensions;
+using Eshava.Core.Models;
 using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 
@@ -31,7 +32,7 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			}
 
 			var fieldSourceNames = rangeRules.Where(r => !r.ValueString.IsNullOrEmpty()).Select(r => r.ValueString.Trim()).ToList();
-			var results = new List<ValidationCheckResultEntry>();
+			var results = new List<ValidationError>();
 
 			foreach (var fieldSourceName in fieldSourceNames)
 			{
@@ -79,12 +80,12 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 			return new ValidationCheckResult { ValidationErrors = results };
 		}
 
-		private static ValidationCheckResultEntry GetErrorResult(ValidationErrorType errorType, string fieldFromId, string fieldToId)
+		private static ValidationError GetErrorResult(ValidationErrorType errorType, string fieldFromId, string fieldToId)
 		{
-			return new ValidationCheckResultEntry
+			return new ValidationError
 			{
-				MethodType = ValidationMethodType.RangeFromOrTo,
-				ErrorType = errorType,
+				MethodType = ValidationMethodType.RangeFromOrTo.ToString(),
+				ErrorType = errorType.ToString(),
 				PropertyNameFrom = fieldFromId,
 				PropertyNameTo = fieldToId
 			};

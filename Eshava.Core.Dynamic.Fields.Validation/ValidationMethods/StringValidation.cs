@@ -8,6 +8,7 @@ using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
 using Eshava.Core.Validation.Extension;
 using Eshava.Core.Dynamic.Fields.Interfaces;
+using Eshava.Core.Models;
 
 namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 {
@@ -77,12 +78,12 @@ namespace Eshava.Core.Dynamic.Fields.Validation.ValidationMethods
 		{
 			return new ValidationCheckResult
 			{
-				ValidationErrors = new List<ValidationCheckResultEntry>
+				ValidationErrors = new List<ValidationError>
 				{
-					new ValidationCheckResultEntry
+					new ValidationError
 					{
-						MethodType = ValidationMethodType.String,
-						ErrorType = errorType,
+						MethodType = ValidationMethodType.String.ToString(),
+						ErrorType = errorType.ToString(),
 						PropertyName = fieldId
 					}
 				}
