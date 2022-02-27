@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Eshava.Core.Extensions;
+using Eshava.Core.Models;
 using Eshava.Core.Validation.Attributes;
 using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
@@ -32,7 +33,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			//Determining the property for the start value of the value range
 			var propertiesSource = rangeSource.PropertyName.Contains(",") ? rangeSource.PropertyName.Split(',') : new[] { rangeSource.PropertyName };
-			var results = new List<ValidationCheckResultEntry>();
+			var results = new List<ValidationError>();
 
 			foreach (var propertySource in propertiesSource)
 			{
@@ -83,12 +84,12 @@ namespace Eshava.Core.Validation.ValidationMethods
 			return new ValidationCheckResult { ValidationErrors = results };
 		}
 
-		private static ValidationCheckResultEntry GetErrorResult(ValidationErrorType errorType, string propertyNameFrom, string propertyNameTo)
+		private static ValidationError GetErrorResult(ValidationErrorType errorType, string propertyNameFrom, string propertyNameTo)
 		{
-			return new ValidationCheckResultEntry
+			return new ValidationError
 			{
-				MethodType = ValidationMethodType.RangeFromOrTo,
-				ErrorType = errorType,
+				MethodType = ValidationMethodType.RangeFromOrTo.ToString(),
+				ErrorType = errorType.ToString(),
 				PropertyNameFrom = propertyNameFrom,
 				PropertyNameTo = propertyNameTo
 			};
