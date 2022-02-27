@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Eshava.Core.Extensions;
+using Eshava.Core.Models;
 using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Extension;
 using Eshava.Core.Validation.Models;
@@ -86,12 +87,12 @@ namespace Eshava.Core.Validation.ValidationMethods
 		{
 			return new ValidationCheckResult
 			{
-				ValidationErrors = new List<ValidationCheckResultEntry>
+				ValidationErrors = new List<ValidationError>
 				{
-					new ValidationCheckResultEntry
+					new ValidationError
 					{
-						MethodType = ValidationMethodType.String,
-						ErrorType = errorType,
+						MethodType = ValidationMethodType.String.ToString(),
+						ErrorType = errorType.ToString(),
 						PropertyName = propertyName
 					}
 				}

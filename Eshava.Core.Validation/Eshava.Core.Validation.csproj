@@ -9,14 +9,14 @@
 		<PackageProjectUrl>https://github.com/eshava/core</PackageProjectUrl>
 		<Description>Collection of methods, classes and helpers to simplify recurring standard actions</Description>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-		<Version>1.0.2.5</Version>
+		<Version>1.0.3</Version>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Eshava.Core" Version="1.0.0" />
-	  <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-	  <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
+	  <PackageReference Include="Eshava.Core" Version="1.0.1" />
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	  <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
 	</ItemGroup>
 
 	<ItemGroup>

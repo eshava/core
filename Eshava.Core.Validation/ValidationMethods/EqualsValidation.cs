@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Eshava.Core.Extensions;
+using Eshava.Core.Models;
 using Eshava.Core.Validation.Attributes;
 using Eshava.Core.Validation.Enums;
 using Eshava.Core.Validation.Models;
@@ -104,12 +105,12 @@ namespace Eshava.Core.Validation.ValidationMethods
 		{
 			return new ValidationCheckResult
 			{
-				ValidationErrors = new List<ValidationCheckResultEntry>
+				ValidationErrors = new List<ValidationError>
 				{
-					new ValidationCheckResultEntry
+					new ValidationError
 					{
-						MethodType = parameters.NotEquals ? ValidationMethodType.NotEquals : ValidationMethodType.Equals,
-						ErrorType = errorType,
+						MethodType = (parameters.NotEquals ? ValidationMethodType.NotEquals : ValidationMethodType.Equals).ToString(),
+						ErrorType = errorType.ToString(),
 						PropertyName = parameters.PropertyInfo.Name,
 						PropertyNameTo = propertyNameToEquals
 					}
