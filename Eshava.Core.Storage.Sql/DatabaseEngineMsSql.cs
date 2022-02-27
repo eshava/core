@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +10,7 @@ using Eshava.Core.Storage.Models;
 using Eshava.Core.Storage.Sql.Constants;
 using Eshava.Core.Storage.Sql.Enums;
 using Eshava.Core.Storage.Sql.Extensions;
+using Microsoft.Data.SqlClient;
 
 namespace Eshava.Core.Storage.Sql
 {
