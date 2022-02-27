@@ -29,7 +29,8 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildSortCondition<Alpha>(SortOrder.None, alpha => alpha.Beta);
 
 			// Assert
-			result.Should().BeNull();
+			result.IsFaulty.Should().BeTrue();
+			result.Message.Should().Be("InvalidInput");
 		}
 
 		[TestMethod, ExpectedException(typeof(NullReferenceException))]
@@ -46,9 +47,11 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildSortCondition<Alpha>(SortOrder.Ascending, p => p.Beta);
 
 			// Assert
-			result.SortOrder.Should().Be(SortOrder.Ascending);
-			result.Member.Member.Name.Should().Be(nameof(Alpha.Beta));
-			result.Parameter.Name.Should().Be("p");
+			result.IsFaulty.Should().BeFalse();
+
+			result.Data.SortOrder.Should().Be(SortOrder.Ascending);
+			result.Data.Member.Member.Name.Should().Be(nameof(Alpha.Beta));
+			result.Data.Parameter.Name.Should().Be("p");
 		}
 
 		[TestMethod]
@@ -58,19 +61,25 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildSortCondition<Alpha>(SortOrder.Descending, p => p.Sigma);
 
 			// Assert
-			result.SortOrder.Should().Be(SortOrder.Descending);
-			result.Member.Member.Name.Should().Be(nameof(Alpha.Sigma));
-			result.Parameter.Name.Should().Be("p");
+			result.IsFaulty.Should().BeFalse();
+
+			result.Data.SortOrder.Should().Be(SortOrder.Descending);
+			result.Data.Member.Member.Name.Should().Be(nameof(Alpha.Sigma));
+			result.Data.Parameter.Name.Should().Be("p");
 		}
 
-		[TestMethod, ExpectedException(typeof(ArgumentNullException))]
+		[TestMethod]
 		public void BuildSortConditionsNoParameterTest()
 		{
 			// Arrange
 			var queryParameters = default(QueryParameters);
 
 			// Act
-			_classUnderTest.BuildSortConditions<Alpha>(queryParameters);
+			var result = _classUnderTest.BuildSortConditions<Alpha>(queryParameters);
+
+			// Assert
+			result.IsFaulty.Should().BeTrue();
+			result.Message.Should().Be("InvalidInput");
 		}
 
 		[TestMethod]
@@ -83,7 +92,9 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildSortConditions<Alpha>(queryParameters);
 
 			// Assert
-			result.Should().HaveCount(0);
+			result.IsFaulty.Should().BeFalse();
+
+			result.Data.Should().HaveCount(0);
 		}
 
 		[TestMethod]
@@ -116,20 +127,22 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildSortConditions<Alpha>(parameter);
 
 			// Assert
-			result.Should().HaveCount(3);
-			var resultItem = result.First();
+			result.IsFaulty.Should().BeFalse();
+
+			result.Data.Should().HaveCount(3);
+			var resultItem = result.Data.First();
 			resultItem.SortOrder.Should().Be(SortOrder.Ascending);
 			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Beta));
 			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
 			resultItem.Parameter.Name.Should().Be("p");
 
-			resultItem = result.Skip(1).First();
+			resultItem = result.Data.Skip(1).First();
 			resultItem.SortOrder.Should().Be(SortOrder.Descending);
 			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Sigma));
 			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
 			resultItem.Parameter.Name.Should().Be("p");
 
-			resultItem = result.Skip(2).First();
+			resultItem = result.Data.Skip(2).First();
 			resultItem.SortOrder.Should().Be(SortOrder.Descending);
 			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Kappa));
 			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
@@ -161,8 +174,10 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildSortConditions(parameter, mappings);
 
 			// Assert
-			result.Should().HaveCount(1);
-			var resultItem = result.First();
+			result.IsFaulty.Should().BeFalse();
+
+			result.Data.Should().HaveCount(1);
+			var resultItem = result.Data.First();
 			resultItem.SortOrder.Should().Be(SortOrder.Ascending);
 			resultItem.Member.Member.Name.Should().Be(nameof(Omega.Psi));
 			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Omega));
@@ -235,7 +250,7 @@ namespace Eshava.Test.Core.Linq
 			var conditions = _classUnderTest.BuildSortConditions<Alpha>(parameter);
 
 			// Act
-			var result = _classUnderTest.ApplySorting(query, conditions).ToList();
+			var result = _classUnderTest.ApplySorting(query, conditions.Data).ToList();
 
 			// Assert
 			result[0].Rho.Should().Be(3);
@@ -276,7 +291,7 @@ namespace Eshava.Test.Core.Linq
 			var condition = _classUnderTest.BuildSortCondition<Alpha>(SortOrder.Descending, p => p.Beta);
 
 			// Act
-			var result = _classUnderTest.AddOrder(query, condition).ToList();
+			var result = _classUnderTest.AddOrder(query, condition.Data).ToList();
 
 			// Assert
 			result[0].Rho.Should().Be(1);
@@ -315,10 +330,10 @@ namespace Eshava.Test.Core.Linq
 
 			var firstCondition = _classUnderTest.BuildSortCondition<Alpha>(SortOrder.Descending, p => p.Beta);
 			var secondCondition = _classUnderTest.BuildSortCondition<Alpha>(SortOrder.Ascending, p => p.OmegaDateTime);
-			var query = _classUnderTest.AddOrder(elements.AsQueryable(), firstCondition);
+			var query = _classUnderTest.AddOrder(elements.AsQueryable(), firstCondition.Data);
 
 			// Act
-			var result = _classUnderTest.AddOrderThen(query, secondCondition).ToList();
+			var result = _classUnderTest.AddOrderThen(query, secondCondition.Data).ToList();
 
 			// Assert
 			result[0].Rho.Should().Be(3);
@@ -355,7 +370,7 @@ namespace Eshava.Test.Core.Linq
 			var condition = _classUnderTest.BuildSortCondition<Omega>(SortOrder.Descending, p => p.Number);
 
 			// Act
-			var result = _classUnderTest.AddOrder(query, condition).ToList();
+			var result = _classUnderTest.AddOrder(query, condition.Data).ToList();
 
 			// Assert
 			result[0].Number.Should().Be(Number.Four);
@@ -392,7 +407,7 @@ namespace Eshava.Test.Core.Linq
 			var condition = _classUnderTest.BuildSortCondition<Omega>(SortOrder.Ascending, p => p.Number);
 
 			// Act
-			var result = _classUnderTest.AddOrder(query, condition).ToList();
+			var result = _classUnderTest.AddOrder(query, condition.Data).ToList();
 
 			// Assert
 			result[0].Number.Should().Be(Number.One);
@@ -427,10 +442,10 @@ namespace Eshava.Test.Core.Linq
 
 			var firstCondition = _classUnderTest.BuildSortCondition<Omega>(SortOrder.Descending, p => p.Sigma);
 			var secondCondition = _classUnderTest.BuildSortCondition<Omega>(SortOrder.Descending, p => p.Number);
-			var query = _classUnderTest.AddOrder(elements.AsQueryable(), firstCondition);
+			var query = _classUnderTest.AddOrder(elements.AsQueryable(), firstCondition.Data);
 
 			// Act
-			var result = _classUnderTest.AddOrderThen(query, secondCondition).ToList();
+			var result = _classUnderTest.AddOrderThen(query, secondCondition.Data).ToList();
 
 
 			// Assert
@@ -466,10 +481,10 @@ namespace Eshava.Test.Core.Linq
 
 			var firstCondition = _classUnderTest.BuildSortCondition<Omega>(SortOrder.Ascending, p => p.Sigma);
 			var secondCondition = _classUnderTest.BuildSortCondition<Omega>(SortOrder.Ascending, p => p.Number);
-			var query = _classUnderTest.AddOrder(elements.AsQueryable(), firstCondition);
+			var query = _classUnderTest.AddOrder(elements.AsQueryable(), firstCondition.Data);
 
 			// Act
-			var result = _classUnderTest.AddOrderThen(query, secondCondition).ToList();
+			var result = _classUnderTest.AddOrderThen(query, secondCondition.Data).ToList();
 
 			// Assert
 			result[0].Number.Should().Be(Number.Three);
@@ -478,14 +493,18 @@ namespace Eshava.Test.Core.Linq
 			result[3].Number.Should().Be(Number.Two);
 		}
 
-		[TestMethod, ExpectedException(typeof(ArgumentNullException))]
+		[TestMethod]
 		public void NoSortingObjectTest()
 		{
 			// Arrange
 			var sortings = default(SortingModel);
 
 			// Act
-			_classUnderTest.BuildSortConditions<Alpha>(sortings);
+			var result = _classUnderTest.BuildSortConditions<Alpha>(sortings);
+
+			// Assert
+			result.IsFaulty.Should().BeTrue();
+			result.Message.Should().Be("InvalidInput");
 		}
 
 		[TestMethod]
@@ -515,20 +534,22 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildSortConditions<Alpha>(sortings);
 
 			// Assert
-			result.Should().HaveCount(3);
-			var resultItem = result.First();
+			result.IsFaulty.Should().BeFalse();
+
+			result.Data.Should().HaveCount(3);
+			var resultItem = result.Data.First();
 			resultItem.SortOrder.Should().Be(SortOrder.Ascending);
 			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Beta));
 			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
 			resultItem.Parameter.Name.Should().Be("p");
 
-			resultItem = result.Skip(1).First();
+			resultItem = result.Data.Skip(1).First();
 			resultItem.SortOrder.Should().Be(SortOrder.Descending);
 			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Sigma));
 			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
 			resultItem.Parameter.Name.Should().Be("p");
 
-			resultItem = result.Skip(2).First();
+			resultItem = result.Data.Skip(2).First();
 			resultItem.SortOrder.Should().Be(SortOrder.Descending);
 			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Kappa));
 			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
@@ -557,8 +578,10 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildSortConditions(sortings, mappings);
 
 			// Assert
-			result.Should().HaveCount(1);
-			var resultItem = result.First();
+			result.IsFaulty.Should().BeFalse();
+
+			result.Data.Should().HaveCount(1);
+			var resultItem = result.Data.First();
 			resultItem.SortOrder.Should().Be(SortOrder.Ascending);
 			resultItem.Member.Member.Name.Should().Be(nameof(Omega.Psi));
 			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Omega));
@@ -592,20 +615,22 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildSortConditions<Alpha>(sortingQueryProperties);
 
 			// Assert
-			result.Should().HaveCount(3);
-			var resultItem = result.First();
+			result.IsFaulty.Should().BeFalse();
+
+			result.Data.Should().HaveCount(3);
+			var resultItem = result.Data.First();
 			resultItem.SortOrder.Should().Be(SortOrder.Ascending);
 			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Beta));
 			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
 			resultItem.Parameter.Name.Should().Be("p");
 
-			resultItem = result.Skip(1).First();
+			resultItem = result.Data.Skip(1).First();
 			resultItem.SortOrder.Should().Be(SortOrder.Descending);
 			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Sigma));
 			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
 			resultItem.Parameter.Name.Should().Be("p");
 
-			resultItem = result.Skip(2).First();
+			resultItem = result.Data.Skip(2).First();
 			resultItem.SortOrder.Should().Be(SortOrder.Descending);
 			resultItem.Member.Member.Name.Should().Be(nameof(Alpha.Kappa));
 			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Alpha));
@@ -634,8 +659,10 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildSortConditions(sortingQueryProperties, mappings);
 
 			// Assert
-			result.Should().HaveCount(1);
-			var resultItem = result.First();
+			result.IsFaulty.Should().BeFalse();
+
+			result.Data.Should().HaveCount(1);
+			var resultItem = result.Data.First();
 			resultItem.SortOrder.Should().Be(SortOrder.Ascending);
 			resultItem.Member.Member.Name.Should().Be(nameof(Omega.Psi));
 			resultItem.Member.Member.DeclaringType.Should().Be(typeof(Omega));

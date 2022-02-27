@@ -29,11 +29,18 @@ namespace Eshava.Test.Core.Linq
 			});
 		}
 
-		[TestMethod, ExpectedException(typeof(ArgumentNullException))]
+		[TestMethod]
 		public void BuildQueryExpressionsWithNullInputTest()
 		{
+			// Arrange
+			var queryParameters = default(QueryParameters);
+
 			// Act
-			_classUnderTest.BuildQueryExpressions<Alpha>(null);
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameters);
+
+			// Assert
+			result.IsFaulty.Should().BeTrue();
+			result.Message.Should().Be("InvalidInput");
 		}
 
 		[TestMethod]
@@ -46,7 +53,8 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(0);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(0);
 		}
 
 		[TestMethod]
@@ -79,9 +87,10 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(1);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).ToList();
 			resultWhere.Should().HaveCount(properties.Count - propertyCountQueryIgnore);
 			propertyCountQueryIgnore.Should().Be(1);
 		}
@@ -125,9 +134,10 @@ namespace Eshava.Test.Core.Linq
 			var result = classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(1);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			if (containsSearchSplitBySpace)
 			{
 				resultWhere.Should().HaveCount(properties.Count - propertyCountQueryIgnore);
@@ -191,11 +201,12 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(2);
-			result.First().Should().BeEquivalentTo(expectedResultGamma);
-			result.Last().Should().BeEquivalentTo(expectedResultDelta);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+			result.Data.First().Should().BeEquivalentTo(expectedResultGamma);
+			result.Data.Last().Should().BeEquivalentTo(expectedResultDelta);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Beta.Should().Be(2);
 		}
@@ -255,9 +266,10 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(2);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Beta.Should().Be(3);
 		}
@@ -307,10 +319,11 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(1);
-			result.Single().Should().BeEquivalentTo(expectedResultDelta);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+			result.Data.Single().Should().BeEquivalentTo(expectedResultDelta);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Beta.Should().Be(3);
 		}
@@ -360,10 +373,11 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(1);
-			result.Single().Should().BeEquivalentTo(expectedResultDelta);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+			result.Data.Single().Should().BeEquivalentTo(expectedResultDelta);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(2);
 			resultWhere.First().Beta.Should().Be(1);
 			resultWhere.Last().Beta.Should().Be(2);
@@ -420,18 +434,19 @@ namespace Eshava.Test.Core.Linq
 			var result = classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
+			result.IsFaulty.Should().BeFalse();
 			if (containsSearchSplitBySpace)
 			{
-				result.Should().HaveCount(2);
+				result.Data.Should().HaveCount(2);
 
-				var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+				var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 				resultWhere.Should().HaveCount(1);
 				resultWhere.First().Beta.Should().Be(2);
 			}
 			else
 			{
-				result.Should().HaveCount(1);
-				var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+				result.Data.Should().HaveCount(1);
+				var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 				resultWhere.Should().HaveCount(0);
 			}
 		}
@@ -481,10 +496,11 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(1);
-			result.Single().Should().BeEquivalentTo(expectedResultDelta);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+			result.Data.Single().Should().BeEquivalentTo(expectedResultDelta);
 
-			var resultWhere = exampleList.Where(result.Single().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.Single().Compile()).ToList();
 			resultWhere.Should().HaveCount(2);
 			resultWhere.First().Beta.Should().Be(1);
 			resultWhere.Last().Beta.Should().Be(2);
@@ -548,11 +564,12 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(2);
-			result.First().Should().BeEquivalentTo(expectedResultLambda);
-			result.Last().Should().BeEquivalentTo(expectedResultLambdaNullable);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+			result.Data.First().Should().BeEquivalentTo(expectedResultLambda);
+			result.Data.Last().Should().BeEquivalentTo(expectedResultLambdaNullable);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(2);
 			resultWhere.First().Beta.Should().Be(2);
 			resultWhere.Last().Beta.Should().Be(3);
@@ -616,11 +633,12 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(2);
-			result.First().Should().BeEquivalentTo(expectedResultLambda);
-			result.Last().Should().BeEquivalentTo(expectedResultLambdaNullable);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+			result.Data.First().Should().BeEquivalentTo(expectedResultLambda);
+			result.Data.Last().Should().BeEquivalentTo(expectedResultLambdaNullable);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(2);
 			resultWhere.First().Beta.Should().Be(2);
 			resultWhere.Last().Beta.Should().Be(3);
@@ -684,11 +702,12 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(2);
-			result.First().Should().BeEquivalentTo(expectedResultMy);
-			result.Last().Should().BeEquivalentTo(expectedResultMyNullableOne);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+			result.Data.First().Should().BeEquivalentTo(expectedResultMy);
+			result.Data.Last().Should().BeEquivalentTo(expectedResultMyNullableOne);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(2);
 			resultWhere.First().Beta.Should().Be(2);
 			resultWhere.Last().Beta.Should().Be(3);
@@ -753,11 +772,12 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(2);
-			result.First().Should().BeEquivalentTo(expectedResultNy);
-			result.Last().Should().BeEquivalentTo(expectedResultNyNullable);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+			result.Data.First().Should().BeEquivalentTo(expectedResultNy);
+			result.Data.Last().Should().BeEquivalentTo(expectedResultNyNullable);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(2);
 			resultWhere.First().Beta.Should().Be(2);
 			resultWhere.Last().Beta.Should().Be(3);
@@ -815,11 +835,12 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(2);
-			result.First().Should().BeEquivalentTo(expectedResultXi);
-			result.Last().Should().BeEquivalentTo(expectedResultXiNullable);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+			result.Data.First().Should().BeEquivalentTo(expectedResultXi);
+			result.Data.Last().Should().BeEquivalentTo(expectedResultXiNullable);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Beta.Should().Be(2);
 		}
@@ -884,11 +905,12 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(2);
-			result.First().Should().BeEquivalentTo(expectedResultPsi);
-			result.Last().Should().BeEquivalentTo(expectedResultOmegaDateTime);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+			result.Data.First().Should().BeEquivalentTo(expectedResultPsi);
+			result.Data.Last().Should().BeEquivalentTo(expectedResultOmegaDateTime);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(2);
 			resultWhere.First().Beta.Should().Be(2);
 			resultWhere.Last().Beta.Should().Be(3);
@@ -957,7 +979,12 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(0);
+			result.IsFaulty.Should().BeTrue();
+			result.Message.Should().Be("InvalidData");
+
+			result.ValidationErrors.Should().HaveCount(1);
+			result.ValidationErrors.First().PropertyName.Should().Be("Gamma");
+			result.ValidationErrors.First().ErrorType.Should().Be("InvalidFilterValue");
 		}
 
 		[TestMethod]
@@ -1018,11 +1045,12 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(2);
-			result.First().Should().BeEquivalentTo(expectedResultStigmaOne);
-			result.Last().Should().BeEquivalentTo(expectedResultStigmaTwo);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+			result.Data.First().Should().BeEquivalentTo(expectedResultStigmaOne);
+			result.Data.Last().Should().BeEquivalentTo(expectedResultStigmaTwo);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Beta.Should().Be(2);
 		}
@@ -1076,11 +1104,12 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(2);
-			result.First().Should().BeEquivalentTo(expectedResultStigmaOne);
-			result.Last().Should().BeEquivalentTo(expectedResultStigmaTwo);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+			result.Data.First().Should().BeEquivalentTo(expectedResultStigmaOne);
+			result.Data.Last().Should().BeEquivalentTo(expectedResultStigmaTwo);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Beta.Should().Be(1);
 		}
@@ -1135,10 +1164,11 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(1);
-			result.First().Should().BeEquivalentTo(expectedResultStigmaOne);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+			result.Data.First().Should().BeEquivalentTo(expectedResultStigmaOne);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Beta.Should().Be(3);
 		}
@@ -1214,12 +1244,49 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions(queryParameter, mappings);
 
 			// Assert
-			result.Should().HaveCount(2);
-			result.First().Should().BeEquivalentTo(expectedResultEqual);
-			result.Last().Should().BeEquivalentTo(expectedResultContains);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+			result.Data.First().Should().BeEquivalentTo(expectedResultEqual);
+			result.Data.Last().Should().BeEquivalentTo(expectedResultContains);
 
-			exampleList.Where(result.First().Compile()).Single().Beta.Should().Be(3);
-			exampleList.Where(result.Last().Compile()).Single().Beta.Should().Be(4);
+			exampleList.Where(result.Data.First().Compile()).Single().Beta.Should().Be(3);
+			exampleList.Where(result.Data.Last().Compile()).Single().Beta.Should().Be(4);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsPropertyMappingMultipleWithInvalidFilterValueTest()
+		{
+			// Arrange
+			var mappings = new Dictionary<string, List<Expression<Func<Alpha, object>>>>
+			{
+				{ nameof(Alpha.Chi), new List<Expression<Func<Alpha, object>>> { p => p.Kappa.Psi, p => p.Kappa.Chi, p => p.Kappa.Sigma } }
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new WhereQueryProperty
+					{
+						Operator =  CompareOperator.Equal,
+						PropertyName = nameof(Alpha.Chi),
+						SearchTerm = "Darkwing Duck"
+					}
+				}
+			};
+
+			Expression<Func<Alpha, bool>> expectedResultEqual = p => p.Kappa.Psi == "Darkwing Duck" || p.Kappa.Chi == "Darkwing Duck";
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions(queryParameter, mappings);
+
+			// Assert
+			result.IsFaulty.Should().BeTrue();
+			result.Message.Should().Be("InvalidData");
+
+			result.ValidationErrors.Should().HaveCount(1);
+			result.ValidationErrors.First().PropertyName.Should().Be("Sigma");
+			result.ValidationErrors.First().ErrorType.Should().Be("InvalidFilterValue");
 		}
 
 		[TestMethod]
@@ -1268,7 +1335,7 @@ namespace Eshava.Test.Core.Linq
 
 			var mappings = new Dictionary<string, List<Expression<Func<Alpha, object>>>>
 			{
-				{ nameof(Alpha.Chi), new List<Expression<Func<Alpha, object>>> { p => p.Kappa.Psi, p => p.Kappa.Chi, p => p.Kappa.Sigma } }
+				{ nameof(Alpha.Chi), new List<Expression<Func<Alpha, object>>> { p => p.Kappa.Psi, p => p.Kappa.Chi } }
 			};
 
 			var queryParameter = new QueryParameters
@@ -1290,10 +1357,11 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions(queryParameter, mappings);
 
 			// Assert
-			result.Should().HaveCount(1);
-			result.First().Should().BeEquivalentTo(expectedResultEqual);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+			result.Data.First().Should().BeEquivalentTo(expectedResultEqual);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).ToList();
 			resultWhere.Should().HaveCount(2);
 			resultWhere.First().Beta.Should().Be(3);
 			resultWhere.Last().Beta.Should().Be(4);
@@ -1351,10 +1419,11 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions(queryParameter, mappings);
 
 			// Assert
-			result.Should().HaveCount(1);
-			result.First().Should().BeEquivalentTo(expectedResultEqual);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+			result.Data.First().Should().BeEquivalentTo(expectedResultEqual);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Beta.Should().Be(3);
 		}
@@ -1406,10 +1475,11 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(1);
-			result.First().Should().BeEquivalentTo(expectedResultEqual);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+			result.Data.First().Should().BeEquivalentTo(expectedResultEqual);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Beta.Should().Be(3);
 		}
@@ -1572,11 +1642,12 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Omega>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(2);
-			result.First().Should().BeEquivalentTo(expectedResultNumber);
-			result.Last().Should().BeEquivalentTo(expectedResultNumber);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+			result.Data.First().Should().BeEquivalentTo(expectedResultNumber);
+			result.Data.Last().Should().BeEquivalentTo(expectedResultNumber);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(2);
 			resultWhere.First().Sigma.Should().Be(2);
 			resultWhere.Last().Sigma.Should().Be(4);
@@ -1654,9 +1725,10 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Omega>(queryParameter, mappings);
 
 			// Assert
-			result.Should().HaveCount(2);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(2);
 			resultWhere.First().Sigma.Should().Be(2);
 			resultWhere.Last().Sigma.Should().Be(4);
@@ -1716,11 +1788,12 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Omega>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(2);
-			result.First().Should().BeEquivalentTo(expectedResultGreaterNumber);
-			result.Last().Should().BeEquivalentTo(expectedResultLessNumber);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+			result.Data.First().Should().BeEquivalentTo(expectedResultGreaterNumber);
+			result.Data.Last().Should().BeEquivalentTo(expectedResultLessNumber);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Sigma.Should().Be(3);
 		}
@@ -1776,9 +1849,10 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Omega>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(2);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Sigma.Should().Be(1);
 		}
@@ -1828,9 +1902,10 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Omega>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(1);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(2);
 			resultWhere.First().Sigma.Should().Be(1);
 			resultWhere.Last().Sigma.Should().Be(4);
@@ -1891,9 +1966,10 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
-			result.Should().HaveCount(2);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(2);
 			resultWhere.First().Beta.Should().Be(1);
 			resultWhere.Last().Beta.Should().Be(4);
@@ -1937,9 +2013,10 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions(queryParameter, mappings);
 
 			// Assert
-			result.Should().HaveCount(1);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 		}
 
@@ -1990,13 +2067,74 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(filter, null);
 
 			// Assert
-			result.Should().HaveCount(2);
-			result.First().Should().BeEquivalentTo(expectedResultGamma);
-			result.Last().Should().BeEquivalentTo(expectedResultDelta);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+			result.Data.First().Should().BeEquivalentTo(expectedResultGamma);
+			result.Data.Last().Should().BeEquivalentTo(expectedResultDelta);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).Where(result.Last().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
 			resultWhere.First().Beta.Should().Be(2);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringPropertyByFilterObjectWithNotAllowedCompareOperationsTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new Alpha
+				{
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QuackFu better than KungFu"
+				},
+				new Alpha
+				{
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Delta = "QuackFu better than KungFu"
+				},
+				new Alpha
+				{
+					Beta = 3,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu"
+				}
+			};
+
+			var filter = new FilterModel
+			{
+				Gamma = new SpecialFilterField
+				{
+					Operator = CompareOperator.StartsWith,
+					SearchTerm = "Darkwing Duck"
+				},
+				Delta = new FilterField
+				{
+					Operator = CompareOperator.EndsWith,
+					SearchTerm = "QuackFu"
+				}
+			};
+
+			Expression<Func<Alpha, bool>> expectedResultGamma = p => p.Gamma == "Darkwing Duck";
+			Expression<Func<Alpha, bool>> expectedResultDelta = p => p.Delta != null && p.Delta.Contains("QuackFu");
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(filter, null);
+
+			// Assert
+			result.IsFaulty.Should().BeTrue();
+			result.Message.Should().Be("InvalidFilter");
+
+			result.ValidationErrors.Should().HaveCount(2);
+			result.ValidationErrors.First().PropertyName.Should().Be(nameof(FilterModel.Gamma));
+			result.ValidationErrors.First().ErrorType.Should().Be("InvalidOperator");
+			result.ValidationErrors.First().Value.Should().Be(CompareOperator.StartsWith.ToString());
+
+			result.ValidationErrors.Last().PropertyName.Should().Be(nameof(FilterModel.Delta));
+			result.ValidationErrors.Last().ErrorType.Should().Be("InvalidOperator");
+			result.ValidationErrors.Last().Value.Should().Be(CompareOperator.EndsWith.ToString());
 		}
 
 		[TestMethod]
@@ -2029,9 +2167,10 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(filter, filter.SearchTerm);
 
 			// Assert
-			result.Should().HaveCount(1);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
 
-			var resultWhere = exampleList.Where(result.First().Compile()).ToList();
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).ToList();
 			resultWhere.Should().HaveCount(properties.Count - propertyCountQueryIgnore);
 			propertyCountQueryIgnore.Should().Be(1);
 		}
@@ -2096,10 +2235,11 @@ namespace Eshava.Test.Core.Linq
 			var result = _classUnderTest.BuildQueryExpressions(filter, null, mappings);
 
 			// Assert
-			result.Should().HaveCount(1);
-			result.First().Should().BeEquivalentTo(expectedResultEqual);
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+			result.Data.First().Should().BeEquivalentTo(expectedResultEqual);
 			
-			exampleList.Where(result.First().Compile()).Single().Beta.Should().Be(3);
+			exampleList.Where(result.Data.First().Compile()).Single().Beta.Should().Be(3);
 		}
 
 	}

@@ -6,6 +6,7 @@ using System.Reflection;
 using Eshava.Core.Linq.Enums;
 using Eshava.Core.Linq.Interfaces;
 using Eshava.Core.Linq.Models;
+using Eshava.Core.Models;
 
 namespace Eshava.Core.Linq
 {
@@ -13,23 +14,31 @@ namespace Eshava.Core.Linq
 	{
 		private static readonly Type _sortField = typeof(SortField);
 
-		public OrderByCondition BuildSortCondition<T>(SortOrder sortOrder, Expression<Func<T, object>> expression) where T : class
+		public ResponseData<OrderByCondition> BuildSortCondition<T>(SortOrder sortOrder, Expression<Func<T, object>> expression) where T : class
 		{
 			var member = GetMemberExpressionAndParameter(expression);
 
 			if (member.Expression != null && sortOrder != SortOrder.None)
 			{
-				return new OrderByCondition { SortOrder = sortOrder, Member = member.Expression, Parameter = member.Parameter };
+				return new ResponseData<OrderByCondition>
+				{
+					Data = new OrderByCondition
+					{
+						SortOrder = sortOrder,
+						Member = member.Expression,
+						Parameter = member.Parameter
+					}
+				};
 			}
 
-			return null;
+			return ResponseData<OrderByCondition>.CreateFaultyResponse("InvalidInput");
 		}
 
-		public IEnumerable<OrderByCondition> BuildSortConditions<T>(object sortings, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
+		public ResponseData<IEnumerable<OrderByCondition>> BuildSortConditions<T>(object sortings, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
 		{
 			if (sortings == null)
 			{
-				throw new ArgumentNullException(nameof(sortings));
+				return ResponseData<IEnumerable<OrderByCondition>>.CreateFaultyResponse("InvalidInput");
 			}
 
 			var sortFields = new List<(string Property, SortField field)>();
@@ -61,28 +70,33 @@ namespace Eshava.Core.Linq
 			return BuildSortConditions(sortQueryProperties, mappings);
 		}
 
-		public IEnumerable<OrderByCondition> BuildSortConditions<T>(QueryParameters queryParameters, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
+		public ResponseData<IEnumerable<OrderByCondition>> BuildSortConditions<T>(QueryParameters queryParameters, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
 		{
 			if (queryParameters == null)
 			{
-				throw new ArgumentNullException(nameof(queryParameters));
+				return ResponseData<IEnumerable<OrderByCondition>>.CreateFaultyResponse("InvalidInput");
 			}
 
 			if (!(queryParameters.SortingQueryProperties?.Any() ?? false))
 			{
-				return new List<OrderByCondition>();
+				return new ResponseData<IEnumerable<OrderByCondition>>(new List<OrderByCondition>());
 			}
 
 			return BuildSortConditions(queryParameters.SortingQueryProperties, mappings);
 		}
 
-		public IEnumerable<OrderByCondition> BuildSortConditions<T>(IEnumerable<SortingQueryProperty> sortingQueryProperties, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
+		public ResponseData<IEnumerable<OrderByCondition>> BuildSortConditions<T>(IEnumerable<SortingQueryProperty> sortingQueryProperties, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
 		{
+			if (sortingQueryProperties == null)
+			{
+				return ResponseData<IEnumerable<OrderByCondition>>.CreateFaultyResponse("InvalidInput");
+			}
+
 			var sortingConditions = new List<OrderByCondition>();
 
-			if (!(sortingQueryProperties?.Any() ?? false))
+			if (!sortingQueryProperties.Any())
 			{
-				return sortingConditions;
+				return new ResponseData<IEnumerable<OrderByCondition>>(new List<OrderByCondition>());
 			}
 
 			var type = typeof(T);
@@ -111,7 +125,7 @@ namespace Eshava.Core.Linq
 				}
 			}
 
-			return sortingConditions;
+			return new ResponseData<IEnumerable<OrderByCondition>>(sortingConditions);
 		}
 
 		public IQueryable<T> ApplySorting<T>(IQueryable<T> query, IEnumerable<OrderByCondition> conditions) where T : class
