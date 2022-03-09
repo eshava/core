@@ -31,7 +31,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 					}
 				}
 
-				if (parameters.PropertyInfo.PropertyType == typeof(Guid))
+				if (parameters.PropertyInfo.PropertyType.GetDataType() == typeof(Guid))
 				{
 					var valueGuid = parameters.PropertyValue as Guid?;
 
@@ -41,11 +41,11 @@ namespace Eshava.Core.Validation.ValidationMethods
 					}
 				}
 
-				if (parameters.PropertyInfo.PropertyType == typeof(DateTime))
+				if (parameters.PropertyInfo.PropertyType.GetDataType() == typeof(DateTime))
 				{
-					var valueGuid = parameters.PropertyValue as DateTime?;
+					var valueDateTime = parameters.PropertyValue as DateTime?;
 
-					if (!valueGuid.HasValue || valueGuid.Value == DateTime.MinValue)
+					if (!valueDateTime.HasValue || valueDateTime.Value == DateTime.MinValue)
 					{
 						return GetErrorResult(ValidationErrorType.IsEmpty, parameters.PropertyInfo.Name);
 					}

@@ -36,13 +36,18 @@ namespace Eshava.Test.Core.Validation
 		public void ValidateWithEmptyClassTest()
 		{
 			// Arrange
-			var source = new Alpha();
+			var source = new Alpha
+			{
+				PsiRequiredNullable = DateTime.MinValue,
+				ChiNullable = Guid.Empty
+			};
+
 			// Act
 			var result = _classUnderTest.Validate(source);
 
 			// Assert
 			result.IsValid.Should().BeFalse();
-			result.ValidationErrors.Should().HaveCount(16);
+			result.ValidationErrors.Should().HaveCount(18);
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.Required.ToString()
@@ -59,7 +64,19 @@ namespace Eshava.Test.Core.Validation
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.Required.ToString()
 				&& error.ErrorType == ValidationErrorType.IsEmpty.ToString()
+				&& error.PropertyName == nameof(Alpha.ChiNullable))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required.ToString()
+				&& error.ErrorType == ValidationErrorType.IsEmpty.ToString()
 				&& error.PropertyName == nameof(Alpha.PsiRequired))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required.ToString()
+				&& error.ErrorType == ValidationErrorType.IsEmpty.ToString()
+				&& error.PropertyName == nameof(Alpha.PsiRequiredNullable))
 			.Should().BeTrue();
 
 			result.ValidationErrors.Any(error =>
@@ -172,7 +189,9 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -209,7 +228,7 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
-			result.ValidationErrors.Should().HaveCount(8);
+			result.ValidationErrors.Should().HaveCount(10);
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.Required.ToString()
@@ -221,6 +240,12 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.Required.ToString()
 				&& error.ErrorType == ValidationErrorType.IsEmpty.ToString()
 				&& error.PropertyName == nameof(Alpha.PsiRequired))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required.ToString()
+				&& error.ErrorType == ValidationErrorType.IsNull.ToString()
+				&& error.PropertyName == nameof(Alpha.PsiRequiredNullable))
 			.Should().BeTrue();
 
 			result.ValidationErrors.Any(error =>
@@ -253,6 +278,11 @@ namespace Eshava.Test.Core.Validation
 				&& error.PropertyName == nameof(Alpha.ChiNotNull))
 			.Should().BeTrue();
 
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required.ToString()
+				&& error.ErrorType == ValidationErrorType.IsNull.ToString()
+				&& error.PropertyName == nameof(Alpha.ChiNullable))
+			.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -279,7 +309,9 @@ namespace Eshava.Test.Core.Validation
 				OmegaLongEqualTwo = 2L,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -349,7 +381,9 @@ namespace Eshava.Test.Core.Validation
 				Omikron = Alphabet.A,
 				Sigma = new List<int> { 1 },
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -437,7 +471,9 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -471,7 +507,9 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -522,7 +560,9 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -586,7 +626,9 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -657,7 +699,9 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -726,7 +770,9 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -771,7 +817,9 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -812,7 +860,9 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -846,7 +896,9 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -902,7 +954,9 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -999,7 +1053,9 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -1240,7 +1296,9 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
 			};
 
 			// Act
@@ -1289,7 +1347,10 @@ namespace Eshava.Test.Core.Validation
 				OmegaIntegerNotEqual = 1,
 				OmegaLongNotEqual = 1L,
 				ChiNotNull = Guid.NewGuid(),
-				PsiRequired = DateTime.UtcNow
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
+
 			};
 
 			// Act
