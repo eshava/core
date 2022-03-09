@@ -135,10 +135,15 @@ namespace Eshava.Test.Core.Validation.Models
 
 		[Required]
 		public Guid ChiNotNull { get; set; }
+		[Required]
+		public Guid? ChiNullable { get; set; }
+
 		public DateTime? Psi { get; set; }
 		[Required]
 		public DateTime PsiRequired { get; set; }
-		
+		[Required]
+		public DateTime? PsiRequiredNullable { get; set; }
+
 		[RangeTo("OmegaFloatTo", false)]
 		public float OmegaFloatFrom { get; set; }
 		[RangeFrom("OmegaFloatFrom", false)]
