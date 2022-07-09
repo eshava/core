@@ -27,6 +27,7 @@ namespace Eshava.Core.Validation
 			RangeFromOrToValidation.CheckRangeFrom,
 			RangeFromOrToValidation.CheckRangeTo,
 			RangeBetweenValidation.CheckRangeBetween,
+			RegularExpressionValidation.CheckRegularExpression,
 			parameter => { parameter.NotEquals = false; return EqualsValidation.CheckEqualsTo(parameter); },
 			parameter => { parameter.NotEquals = true; return EqualsValidation.CheckEqualsTo(parameter); }
 		};

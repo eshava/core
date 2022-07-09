@@ -7,6 +7,8 @@ namespace Eshava.Test.Core.Validation.Models
 {
 	public class Alpha
 	{
+		public const string OMEGAREGEXFORMAT = @"^([a-zA-Z]{1})([\-]?[a-zA-Z\d]+)*$";
+
 		public Alpha()
 		{
 			
@@ -199,5 +201,8 @@ namespace Eshava.Test.Core.Validation.Models
 		[Required]
 		[ValidationIgnore]
 		public string StigmaThree { get; set; }
+
+		[RegularExpression(OMEGAREGEXFORMAT)]
+		public string OmegaRegEx { get; set; }
 	}
 }

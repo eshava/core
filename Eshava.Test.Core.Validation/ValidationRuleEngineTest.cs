@@ -259,7 +259,7 @@ namespace Eshava.Test.Core.Validation
 			var rules = _classUnderTest.CalculateValidationRules<ComplexData>();
 
 			// Assert
-			rules.Should().HaveCount(4);
+			rules.Should().HaveCount(5);
 
 			var alpha = rules.Single(r => r.PropertyName == nameof(ComplexData.Alpha));
 			alpha.DataType.Should().Be("string");
@@ -272,7 +272,7 @@ namespace Eshava.Test.Core.Validation
 
 			var camelCaseNameProperties = rules.Where(r => r.PropertyName == nameof(BasicRules.CamelCaseName));
 			var justAnotherPropertyProperties = rules.Where(r => r.PropertyName == nameof(BasicRules.JustAnotherProperty));
-
+			
 			camelCaseNameProperties.Should().HaveCount(1);
 			camelCaseNameProperties.Single().DataType.Should().Be("string");
 			camelCaseNameProperties.Single().Rules.Should().HaveCount(1);
@@ -282,6 +282,12 @@ namespace Eshava.Test.Core.Validation
 			justAnotherPropertyProperties.Single().DataType.Should().Be("string");
 			justAnotherPropertyProperties.Single().Rules.Should().HaveCount(1);
 			justAnotherPropertyProperties.Single().Rules.Single().Rule.Should().Be("Custom");
-		}		
+
+			var epsilon = rules.Single(r => r.PropertyName == nameof(ComplexData.Epsilon));
+			epsilon.DataType.Should().Be("string");
+			epsilon.Rules.Should().HaveCount(1);
+			epsilon.Rules.SingleOrDefault(r => r.Rule == "RegularExpression").Should().NotBeNull();
+			epsilon.Rules.SingleOrDefault(r => r.RegEx == ComplexData.EPSILONFORMAT).Should().NotBeNull();
+		}
 	}
 }
