@@ -16,7 +16,7 @@ namespace Eshava.Test.Core.IO
 	public class ZipArchiveEngineTest
 	{
 		private ZipArchiveEngine _classUnderTest;
-		private ConcurrentBag<string> _workspaces;
+		private static ConcurrentBag<string> _workspaces;
 
 		[TestInitialize]
 		public void Setup()
@@ -26,7 +26,7 @@ namespace Eshava.Test.Core.IO
 		}
 
 		[AssemblyCleanup]
-		public void CleanupAfterAllTests()
+		public static void CleanupAfterAllTests()
 		{
 			CleanUpTestBed();
 		}
@@ -371,7 +371,7 @@ namespace Eshava.Test.Core.IO
 			_classUnderTest.ReadFullFileNames(Path.Combine(Path.GetTempPath(), "Archive.zip"));
 		}
 
-		private void CleanUpTestBed(string sourceDirectoryPath, string targetDirectoryPath)
+		private static void CleanUpTestBed(string sourceDirectoryPath, string targetDirectoryPath)
 		{
 			if (!sourceDirectoryPath.IsNullOrEmpty() && System.IO.Directory.Exists(sourceDirectoryPath))
 			{
@@ -384,7 +384,7 @@ namespace Eshava.Test.Core.IO
 			}
 		}
 
-		private void CleanUpTestBed()
+		private static void CleanUpTestBed()
 		{
 			foreach (var workspace in _workspaces.Where(System.IO.Directory.Exists))
 			{

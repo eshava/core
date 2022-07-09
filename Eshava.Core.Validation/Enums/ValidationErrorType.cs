@@ -25,6 +25,7 @@
 		NoWellFormedUri = 20,
 		NoWellFormedMailAddress = 21,
 		GreaterMaxLength = 22,
-		LowerMinLength = 23
+		LowerMinLength = 23,
+		RegularExpression = 24
 	}
 }

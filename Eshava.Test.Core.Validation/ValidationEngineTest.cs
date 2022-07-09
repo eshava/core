@@ -271,7 +271,7 @@ namespace Eshava.Test.Core.Validation
 				&& error.ErrorType == ValidationErrorType.IsNull.ToString()
 				&& error.PropertyName == nameof(Alpha.Psi))
 			.Should().Be(2);
-			
+
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.Required.ToString()
 				&& error.ErrorType == ValidationErrorType.IsEmpty.ToString()
@@ -1252,8 +1252,8 @@ namespace Eshava.Test.Core.Validation
 			// Assert
 			result.IsValid.Should().BeFalse();
 			result.ValidationErrors.Should().HaveCount(6);
-			result.ValidationErrors.All(error => 
-					error.MethodType == ValidationMethodType.RangeBetween.ToString() 
+			result.ValidationErrors.All(error =>
+					error.MethodType == ValidationMethodType.RangeBetween.ToString()
 				 && error.ErrorType != ValidationErrorType.DataTypesNotEqual.ToString()
 				 && error.ErrorType != ValidationErrorType.DataTypeNotSupported.ToString())
 				.Should()
@@ -1367,6 +1367,54 @@ namespace Eshava.Test.Core.Validation
 					error.MethodType == ValidationMethodType.String.ToString()
 					&& error.ErrorType == ValidationErrorType.NoWellFormedMailAddress.ToString()
 					&& error.PropertyName == nameof(Alpha.DeltaMail))
+				.Should().BeTrue();
+			}
+		}
+
+		[DataTestMethod]
+		[DataRow("a-b1-c2", true, DisplayName = "Valid value for regular expression (1)")]
+		[DataRow("a-B-2", true, DisplayName = "Valid value for regular expression (2)")]
+		[DataRow("a--c", false, DisplayName = "Invalid value for regular expression")]
+		public void ValidateRegularExpressionTest(string omegaRegEx, bool isValid)
+		{
+			// Arrange
+			var source = new Alpha
+			{
+				Gamma = "QuackFu",
+				Delta = "QuackFu",
+				DeltaTwo = "Alpha",
+				DeltaMail = null,
+				EpsilonTwo = "Alpha",
+				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
+				Ny = 1,
+				Omikron = Alphabet.A,
+				Pi = 2,
+				Rho = 3,
+				Sigma = new List<int> { 1 },
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid(),
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow,
+				OmegaRegEx = omegaRegEx
+			};
+
+			// Act
+			var result = _classUnderTest.Validate(source);
+
+			// Assert
+			result.IsValid.Should().Be(isValid);
+
+			if (!isValid)
+			{
+				result.ValidationErrors.Should().HaveCount(1);
+
+				result.ValidationErrors.Any(error =>
+					error.MethodType == ValidationMethodType.String.ToString()
+					&& error.ErrorType == ValidationErrorType.RegularExpression.ToString()
+					&& error.PropertyName == nameof(Alpha.OmegaRegEx))
 				.Should().BeTrue();
 			}
 		}

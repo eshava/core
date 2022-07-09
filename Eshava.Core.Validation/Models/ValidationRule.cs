@@ -5,6 +5,7 @@
 		public string Rule { get; set; }
 		public int Value { get; set; }
 		public string DefaultValue { get; set; }
+		public string RegEx { get; set; }
 		public decimal Minimum { get; set; }
 		public decimal Maximum { get; set; }
 

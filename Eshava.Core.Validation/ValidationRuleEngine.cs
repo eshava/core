@@ -115,6 +115,7 @@ namespace Eshava.Core.Validation
 			AddRuleEqualsTo(propertyInfo, validationProperty.Rules);
 			AddRuleNotEqualsTo(propertyInfo, validationProperty.Rules);
 			AddRuleCustom(propertyInfo, validationProperty.Rules);
+			AddRuleRegularExpression(propertyInfo, validationProperty.Rules);
 
 			SetDataType(propertyInfo, validationProperty);
 
@@ -207,6 +208,14 @@ namespace Eshava.Core.Validation
 			if (Attribute.GetCustomAttribute(propertyInfo, typeof(SpecialValidationAttribute)) is SpecialValidationAttribute)
 			{
 				rules.Add(new ValidationRule { Rule = "Custom" });
+			}
+		}
+
+		private void AddRuleRegularExpression(PropertyInfo propertyInfo, IList<ValidationRule> rules)
+		{
+			if (Attribute.GetCustomAttribute(propertyInfo, typeof(RegularExpressionAttribute)) is RegularExpressionAttribute regex)
+			{
+				rules.Add(new ValidationRule { Rule = "RegularExpression", RegEx = regex.Pattern });
 			}
 		}
 
