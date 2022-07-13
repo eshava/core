@@ -278,7 +278,11 @@ namespace Eshava.Core.Linq
 							return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse(mappingResult);
 						}
 
-						members.Add(JoinAndExpressions(mappingResult.Data));
+						var joinResult = JoinAndExpressions(mappingResult.Data);
+						if (joinResult != null)
+						{
+							members.Add(joinResult);
+						}
 					}
 
 					if (members.Count == 1)
@@ -287,7 +291,11 @@ namespace Eshava.Core.Linq
 					}
 					else if (members.Count > 1)
 					{
-						conditions.Add(JoinOrExpressions(members));
+						var joinResult = JoinOrExpressions(members);
+						if (joinResult != null)
+						{
+							conditions.Add(joinResult);
+						}
 					}
 				}
 				else
