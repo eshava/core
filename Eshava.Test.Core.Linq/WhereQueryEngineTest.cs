@@ -25,7 +25,8 @@ namespace Eshava.Test.Core.Linq
 			_classUnderTest = new WhereQueryEngine(new WhereQueryEngineOptions
 			{
 				UseUtcDateTime = true,
-				ContainsSearchSplitBySpace = false
+				ContainsSearchSplitBySpace = false,
+				SkipInvalidWhereQueries = false
 			});
 		}
 
@@ -1293,6 +1294,13 @@ namespace Eshava.Test.Core.Linq
 		public void BuildQueryExpressionsPropertyMappingMultipleTest()
 		{
 			// Arrange
+			_classUnderTest = new WhereQueryEngine(new WhereQueryEngineOptions
+			{
+				UseUtcDateTime = true,
+				ContainsSearchSplitBySpace = false,
+				SkipInvalidWhereQueries = true
+			});
+
 			var exampleList = new List<Alpha>
 			{
 				new Alpha
@@ -1335,7 +1343,7 @@ namespace Eshava.Test.Core.Linq
 
 			var mappings = new Dictionary<string, List<Expression<Func<Alpha, object>>>>
 			{
-				{ nameof(Alpha.Chi), new List<Expression<Func<Alpha, object>>> { p => p.Kappa.Psi, p => p.Kappa.Chi } }
+				{ nameof(Alpha.Chi), new List<Expression<Func<Alpha, object>>> { p => p.Kappa.Psi, p => p.Kappa.Chi, p => p.Beta } }
 			};
 
 			var queryParameter = new QueryParameters
