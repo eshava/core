@@ -15,5 +15,7 @@ namespace Eshava.Test.Core.Linq.Models
 		public string IAmAString { get; set; }
 		public int IAmAnInteger { get; set; }
 		public decimal IAmAnDecimal { get; set; }
+
+		public Guid? UniqueIdentifer { get; set; }
 	}
 }

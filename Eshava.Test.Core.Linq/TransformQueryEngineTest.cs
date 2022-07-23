@@ -21,20 +21,22 @@ namespace Eshava.Test.Core.Linq
 		{
 			_classUnderTest = new TransformQueryEngine();
 		}
-
+		
 		[TestMethod]
 		public void TransformDomainModelToDataModelTest()
 		{
 			// Arrange
 			var today = DateTime.Today;
-			Expression<Func<DomainModel, bool>> sourcExpression = s => s.Id == 5 && s.Name == "Test" && today == s.Date;
+			Guid? guid = Guid.Parse("3806b952-52ed-45e0-ba7c-ae09dae982ad");
+			Expression<Func<DomainModel, bool>> sourcExpression = s => s.Id == 5 && s.Name == "Test" && today == s.Date && s.UniqueIdentifer == guid;
 
 			var list = new List<DataModel>
 			{
-				new DataModel { Id = 1, Name = "Test", Date = DateTime.Today },
-				new DataModel { Id = 5, Name = "Test", Date = DateTime.Today },
-				new DataModel { Id = 5, Name = "Test A", Date = DateTime.Today },
-				new DataModel { Id = 5, Name = "Test", Date = DateTime.Today.AddDays(1) }
+				new DataModel { Id = 1, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { Id = 5, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { Id = 5, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.Parse("3806b952-52ed-45e0-ba7c-ae09dae982ad") },
+				new DataModel { Id = 5, Name = "Test A", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { Id = 5, Name = "Test", Date = DateTime.Today.AddDays(1), UniqueIdentifer = Guid.NewGuid() }
 			};
 
 			// Act
@@ -50,15 +52,14 @@ namespace Eshava.Test.Core.Linq
 		public void TransformDataModelToDomainModelTest()
 		{
 			// Arrange
-			var today = DateTime.Today;
-			Expression<Func<DataModel, bool>> sourcExpression = s => s.Id == 5 && s.Name == "Test" && today == s.Date;
+			Expression<Func<DataModel, bool>> sourcExpression = s => s.Id == 5 && s.Name == "Test" && DateTime.Today == s.Date && s.UniqueIdentifer == Guid.Parse("3806b952-52ed-45e0-ba7c-ae09dae982ad");
 
 			var list = new List<DomainModel>
 			{
-				new DomainModel { Id = 1, Name = "Test", Date = DateTime.Today },
-				new DomainModel { Id = 5, Name = "Test", Date = DateTime.Today },
-				new DomainModel { Id = 5, Name = "Test A", Date = DateTime.Today },
-				new DomainModel { Id = 5, Name = "Test", Date = DateTime.Today.AddDays(1) }
+				new DomainModel { Id = 1, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DomainModel { Id = 5, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.Parse("3806b952-52ed-45e0-ba7c-ae09dae982ad") },
+				new DomainModel { Id = 5, Name = "Test A", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DomainModel { Id = 5, Name = "Test", Date = DateTime.Today.AddDays(1), UniqueIdentifer = Guid.NewGuid() }
 			};
 
 			// Act
