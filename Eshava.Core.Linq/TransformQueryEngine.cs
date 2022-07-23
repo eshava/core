@@ -16,10 +16,12 @@ namespace Eshava.Core.Linq
 	{
 		private static readonly Type _dateTimeType = typeof(DateTime);
 		private static readonly Type _typeObject = typeof(object);
+		private static readonly Type _typeGuid = typeof(Guid);
 
 		private const string METHOD_CONTAINS = "contains";
 		private const string METHOD_ANY = "any";
 		private const string METHOD_COMPARETO = "compareto";
+		private const string METHOD_PARSE = "parse";
 
 		/// <summary>
 		/// Transforms an expression from source to target data type
@@ -295,6 +297,11 @@ namespace Eshava.Core.Linq
 				return ProcessMethodCallExpressionCompareTo<Target>(methodCallExpression, mappingExpression, parameterExpression);
 			}
 
+			if (method == METHOD_PARSE)
+			{
+				return ProcessMethodCallExpressionParse<Target>(methodCallExpression, mappingExpression, parameterExpression);
+			}
+
 			var memberExpression = ProcessExpression<Target>(methodCallExpression.Object, mappingExpression, parameterExpression);
 			var valueExpression = ProcessExpression<Target>(methodCallExpression.Arguments.First(), mappingExpression, parameterExpression);
 
@@ -346,6 +353,24 @@ namespace Eshava.Core.Linq
 			memberExpression = AddValueAccessToNullableProperty(memberExpression);
 
 			return Expression.Call(valueExpression, compareToMethod, memberExpression);
+		}
+
+		private Expression ProcessMethodCallExpressionParse<Target>(MethodCallExpression methodCallExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
+		{
+			//DisplayClass
+			var valueExpression = ProcessExpression<Target>(methodCallExpression.Arguments.First(), mappingExpression, parameterExpression) as ConstantExpression;
+			object parsedValue;
+
+			if (methodCallExpression.Type == _typeGuid)
+			{
+				parsedValue = Guid.Parse(valueExpression.Value as string);
+			}
+			else
+			{
+				return null;
+			}
+
+			return Expression.Constant(parsedValue, methodCallExpression.Type);
 		}
 
 		private Expression ProcessMethodCallExpressionAny<Target>(MethodCallExpression methodCallExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
@@ -409,6 +434,10 @@ namespace Eshava.Core.Linq
 					expression = Expression.Constant(convertedValue, memberExpression.Type);
 				}
 				else if (memberExpression.Type.IsDataTypeNullable())
+				{
+					expression = Expression.Constant(c.Value, memberExpression.Type);
+				}
+				else if (expression.Type.IsDataTypeNullable() && !memberExpression.Type.IsDataTypeNullable())
 				{
 					expression = Expression.Constant(c.Value, memberExpression.Type);
 				}
