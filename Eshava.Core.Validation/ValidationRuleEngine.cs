@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
@@ -116,6 +117,7 @@ namespace Eshava.Core.Validation
 			AddRuleNotEqualsTo(propertyInfo, validationProperty.Rules);
 			AddRuleCustom(propertyInfo, validationProperty.Rules);
 			AddRuleRegularExpression(propertyInfo, validationProperty.Rules);
+			AddRuleReadOnly(propertyInfo, validationProperty.Rules);
 
 			SetDataType(propertyInfo, validationProperty);
 
@@ -351,6 +353,14 @@ namespace Eshava.Core.Validation
 						DefaultValue = attNotEqualsTo.DefaultValue?.ToString()
 					});
 				});
+			}
+		}
+
+		private void AddRuleReadOnly(PropertyInfo propertyInfo, IList<ValidationRule> rules)
+		{
+			if (Attribute.GetCustomAttribute(propertyInfo, typeof(ReadOnlyAttribute)) is ReadOnlyAttribute @readonly && @readonly.IsReadOnly)
+			{
+				rules.Add(new ValidationRule { Rule = "ReadOnly" });
 			}
 		}
 

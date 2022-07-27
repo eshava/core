@@ -259,7 +259,7 @@ namespace Eshava.Test.Core.Validation
 			var rules = _classUnderTest.CalculateValidationRules<ComplexData>();
 
 			// Assert
-			rules.Should().HaveCount(5);
+			rules.Should().HaveCount(7);
 
 			var alpha = rules.Single(r => r.PropertyName == nameof(ComplexData.Alpha));
 			alpha.DataType.Should().Be("string");
@@ -288,6 +288,16 @@ namespace Eshava.Test.Core.Validation
 			epsilon.Rules.Should().HaveCount(1);
 			epsilon.Rules.SingleOrDefault(r => r.Rule == "RegularExpression").Should().NotBeNull();
 			epsilon.Rules.SingleOrDefault(r => r.RegEx == ComplexData.EPSILONFORMAT).Should().NotBeNull();
+
+			var zeta = rules.Single(r => r.PropertyName == nameof(ComplexData.Zeta));
+			zeta.DataType.Should().Be("string");
+			zeta.Rules.Should().HaveCount(1);
+			zeta.Rules.SingleOrDefault(r => r.Rule == "ReadOnly").Should().NotBeNull();
+
+			var eta = rules.Single(r => r.PropertyName == nameof(ComplexData.Eta));
+			eta.DataType.Should().Be("string");
+			eta.Rules.Should().HaveCount(0);
+
 		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace Eshava.Test.Core.Validation.Models
@@ -14,5 +15,11 @@ namespace Eshava.Test.Core.Validation.Models
 
 		[RegularExpression(EPSILONFORMAT)]
 		public string Epsilon { get; set; }
+
+		[ReadOnly(true)]
+		public string Zeta { get; set; }
+
+		[ReadOnly(false)]
+		public string Eta { get; set; }
 	}
 }
