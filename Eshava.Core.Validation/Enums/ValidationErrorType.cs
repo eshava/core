@@ -26,6 +26,7 @@
 		NoWellFormedMailAddress = 21,
 		GreaterMaxLength = 22,
 		LowerMinLength = 23,
-		RegularExpression = 24
+		RegularExpression = 24,
+		Invalid = 25
 	}
 }
