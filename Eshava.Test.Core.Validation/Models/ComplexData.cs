@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Eshava.Core.Validation.Attributes;
 
 namespace Eshava.Test.Core.Validation.Models
 {
@@ -21,5 +22,15 @@ namespace Eshava.Test.Core.Validation.Models
 
 		[ReadOnly(false)]
 		public string Eta { get; set; }
+
+		[Enumeration(invalidateZero: true)]
+		public Color PrimaryColor { get; set; }
+
+		[Enumeration(skipValidation: true)]
+		public Color SecondaryColor { get; set; }
+
+		[Required]
+		[Enumeration]
+		public Color? BaseColor { get; set; }
 	}
 }

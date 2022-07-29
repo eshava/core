@@ -47,7 +47,7 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
-			result.ValidationErrors.Should().HaveCount(18);
+			result.ValidationErrors.Should().HaveCount(19);
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.Required.ToString()
@@ -135,6 +135,13 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeHardCoded.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeInteger.ToString()
 				&& error.PropertyName == nameof(Alpha.Omikron))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Enumeration.ToString()
+				&& error.ErrorType == ValidationErrorType.Invalid.ToString()
+				&& error.PropertyName == nameof(Alpha.Omikron)
+				&& error.Value == "0")
 			.Should().BeTrue();
 
 			result.ValidationErrors.Any(error =>
@@ -636,7 +643,7 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
-			result.ValidationErrors.Should().HaveCount(6);
+			result.ValidationErrors.Should().HaveCount(7);
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.RangeHardCoded.ToString()
@@ -672,6 +679,13 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeHardCoded.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeInteger.ToString()
 				&& error.PropertyName == nameof(Alpha.Omikron))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Enumeration.ToString()
+				&& error.ErrorType == ValidationErrorType.Invalid.ToString()
+				&& error.PropertyName == nameof(Alpha.Omikron)
+				&& error.Value == "0")
 			.Should().BeTrue();
 		}
 
@@ -709,7 +723,7 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
-			result.ValidationErrors.Should().HaveCount(6);
+			result.ValidationErrors.Should().HaveCount(7);
 
 			result.ValidationErrors.Any(error =>
 					error.MethodType == ValidationMethodType.RangeHardCoded.ToString()
@@ -745,6 +759,13 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeHardCoded.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeInteger.ToString()
 				&& error.PropertyName == nameof(Alpha.Omikron))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Enumeration.ToString()
+				&& error.ErrorType == ValidationErrorType.Invalid.ToString()
+				&& error.PropertyName == nameof(Alpha.Omikron)
+				&& error.Value == "4")
 			.Should().BeTrue();
 		}
 
@@ -1417,6 +1438,43 @@ namespace Eshava.Test.Core.Validation
 					&& error.PropertyName == nameof(Alpha.OmegaRegEx))
 				.Should().BeTrue();
 			}
+		}
+
+		[TestMethod]
+		public void ValidateEnumValues()
+		{
+			// Arrange
+			var complextData = new ComplexData
+			{
+				/* invalidated zero */
+				PrimaryColor = Color.Transparent,
+				/* disabled validation */
+				SecondaryColor = (Color)999,
+				/* default configuration */
+				BaseColor = (Color)999
+			};
+
+			// Act
+			var result = _classUnderTest.Validate(complextData);
+
+			// Assert
+			result.IsValid.Should().BeFalse();
+
+			result.ValidationErrors.Should().HaveCount(2);
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Enumeration.ToString()
+				&& error.ErrorType == ValidationErrorType.Invalid.ToString()
+				&& error.PropertyName == nameof(ComplexData.PrimaryColor)
+				&& error.Value == nameof(Color.Transparent))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Enumeration.ToString()
+				&& error.ErrorType == ValidationErrorType.Invalid.ToString()
+				&& error.PropertyName == nameof(ComplexData.BaseColor)
+				&& error.Value == "999")
+			.Should().BeTrue();
 		}
 	}
 }

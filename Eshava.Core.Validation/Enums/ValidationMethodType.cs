@@ -11,6 +11,7 @@
 		Range = 6,
 		RangeBetween = 7,
 		RangeFromOrTo = 8,
-		String = 9
+		String = 9,
+		Enumeration = 10
 	}
 }

@@ -259,7 +259,7 @@ namespace Eshava.Test.Core.Validation
 			var rules = _classUnderTest.CalculateValidationRules<ComplexData>();
 
 			// Assert
-			rules.Should().HaveCount(7);
+			rules.Should().HaveCount(10);
 
 			var alpha = rules.Single(r => r.PropertyName == nameof(ComplexData.Alpha));
 			alpha.DataType.Should().Be("string");
@@ -298,6 +298,21 @@ namespace Eshava.Test.Core.Validation
 			eta.DataType.Should().Be("string");
 			eta.Rules.Should().HaveCount(0);
 
+			var primaryColor = rules.Single(r => r.PropertyName == nameof(ComplexData.PrimaryColor));
+			primaryColor.DataType.Should().Be("select");
+			primaryColor.Rules.Should().HaveCount(1);
+			primaryColor.Rules.SingleOrDefault(r => r.Rule == "Number").Should().NotBeNull();
+
+			var secondaryColor = rules.Single(r => r.PropertyName == nameof(ComplexData.SecondaryColor));
+			secondaryColor.DataType.Should().Be("select");
+			secondaryColor.Rules.Should().HaveCount(1);
+			secondaryColor.Rules.SingleOrDefault(r => r.Rule == "Number").Should().NotBeNull();
+
+			var baseColor = rules.Single(r => r.PropertyName == nameof(ComplexData.BaseColor));
+			baseColor.DataType.Should().Be("select");
+			baseColor.Rules.Should().HaveCount(2);
+			baseColor.Rules.SingleOrDefault(r => r.Rule == "Number").Should().NotBeNull();
+			baseColor.Rules.SingleOrDefault(r => r.Rule == "Required").Should().NotBeNull();
 		}
 	}
 }
