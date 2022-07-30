@@ -17,6 +17,7 @@ namespace Eshava.Core.Linq
 		private static readonly Type _dateTimeType = typeof(DateTime);
 		private static readonly Type _typeObject = typeof(object);
 		private static readonly Type _typeGuid = typeof(Guid);
+		private static readonly Type _typeInt32 = typeof(int);
 
 		private const string METHOD_CONTAINS = "contains";
 		private const string METHOD_ANY = "any";
@@ -429,7 +430,15 @@ namespace Eshava.Core.Linq
 
 				if (expression.Type.GetDataType() != memberExpression.Type.GetDataType())
 				{
-					var convertedValue = Convert.ChangeType(c.Value, memberExpression.Type, CultureInfo.InvariantCulture);
+					object convertedValue;
+					if (memberExpression.Type.GetDataType().IsEnum && expression.Type.GetDataType() == _typeInt32)
+					{
+						convertedValue = Enum.Parse(memberExpression.Type.GetDataType(), c.Value?.ToString() ?? "");
+					}
+					else
+					{
+						convertedValue = Convert.ChangeType(c.Value, memberExpression.Type, CultureInfo.InvariantCulture);
+					}
 
 					expression = Expression.Constant(convertedValue, memberExpression.Type);
 				}
