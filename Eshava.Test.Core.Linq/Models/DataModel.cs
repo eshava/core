@@ -9,7 +9,7 @@ namespace Eshava.Test.Core.Linq.Models
 		public int? NullableStuff { get; set; }
 		public string Name { get; set; }
 		public DateTime? Date { get; set; }
-		public Color Color { get; set; }
+		public Color? Color { get; set; }
 		public SubDataModel Sub { get; set; }
 
 		public string IAmAString { get; set; }

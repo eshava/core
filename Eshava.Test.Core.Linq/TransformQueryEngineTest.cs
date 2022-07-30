@@ -72,6 +72,52 @@ namespace Eshava.Test.Core.Linq
 		}
 
 		[TestMethod]
+		public void TransformDomainModelToDataModelForEnumerationTest()
+		{
+			// Arrange
+			var color = Color.White;
+			Expression<Func<DomainModel, bool>> sourcExpression = s => s.Color == Color.Black && color != s.Color;
+
+			var list = new List<DataModel>
+			{
+				new DataModel { Id = 1, Color = Color.Black },
+				new DataModel { Id = 5, Color = Color.White },
+				new DataModel { Id = 5, Color = Color.White }
+			};
+
+			// Act
+			var targetExpression = _classUnderTest.Transform<DomainModel, DataModel>(sourcExpression, true);
+
+			// Assert
+			var result = list.Where(targetExpression.Compile()).ToList();
+
+			result.Should().HaveCount(1);
+		}
+
+		[TestMethod]
+		public void TransformDataModelToDomainModelForEnumerationTest()
+		{
+			// Arrange
+			Color? colorNullable = Color.Black;
+			Expression<Func<DataModel, bool>> sourcExpression = s => colorNullable == s.Color;
+
+			var list = new List<DomainModel>
+			{
+				new DomainModel { Id = 1, Color = Color.Black },
+				new DomainModel { Id = 5, Color = Color.White },
+				new DomainModel { Id = 5, Color = Color.White }
+			};
+
+			// Act
+			var targetExpression = _classUnderTest.Transform<DataModel, DomainModel>(sourcExpression, true);
+
+			// Assert
+			var result = list.Where(targetExpression.Compile()).ToList();
+
+			result.Should().HaveCount(1);
+		}
+
+		[TestMethod]
 		public void TransformDomainModelToDataModelWithSubNavigationTest()
 		{
 			// Arrange
