@@ -2,7 +2,7 @@
 
 namespace Eshava.Test.Core.Validation.Models
 {
-	public enum Color
+	public enum Color : short
 	{
 		[EnumMember(Value = "transparent")]
 		Transparent,

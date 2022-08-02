@@ -25,12 +25,12 @@ namespace Eshava.Core.Validation.ValidationMethods
 			}
 
 			var invalidateZero = enumAttribute?.InvalidateZero ?? false;
-			var propertyValue = Convert.ToInt32(parameters.PropertyValue);
+			var propertyValue = Convert.ToInt64(parameters.PropertyValue);
 			var isValidEnumValue = false;
 
 			foreach (var enumValue in Enum.GetValues(dataType))
 			{
-				if ((int)enumValue == propertyValue && (propertyValue != 0 || !invalidateZero))
+				if (Convert.ToInt64(enumValue) == propertyValue && (propertyValue != 0 || !invalidateZero))
 				{
 					isValidEnumValue = true;
 
