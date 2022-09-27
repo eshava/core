@@ -14,7 +14,8 @@ namespace Eshava.Core.Validation.ValidationMethods
 	{
 		public static ValidationCheckResult CheckRequired(ValidationCheckParameters parameters)
 		{
-			if (Attribute.GetCustomAttribute(parameters.PropertyInfo, typeof(RequiredAttribute)) != null)
+			var requiredAttribute = Attribute.GetCustomAttribute(parameters.PropertyInfo, typeof(RequiredAttribute)) as RequiredAttribute;
+			if (requiredAttribute != null)
 			{
 				if (parameters.PropertyValue == null)
 				{
@@ -24,8 +25,12 @@ namespace Eshava.Core.Validation.ValidationMethods
 				if (parameters.PropertyInfo.PropertyType == typeof(string))
 				{
 					var valueString = parameters.PropertyValue as string;
+					if (valueString == null)
+					{
+						return GetErrorResult(ValidationErrorType.IsNull, parameters.PropertyInfo.Name);
+					}
 
-					if (valueString.IsNullOrEmpty())
+					if (valueString.IsNullOrEmpty() && !requiredAttribute.AllowEmptyStrings)
 					{
 						return GetErrorResult(ValidationErrorType.IsEmpty, parameters.PropertyInfo.Name);
 					}

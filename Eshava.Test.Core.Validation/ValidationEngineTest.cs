@@ -39,7 +39,8 @@ namespace Eshava.Test.Core.Validation
 			var source = new Alpha
 			{
 				PsiRequiredNullable = DateTime.MinValue,
-				ChiNullable = Guid.Empty
+				ChiNullable = Guid.Empty,
+				EpsilonThree = ""
 			};
 
 			// Act
@@ -47,7 +48,7 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
-			result.ValidationErrors.Should().HaveCount(19);
+			result.ValidationErrors.Should().HaveCount(21);
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.Required.ToString()
@@ -171,6 +172,18 @@ namespace Eshava.Test.Core.Validation
 				&& error.PropertyName == nameof(Alpha.OmegaLongNotEqual)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaLongEqualTwo))
 			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required.ToString()
+				&& error.ErrorType == ValidationErrorType.IsNull.ToString()
+				&& error.PropertyName == nameof(Alpha.EpsilonFour))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required.ToString()
+				&& error.ErrorType == ValidationErrorType.IsEmpty.ToString()
+				&& error.PropertyName == nameof(Alpha.EpsilonThree))
+			.Should().BeTrue();
 		}
 
 		[TestMethod]
@@ -183,6 +196,8 @@ namespace Eshava.Test.Core.Validation
 				Delta = "QuackFu",
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				MyNullableOne = 0m,
@@ -220,6 +235,8 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				Epsilon = "Alpha",
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -302,6 +319,8 @@ namespace Eshava.Test.Core.Validation
 				Delta = "Quack",
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				Ny = 1,
@@ -382,6 +401,8 @@ namespace Eshava.Test.Core.Validation
 				Epsilon = "QuackFu",
 				EpsilonTwo = "QuackFu",
 				DeltaTwo = "QuackFu",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				Ny = 1,
@@ -468,6 +489,8 @@ namespace Eshava.Test.Core.Validation
 				Delta = "QuackFu",
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				Ny = 1,
@@ -501,6 +524,8 @@ namespace Eshava.Test.Core.Validation
 				Delta = "Duck",
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				Ny = 1,
@@ -554,6 +579,8 @@ namespace Eshava.Test.Core.Validation
 				Delta = "Darkwing Duck",
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				Ny = 1,
@@ -620,6 +647,8 @@ namespace Eshava.Test.Core.Validation
 				Delta = "QuackFu",
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				Lambda = -1,
 				LambdaNullable = 1,
 				LambdaLong = -1L,
@@ -699,6 +728,8 @@ namespace Eshava.Test.Core.Validation
 				Delta = "QuackFu",
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				Lambda = -1,
 				LambdaNullable = 1,
 				LambdaLong = -1L,
@@ -779,6 +810,8 @@ namespace Eshava.Test.Core.Validation
 				Delta = "QuackFu",
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				My = 1.00001m,
@@ -826,6 +859,8 @@ namespace Eshava.Test.Core.Validation
 				Delta = "QuackFu",
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				MyNullableOne = 1,
@@ -868,6 +903,8 @@ namespace Eshava.Test.Core.Validation
 				Delta = "QuackFu",
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				MyNullableThree = 1,
@@ -904,6 +941,8 @@ namespace Eshava.Test.Core.Validation
 				Delta = "QuackFu",
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				MyNullableThree = 1,
@@ -947,6 +986,8 @@ namespace Eshava.Test.Core.Validation
 				Delta = "QuackFu",
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				MyNullableOne = 0,
@@ -1046,6 +1087,8 @@ namespace Eshava.Test.Core.Validation
 				Delta = "QuackFu",
 				DeltaTwo = "Alpha",
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				MyNullableOne = 0,
@@ -1307,6 +1350,8 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				DeltaUrl = url,
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				Ny = 1,
@@ -1358,6 +1403,8 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				DeltaMail = mailAddress,
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				Ny = 1,
@@ -1406,6 +1453,8 @@ namespace Eshava.Test.Core.Validation
 				DeltaTwo = "Alpha",
 				DeltaMail = null,
 				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				Ny = 1,
