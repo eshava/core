@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 	    <LangVersion>latest</LangVersion>
-		<TargetFramework>netcoreapp2.2</TargetFramework>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<Description>Collection of methods, classes and helpers to simplify recurring standard actions</Description>
 		<PackageLicenseUrl>https://github.com/eshava/core/blob/master/LICENSE</PackageLicenseUrl>
 		<PackageProjectUrl>https://github.com/eshava/core</PackageProjectUrl>

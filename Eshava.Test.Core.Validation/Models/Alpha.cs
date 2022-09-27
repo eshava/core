@@ -11,7 +11,7 @@ namespace Eshava.Test.Core.Validation.Models
 
 		public Alpha()
 		{
-			
+
 		}
 
 		public Alpha(int beta, string gamma)
@@ -54,6 +54,11 @@ namespace Eshava.Test.Core.Validation.Models
 		public string Epsilon { get; set; }
 
 		public string EpsilonTwo { get; set; }
+
+		[Required]
+		public string EpsilonThree { get; set; }
+		[Required(AllowEmptyStrings = true)]
+		public string EpsilonFour { get; set; }
 
 		public List<string> Zeta { get; set; }
 
@@ -173,7 +178,7 @@ namespace Eshava.Test.Core.Validation.Models
 		public double OmegaDoubleTo { get; set; }
 		[RangeBetween("OmegaDoubleFrom", "OmegaDoubleTo")]
 		public double OmegaDouble { get; set; }
-		
+
 		[RangeTo("OmegaDateTimeTo", false)]
 		public DateTime OmegaDateTimeFrom { get; set; }
 		[RangeFrom("OmegaDateTimeFrom", false)]
