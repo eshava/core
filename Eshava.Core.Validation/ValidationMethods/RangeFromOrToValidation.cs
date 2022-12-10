@@ -41,7 +41,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 				if (propertyInfoSource == null)
 				{
-					results.Add(GetErrorResult(ValidationErrorType.PropertyNotFoundFrom, propertySource.Trim(), propertyInfoTarget.Name));
+					results.Add(GetErrorResult(ValidationErrorType.PropertyNotFoundFrom, propertySource.Trim(), propertyInfoTarget.Name, null));
 
 					continue;
 				}
@@ -51,7 +51,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				//Check whether the data types match
 				if (dataType != dataTypeFrom)
 				{
-					results.Add(GetErrorResult(ValidationErrorType.DataTypesNotEqual, propertyInfoSource.Name, propertyInfoTarget.Name));
+					results.Add(GetErrorResult(ValidationErrorType.DataTypesNotEqual, propertyInfoSource.Name, propertyInfoTarget.Name, null));
 
 					continue;
 				}
@@ -84,14 +84,15 @@ namespace Eshava.Core.Validation.ValidationMethods
 			return new ValidationCheckResult { ValidationErrors = results };
 		}
 
-		private static ValidationError GetErrorResult(ValidationErrorType errorType, string propertyNameFrom, string propertyNameTo)
+		private static ValidationError GetErrorResult(ValidationErrorType errorType, string propertyNameFrom, string propertyNameTo, string @value)
 		{
 			return new ValidationError
 			{
 				MethodType = ValidationMethodType.RangeFromOrTo.ToString(),
 				ErrorType = errorType.ToString(),
 				PropertyNameFrom = propertyNameFrom,
-				PropertyNameTo = propertyNameTo
+				PropertyNameTo = propertyNameTo,
+				Value = @value
 			};
 		}
 	}

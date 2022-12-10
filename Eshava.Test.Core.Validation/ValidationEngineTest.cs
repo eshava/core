@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Eshava.Core.Validation;
 using Eshava.Core.Validation.Enums;
@@ -351,6 +352,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.Equals.ToString()
 				&& error.ErrorType == ValidationErrorType.NotEqualsString.ToString()
 				&& error.PropertyName == nameof(Alpha.Gamma)
+				&& error.Value == source.Gamma
 				&& error.PropertyNameTo == nameof(Alpha.Delta))
 			.Should().BeTrue();
 
@@ -358,6 +360,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.Equals.ToString()
 				&& error.ErrorType == ValidationErrorType.NotEqualsString.ToString()
 				&& error.PropertyName == nameof(Alpha.Delta)
+				&& error.Value == source.Delta
 				&& error.PropertyNameTo == nameof(Alpha.Gamma))
 			.Should().BeTrue();
 
@@ -365,6 +368,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.Equals.ToString()
 				&& error.ErrorType == ValidationErrorType.NotEquals.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaIntegerEqualOne)
+				&& error.Value == source.OmegaIntegerEqualOne.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaIntegerEqualTwo))
 			.Should().BeTrue();
 
@@ -372,6 +376,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.Equals.ToString()
 				&& error.ErrorType == ValidationErrorType.NotEquals.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaIntegerEqualTwo)
+				&& error.Value == source.OmegaIntegerEqualTwo.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaIntegerEqualOne))
 			.Should().BeTrue();
 
@@ -379,6 +384,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.Equals.ToString()
 				&& error.ErrorType == ValidationErrorType.NotEquals.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaLongEqualOne)
+				&& error.Value == source.OmegaLongEqualOne.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaLongEqualTwo))
 			.Should().BeTrue();
 
@@ -386,6 +392,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.Equals.ToString()
 				&& error.ErrorType == ValidationErrorType.NotEquals.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaLongEqualTwo)
+				&& error.Value == source.OmegaLongEqualTwo.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaLongEqualOne))
 			.Should().BeTrue();
 		}
@@ -426,6 +433,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.NotEquals.ToString()
 				&& error.ErrorType == ValidationErrorType.EqualsString.ToString()
 				&& error.PropertyName == nameof(Alpha.Gamma)
+				&& error.Value == source.Gamma
 				&& error.PropertyNameTo == nameof(Alpha.Epsilon))
 			.Should().BeTrue();
 
@@ -433,6 +441,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.NotEquals.ToString()
 				&& error.ErrorType == ValidationErrorType.EqualsString.ToString()
 				&& error.PropertyName == nameof(Alpha.Delta)
+				&& error.Value == source.Delta
 				&& error.PropertyNameTo == nameof(Alpha.Epsilon))
 			.Should().BeTrue();
 
@@ -440,6 +449,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.NotEquals.ToString()
 				&& error.ErrorType == ValidationErrorType.EqualsString.ToString()
 				&& error.PropertyName == nameof(Alpha.Delta)
+				&& error.Value == source.Delta
 				&& error.PropertyNameTo == nameof(Alpha.EpsilonTwo))
 			.Should().BeTrue();
 
@@ -447,6 +457,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.NotEquals.ToString()
 				&& error.ErrorType == ValidationErrorType.EqualsAndNotEqualToDefaultString.ToString()
 				&& error.PropertyName == nameof(Alpha.DeltaTwo)
+				&& error.Value == source.DeltaTwo
 				&& error.PropertyNameTo == nameof(Alpha.EpsilonTwo))
 			.Should().BeTrue();
 
@@ -454,6 +465,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.NotEquals.ToString()
 				&& error.ErrorType == ValidationErrorType.EqualsAndNotEqualToDefault.ToString().ToString()
 				&& error.PropertyName == nameof(Alpha.Pi)
+				&& error.Value == source.Pi.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameTo == nameof(Alpha.Rho))
 			.Should().BeTrue();
 
@@ -461,6 +473,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.NotEquals.ToString()
 				&& error.ErrorType == ValidationErrorType.EqualsAndNotEqualToDefault.ToString().ToString()
 				&& error.PropertyName == nameof(Alpha.Rho)
+				&& error.Value == source.Rho.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameTo == nameof(Alpha.Pi))
 			.Should().BeTrue();
 
@@ -468,6 +481,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.NotEquals.ToString()
 				&& error.ErrorType == ValidationErrorType.Equals.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaIntegerNotEqual)
+				&& error.Value == source.OmegaIntegerNotEqual.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaIntegerEqualTwo))
 			.Should().BeTrue();
 
@@ -475,6 +489,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.NotEquals.ToString()
 				&& error.ErrorType == ValidationErrorType.Equals.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaLongNotEqual)
+				&& error.Value == source.OmegaLongNotEqual.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaLongEqualTwo))
 			.Should().BeTrue();
 		}
@@ -554,18 +569,21 @@ namespace Eshava.Test.Core.Validation
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.String.ToString()
 				&& error.ErrorType == ValidationErrorType.LowerMinLength.ToString()
+				&& error.Value == source.Gamma
 				&& error.PropertyName == nameof(Alpha.Gamma))
 			.Should().BeTrue();
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.String.ToString()
 				&& error.ErrorType == ValidationErrorType.LowerMinLength.ToString()
+				&& error.Value == source.Delta
 				&& error.PropertyName == nameof(Alpha.Delta))
 			.Should().BeTrue();
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.String.ToString()
 				&& error.ErrorType == ValidationErrorType.LowerMinLength.ToString()
+				&& error.Value == source.Ypsilon.Last()
 				&& error.PropertyName == nameof(Alpha.Ypsilon))
 			.Should().BeTrue();
 		}
@@ -609,30 +627,35 @@ namespace Eshava.Test.Core.Validation
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.String.ToString()
 				&& error.ErrorType == ValidationErrorType.GreaterMaxLength.ToString()
+				&& error.Value == source.Gamma
 				&& error.PropertyName == nameof(Alpha.Gamma))
 			.Should().BeTrue();
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.String.ToString()
 				&& error.ErrorType == ValidationErrorType.GreaterMaxLength.ToString()
+				&& error.Value == source.Delta
 				&& error.PropertyName == nameof(Alpha.Delta))
 			.Should().BeTrue();
 
 			result.ValidationErrors.Count(error =>
 				error.MethodType == ValidationMethodType.String.ToString()
 				&& error.ErrorType == ValidationErrorType.GreaterMaxLength.ToString()
-				&& error.PropertyName == nameof(Alpha.Chi))
+				&& error.Value == source.TauIEnumerable.FirstOrDefault().Chi?.ToString()
+				&& error.PropertyName == nameof(Omega.Chi))
 			.Should().Be(2);
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.String.ToString()
 				&& error.ErrorType == ValidationErrorType.GreaterMaxLength.ToString()
+				&& error.Value == source.Ypsilon.Last()
 				&& error.PropertyName == nameof(Alpha.Ypsilon))
 			.Should().BeTrue();
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.String.ToString()
 				&& error.ErrorType == ValidationErrorType.GreaterMaxLength.ToString()
+				&& error.Value == source.Phi
 				&& error.PropertyName == nameof(Alpha.Phi))
 			.Should().BeTrue();
 		}
@@ -839,12 +862,14 @@ namespace Eshava.Test.Core.Validation
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.DecimalPlaces.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeDecimal.ToString()
+				&& error.Value == source.My.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyName == nameof(Alpha.My))
 			.Should().BeTrue();
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.DecimalPlaces.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeFloatOrDouble.ToString()
+				&& error.Value == source.Xi.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyName == nameof(Alpha.Xi))
 			.Should().BeTrue();
 		}
@@ -1032,6 +1057,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeBetween.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeDecimal.ToString()
 				&& error.PropertyName == nameof(Alpha.MyNullableSix)
+				&& error.Value == source.MyNullableSix.Value.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameFrom == nameof(Alpha.MyNullableOne)
 				&& error.PropertyNameTo == nameof(Alpha.MyNullableTwo))
 			.Should().BeTrue();
@@ -1040,6 +1066,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeBetween.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeFloat.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaFloat)
+				&& error.Value == source.OmegaFloat.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameFrom == nameof(Alpha.OmegaFloatFrom)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaFloatTo))
 			.Should().BeTrue();
@@ -1048,6 +1075,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeBetween.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeInteger.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaInteger)
+				&& error.Value == source.OmegaInteger.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameFrom == nameof(Alpha.OmegaIntegerFrom)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaIntegerTo))
 			.Should().BeTrue();
@@ -1056,6 +1084,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeBetween.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeLong.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaLong)
+				&& error.Value == source.OmegaLong.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameFrom == nameof(Alpha.OmegaLongFrom)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaLongTo))
 			.Should().BeTrue();
@@ -1064,6 +1093,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeBetween.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeDouble.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaDouble)
+				&& error.Value == source.OmegaDouble.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameFrom == nameof(Alpha.OmegaDoubleFrom)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaDoubleTo))
 			.Should().BeTrue();
@@ -1072,6 +1102,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeBetween.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeDateTime.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaDateTime)
+				&& error.Value == source.OmegaDateTime.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameFrom == nameof(Alpha.OmegaDateTimeFrom)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaDateTimeTo))
 			.Should().BeTrue();
@@ -1133,6 +1164,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeBetween.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeDecimal.ToString()
 				&& error.PropertyName == nameof(Alpha.MyNullableSix)
+				&& error.Value == source.MyNullableSix.Value.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameFrom == nameof(Alpha.MyNullableOne)
 				&& error.PropertyNameTo == nameof(Alpha.MyNullableTwo))
 			.Should().BeTrue();
@@ -1141,6 +1173,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeBetween.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeFloat.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaFloat)
+				&& error.Value == source.OmegaFloat.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameFrom == nameof(Alpha.OmegaFloatFrom)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaFloatTo))
 			.Should().BeTrue();
@@ -1149,6 +1182,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeBetween.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeInteger.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaInteger)
+				&& error.Value == source.OmegaInteger.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameFrom == nameof(Alpha.OmegaIntegerFrom)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaIntegerTo))
 			.Should().BeTrue();
@@ -1157,6 +1191,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeBetween.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeLong.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaLong)
+				&& error.Value == source.OmegaLong.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameFrom == nameof(Alpha.OmegaLongFrom)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaLongTo))
 			.Should().BeTrue();
@@ -1165,6 +1200,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeBetween.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeDouble.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaDouble)
+				&& error.Value == source.OmegaDouble.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameFrom == nameof(Alpha.OmegaDoubleFrom)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaDoubleTo))
 			.Should().BeTrue();
@@ -1173,6 +1209,7 @@ namespace Eshava.Test.Core.Validation
 				error.MethodType == ValidationMethodType.RangeBetween.ToString()
 				&& error.ErrorType == ValidationErrorType.DataTypeDateTime.ToString()
 				&& error.PropertyName == nameof(Alpha.OmegaDateTime)
+				&& error.Value == source.OmegaDateTime.ToString(CultureInfo.InvariantCulture)
 				&& error.PropertyNameFrom == nameof(Alpha.OmegaDateTimeFrom)
 				&& error.PropertyNameTo == nameof(Alpha.OmegaDateTimeTo))
 			.Should().BeTrue();
@@ -1380,7 +1417,8 @@ namespace Eshava.Test.Core.Validation
 				result.ValidationErrors.Any(error =>
 					error.MethodType == ValidationMethodType.String.ToString()
 					&& error.ErrorType == ValidationErrorType.NoWellFormedUri.ToString()
-					&& error.PropertyName == nameof(Alpha.DeltaUrl))
+					&& error.PropertyName == nameof(Alpha.DeltaUrl)
+					&& error.Value == url)
 				.Should().BeTrue();
 			}
 		}
@@ -1434,7 +1472,8 @@ namespace Eshava.Test.Core.Validation
 				result.ValidationErrors.Any(error =>
 					error.MethodType == ValidationMethodType.String.ToString()
 					&& error.ErrorType == ValidationErrorType.NoWellFormedMailAddress.ToString()
-					&& error.PropertyName == nameof(Alpha.DeltaMail))
+					&& error.PropertyName == nameof(Alpha.DeltaMail)
+					&& error.Value == mailAddress)
 				.Should().BeTrue();
 			}
 		}
@@ -1484,7 +1523,8 @@ namespace Eshava.Test.Core.Validation
 				result.ValidationErrors.Any(error =>
 					error.MethodType == ValidationMethodType.String.ToString()
 					&& error.ErrorType == ValidationErrorType.RegularExpression.ToString()
-					&& error.PropertyName == nameof(Alpha.OmegaRegEx))
+					&& error.PropertyName == nameof(Alpha.OmegaRegEx)
+					&& error.Value == omegaRegEx)
 				.Should().BeTrue();
 			}
 		}

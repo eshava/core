@@ -38,7 +38,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return validationRule.Validate(parameters, range);
 			}
 
-			return GetErrorResult(ValidationErrorType.DataTypeNotSupported, parameters.PropertyInfo.Name);
+			return GetErrorResult(ValidationErrorType.DataTypeNotSupported, parameters.PropertyInfo.Name, null);
 		}
 
 		private static ValidationCheckResult CheckRangeInteger(ValidationCheckParameters parameters, RangeAttribute range)
@@ -49,7 +49,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (valueInteger < minimum || valueInteger > maximum)
 			{
-				return GetErrorResult(ValidationErrorType.DataTypeInteger, parameters.PropertyInfo.Name);
+				return GetErrorResult(ValidationErrorType.DataTypeInteger, parameters.PropertyInfo.Name, valueInteger.ToString(CultureInfo.InvariantCulture));
 			}
 
 			return new ValidationCheckResult();
@@ -63,7 +63,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (valueLong < minimum || valueLong > maximum)
 			{
-				return GetErrorResult(ValidationErrorType.DataTypeLong, parameters.PropertyInfo.Name);
+				return GetErrorResult(ValidationErrorType.DataTypeLong, parameters.PropertyInfo.Name, valueLong.ToString(CultureInfo.InvariantCulture));
 			}
 
 			return new ValidationCheckResult();
@@ -77,7 +77,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (valueFloat < minimum || valueFloat > maximum)
 			{
-				return GetErrorResult(ValidationErrorType.DataTypeFloat, parameters.PropertyInfo.Name);
+				return GetErrorResult(ValidationErrorType.DataTypeFloat, parameters.PropertyInfo.Name, valueFloat.ToString(CultureInfo.InvariantCulture));
 			}
 
 			return new ValidationCheckResult();
@@ -91,7 +91,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (valueDouble < minimum || valueDouble > maximum)
 			{
-				return GetErrorResult(ValidationErrorType.DataTypeDouble, parameters.PropertyInfo.Name);
+				return GetErrorResult(ValidationErrorType.DataTypeDouble, parameters.PropertyInfo.Name, valueDouble.ToString(CultureInfo.InvariantCulture));
 			}
 
 			return new ValidationCheckResult();
@@ -105,13 +105,13 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (valueDecimal < minimum || valueDecimal > maximum)
 			{
-				return GetErrorResult(ValidationErrorType.DataTypeDecimal, parameters.PropertyInfo.Name);
+				return GetErrorResult(ValidationErrorType.DataTypeDecimal, parameters.PropertyInfo.Name, valueDecimal.ToString(CultureInfo.InvariantCulture));
 			}
 
 			return new ValidationCheckResult();
 		}
 
-		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName)
+		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName, string @value)
 		{
 			return new ValidationCheckResult
 			{
@@ -121,7 +121,8 @@ namespace Eshava.Core.Validation.ValidationMethods
 					{
 						MethodType = ValidationMethodType.RangeHardCoded.ToString(),
 						ErrorType = errorType.ToString(),
-						PropertyName = propertyName
+						PropertyName = propertyName,
+						Value = @value
 					}
 				}
 			};

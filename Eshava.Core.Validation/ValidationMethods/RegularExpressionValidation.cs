@@ -29,13 +29,13 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (regex != null && !regex.IsValid(valueString))
 			{
-				return GetErrorResult(ValidationErrorType.RegularExpression, parameters.PropertyInfo.Name);
+				return GetErrorResult(ValidationErrorType.RegularExpression, parameters.PropertyInfo.Name, valueString);
 			}
 
 			return new ValidationCheckResult();
 		}
 
-		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName)
+		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName, string @value)
 		{
 			return new ValidationCheckResult
 			{
@@ -45,7 +45,8 @@ namespace Eshava.Core.Validation.ValidationMethods
 					{
 						MethodType = ValidationMethodType.String.ToString(),
 						ErrorType = errorType.ToString(),
-						PropertyName = propertyName
+						PropertyName = propertyName,
+						Value = @value
 					}
 				}
 			};

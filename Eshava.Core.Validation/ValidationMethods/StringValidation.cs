@@ -31,12 +31,12 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 			if (maxLength != null && valueString.Length > maxLength.Length)
 			{
-				return GetErrorResult(ValidationErrorType.GreaterMaxLength, parameters.PropertyInfo.Name);
+				return GetErrorResult(ValidationErrorType.GreaterMaxLength, parameters.PropertyInfo.Name, valueString);
 			}
 
 			if (minLength != null && valueString.Length < minLength.Length)
 			{
-				return GetErrorResult(ValidationErrorType.LowerMinLength, parameters.PropertyInfo.Name);
+				return GetErrorResult(ValidationErrorType.LowerMinLength, parameters.PropertyInfo.Name, valueString);
 			}
 
 			return new ValidationCheckResult();
@@ -56,7 +56,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				var valueString = parameters.PropertyValue as string;
 				if (!valueString.IsNullOrEmpty() && !valueString.IsEmailAddress())
 				{
-					return GetErrorResult(ValidationErrorType.NoWellFormedMailAddress, parameters.PropertyInfo.Name);
+					return GetErrorResult(ValidationErrorType.NoWellFormedMailAddress, parameters.PropertyInfo.Name, valueString);
 				}
 			}
 
@@ -76,14 +76,14 @@ namespace Eshava.Core.Validation.ValidationMethods
 				var valueString = parameters.PropertyValue as string;
 				if (!valueString.IsNullOrEmpty() && !valueString.IsUrl())
 				{
-					return GetErrorResult(ValidationErrorType.NoWellFormedUri, parameters.PropertyInfo.Name);
+					return GetErrorResult(ValidationErrorType.NoWellFormedUri, parameters.PropertyInfo.Name, valueString);
 				}
 			}
 
 			return new ValidationCheckResult();
 		}
 
-		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName)
+		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName, string @value)
 		{
 			return new ValidationCheckResult
 			{
@@ -93,7 +93,8 @@ namespace Eshava.Core.Validation.ValidationMethods
 					{
 						MethodType = ValidationMethodType.String.ToString(),
 						ErrorType = errorType.ToString(),
-						PropertyName = propertyName
+						PropertyName = propertyName,
+						Value = @value
 					}
 				}
 			};

@@ -48,7 +48,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			var propertyInfoEquals = parameters.DataType.GetProperty(propertyNameInfoEquals);
 			if (propertyInfoEquals == null)
 			{
-				return GetErrorResult(parameters, ValidationErrorType.PropertyNotFoundTo, propertyNameInfoEquals);
+				return GetErrorResult(parameters, ValidationErrorType.PropertyNotFoundTo, propertyNameInfoEquals, null);
 			}
 
 			if (parameters.PropertyInfo.PropertyType == typeof(string))
@@ -68,13 +68,13 @@ namespace Eshava.Core.Validation.ValidationMethods
 			{
 				if (Equals(valueString, valueStringEquals) && !Equals(valueString, defaultValue))
 				{
-					return GetErrorResult(parameters, ValidationErrorType.EqualsAndNotEqualToDefaultString, propertyInfoEquals.Name);
+					return GetErrorResult(parameters, ValidationErrorType.EqualsAndNotEqualToDefaultString, propertyInfoEquals.Name, parameters.PropertyValue?.ToString());
 				}
 			}
 			else if (parameters.NotEquals && Equals(valueString, valueStringEquals) ||
 					 !parameters.NotEquals && !Equals(valueString, valueStringEquals))
 			{
-				return GetErrorResult(parameters, parameters.NotEquals ? ValidationErrorType.EqualsString : ValidationErrorType.NotEqualsString, propertyInfoEquals.Name);
+				return GetErrorResult(parameters, parameters.NotEquals ? ValidationErrorType.EqualsString : ValidationErrorType.NotEqualsString, propertyInfoEquals.Name, parameters.PropertyValue?.ToString());
 			}
 
 			return new ValidationCheckResult();
@@ -88,20 +88,20 @@ namespace Eshava.Core.Validation.ValidationMethods
 			{
 				if (Equals(parameters.PropertyValue, valueToEqual) && !Equals(parameters.PropertyValue, defaultValue))
 				{
-					return GetErrorResult(parameters, ValidationErrorType.EqualsAndNotEqualToDefault, propertyInfoEquals.Name);
+					return GetErrorResult(parameters, ValidationErrorType.EqualsAndNotEqualToDefault, propertyInfoEquals.Name, parameters.PropertyValue?.ToString());
 				}
 			}
 			else if (parameters.NotEquals && Equals(parameters.PropertyValue, valueToEqual) ||
 					 !parameters.NotEquals && !Equals(parameters.PropertyValue, valueToEqual))
 			{
 
-				return GetErrorResult(parameters, parameters.NotEquals ? ValidationErrorType.Equals : ValidationErrorType.NotEquals, propertyInfoEquals.Name);
+				return GetErrorResult(parameters, parameters.NotEquals ? ValidationErrorType.Equals : ValidationErrorType.NotEquals, propertyInfoEquals.Name, parameters.PropertyValue?.ToString());
 			}
 
 			return new ValidationCheckResult();
 		}
 
-		private static ValidationCheckResult GetErrorResult(ValidationCheckParameters parameters, ValidationErrorType errorType, string propertyNameToEquals)
+		private static ValidationCheckResult GetErrorResult(ValidationCheckParameters parameters, ValidationErrorType errorType, string propertyNameToEquals, string @value)
 		{
 			return new ValidationCheckResult
 			{
@@ -112,7 +112,8 @@ namespace Eshava.Core.Validation.ValidationMethods
 						MethodType = (parameters.NotEquals ? ValidationMethodType.NotEquals : ValidationMethodType.Equals).ToString(),
 						ErrorType = errorType.ToString(),
 						PropertyName = parameters.PropertyInfo.Name,
-						PropertyNameTo = propertyNameToEquals
+						PropertyNameTo = propertyNameToEquals,
+						Value = @value
 					}
 				}
 			};

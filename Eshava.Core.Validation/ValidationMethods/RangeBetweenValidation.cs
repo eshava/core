@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Eshava.Core.Extensions;
@@ -40,8 +41,8 @@ namespace Eshava.Core.Validation.ValidationMethods
 			var propertyInfoTo = parameters.DataType.GetProperty(rangeBetween.PropertyNameTo);
 			if (propertyInfoFrom == null || propertyInfoTo == null)
 			{
-				var resultFrom = propertyInfoFrom == null ? GetErrorResult(ValidationErrorType.PropertyNotFoundFrom, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo) : null;
-				var resultTo = propertyInfoTo == null ? GetErrorResult(ValidationErrorType.PropertyNotFoundTo, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo) : null;
+				var resultFrom = propertyInfoFrom == null ? GetErrorResult(ValidationErrorType.PropertyNotFoundFrom, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo, null) : null;
+				var resultTo = propertyInfoTo == null ? GetErrorResult(ValidationErrorType.PropertyNotFoundTo, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo, null) : null;
 
 				if (resultFrom != null && resultTo != null)
 				{
@@ -60,7 +61,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			var dataTypeTo = propertyInfoTo.GetDataType();
 			if (dataType != dataTypeFrom || dataType != dataTypeTo)
 			{
-				return GetErrorResult(ValidationErrorType.DataTypesNotEqual, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo);
+				return GetErrorResult(ValidationErrorType.DataTypesNotEqual, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo, null);
 			}
 
 			var validationRule = _validationRules.SingleOrDefault(rule => rule.Check(dataType));
@@ -69,7 +70,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return validationRule.Validate(parameters, propertyInfoFrom, propertyInfoTo);
 			}
 
-			return GetErrorResult(ValidationErrorType.DataTypeNotSupported, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo);
+			return GetErrorResult(ValidationErrorType.DataTypeNotSupported, parameters.PropertyInfo.Name, rangeBetween.PropertyNameFrom, rangeBetween.PropertyNameTo, null);
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenDateTime(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -83,7 +84,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult();
 			}
 
-			return GetErrorResult(ValidationErrorType.DataTypeDateTime, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
+			return GetErrorResult(ValidationErrorType.DataTypeDateTime, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name, value.ToString(CultureInfo.InvariantCulture));
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenInteger(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -97,7 +98,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult();
 			}
 
-			return GetErrorResult(ValidationErrorType.DataTypeInteger, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
+			return GetErrorResult(ValidationErrorType.DataTypeInteger, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name, value.ToString(CultureInfo.InvariantCulture));
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenLong(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -111,7 +112,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult();
 			}
 
-			return GetErrorResult(ValidationErrorType.DataTypeLong, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
+			return GetErrorResult(ValidationErrorType.DataTypeLong, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name, value.ToString(CultureInfo.InvariantCulture));
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenDecimal(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -125,7 +126,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult();
 			}
 
-			return GetErrorResult(ValidationErrorType.DataTypeDecimal, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
+			return GetErrorResult(ValidationErrorType.DataTypeDecimal, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name, value.ToString(CultureInfo.InvariantCulture));
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenDouble(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -139,7 +140,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult();
 			}
 
-			return GetErrorResult(ValidationErrorType.DataTypeDouble, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
+			return GetErrorResult(ValidationErrorType.DataTypeDouble, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name, value.ToString(CultureInfo.InvariantCulture));
 		}
 
 		private static ValidationCheckResult CheckRangeBetweenFloat(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -153,10 +154,10 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult();
 			}
 
-			return GetErrorResult(ValidationErrorType.DataTypeFloat, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name);
+			return GetErrorResult(ValidationErrorType.DataTypeFloat, parameters.PropertyInfo.Name, propertyInfoFrom.Name, propertyInfoTo.Name, value.ToString(CultureInfo.InvariantCulture));
 		}
 		
-		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName, string propertyNameReferenceFrom, string propertyNameReferenceTo)
+		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName, string propertyNameReferenceFrom, string propertyNameReferenceTo, string @value)
 		{
 			return new ValidationCheckResult
 			{
@@ -168,7 +169,8 @@ namespace Eshava.Core.Validation.ValidationMethods
 						ErrorType = errorType.ToString(),
 						PropertyName = propertyName,
 						PropertyNameFrom = propertyNameReferenceFrom,
-						PropertyNameTo = propertyNameReferenceTo
+						PropertyNameTo = propertyNameReferenceTo,
+						Value = @value
 					}
 				}
 			};

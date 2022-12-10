@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Eshava.Core.Extensions;
 using Eshava.Core.Models;
 using Eshava.Core.Validation.Attributes;
@@ -37,7 +38,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 					if (!Equals(Math.Truncate(valueDouble), valueDouble))
 					{
-						return GetErrorResult(ValidationErrorType.DataTypeFloatOrDouble, parameters.PropertyInfo.Name);
+						return GetErrorResult(ValidationErrorType.DataTypeFloatOrDouble, parameters.PropertyInfo.Name, Convert.ToDouble(parameters.PropertyValue).ToString(CultureInfo.InvariantCulture));
 					}
 				}
 				else if (dataType == typeof(decimal))
@@ -47,7 +48,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 
 					if (!Equals(Math.Truncate(valueDecimal), valueDecimal))
 					{
-						return GetErrorResult(ValidationErrorType.DataTypeDecimal, parameters.PropertyInfo.Name);
+						return GetErrorResult(ValidationErrorType.DataTypeDecimal, parameters.PropertyInfo.Name, ((decimal)parameters.PropertyValue).ToString(CultureInfo.InvariantCulture));
 					}
 				}
 			}
@@ -55,7 +56,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 			return new ValidationCheckResult();
 		}
 
-		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName)
+		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyName, string @value)
 		{
 			return new ValidationCheckResult
 			{
@@ -65,7 +66,8 @@ namespace Eshava.Core.Validation.ValidationMethods
 					{
 						MethodType = ValidationMethodType.DecimalPlaces.ToString(),
 						ErrorType = errorType.ToString(),
-						PropertyName = propertyName
+						PropertyName = propertyName,
+						Value = @value
 					}
 				}
 			};
