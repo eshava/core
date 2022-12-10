@@ -12,12 +12,17 @@
     <Version>1.0.1</Version>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <AssemblyVersion>1.0.1</AssemblyVersion>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
 
