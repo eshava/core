@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using Eshava.Core.Extensions;
 using Eshava.Core.Models;
@@ -65,7 +67,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult();
 			}
 
-			return GetErrorResult(ValidationErrorType.DataTypeFloat, propertyInfoFrom.Name, propertyInfoTo.Name);
+			return GetErrorResult(ValidationErrorType.DataTypeFloat, propertyInfoFrom.Name, propertyInfoTo.Name, valueFrom, valueTo);
 		}
 
 		private static ValidationCheckResult CheckRangeValueDouble(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -80,7 +82,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult();
 			}
 
-			return GetErrorResult(ValidationErrorType.DataTypeDouble, propertyInfoFrom.Name, propertyInfoTo.Name);
+			return GetErrorResult(ValidationErrorType.DataTypeDouble, propertyInfoFrom.Name, propertyInfoTo.Name, valueFrom, valueTo);
 		}
 
 		private static ValidationCheckResult CheckRangeValueDecimal(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -95,7 +97,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult();
 			}
 
-			return GetErrorResult(ValidationErrorType.DataTypeDecimal, propertyInfoFrom.Name, propertyInfoTo.Name);
+			return GetErrorResult(ValidationErrorType.DataTypeDecimal, propertyInfoFrom.Name, propertyInfoTo.Name, valueFrom, valueTo);
 		}
 
 		private static ValidationCheckResult CheckRangeValueInteger(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -110,7 +112,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult();
 			}
 
-			return GetErrorResult(ValidationErrorType.DataTypeInteger, propertyInfoFrom.Name, propertyInfoTo.Name);
+			return GetErrorResult(ValidationErrorType.DataTypeInteger, propertyInfoFrom.Name, propertyInfoTo.Name, valueFrom, valueTo);
 		}
 
 		private static ValidationCheckResult CheckRangeValueLong(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -125,7 +127,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult();
 			}
 
-			return GetErrorResult(ValidationErrorType.DataTypeLong, propertyInfoFrom.Name, propertyInfoTo.Name);
+			return GetErrorResult(ValidationErrorType.DataTypeLong, propertyInfoFrom.Name, propertyInfoTo.Name, valueFrom, valueTo);
 		}
 
 		private static ValidationCheckResult CheckRangeValueDateTime(ValidationCheckParameters parameters, PropertyInfo propertyInfoFrom, PropertyInfo propertyInfoTo)
@@ -140,7 +142,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 				return new ValidationCheckResult();
 			}
 
-			return GetErrorResult(ValidationErrorType.DataTypeDateTime, propertyInfoFrom.Name, propertyInfoTo.Name);
+			return GetErrorResult(ValidationErrorType.DataTypeDateTime, propertyInfoFrom.Name, propertyInfoTo.Name, valueFrom, valueTo);
 		}
 
 		public static bool CheckRangeValue<T>(T? valueFrom, T? valueTo, bool allowNull, T? valueCurrent = null) where T : struct
@@ -168,8 +170,13 @@ namespace Eshava.Core.Validation.ValidationMethods
 			return true;
 		}
 
-		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyNameFrom, string propertyNameTo)
+		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyNameFrom, string propertyNameTo, params object[] @values)
 		{
+			var propertyValue = @values != null && @values.Length > 0
+				? String.Join("|", @values.Select(v => v.ToString()))
+				: null
+				;
+
 			return new ValidationCheckResult
 			{
 				ValidationErrors = new List<ValidationError>
@@ -179,7 +186,8 @@ namespace Eshava.Core.Validation.ValidationMethods
 						MethodType = ValidationMethodType.Range.ToString(),
 						ErrorType = errorType.ToString(),
 						PropertyNameFrom = propertyNameFrom,
-						PropertyNameTo = propertyNameTo
+						PropertyNameTo = propertyNameTo,
+						Value = propertyValue
 					}
 				}
 			};
