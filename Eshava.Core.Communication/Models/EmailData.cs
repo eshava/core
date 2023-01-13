@@ -2,14 +2,17 @@
 
 namespace Eshava.Core.Communication.Models
 {
-	public class MailData
+	public class EmailData
 	{
-		public MailData()
+		public EmailData()
 		{
 			Recipients = new List<string>();
 			RecipientsCC = new List<string>();
 			RecipientsBCC = new List<string>();
 		}
+
+		public string Sender { get; set; }
+		public string SenderDisplayName { get; set; }
 
 		public IEnumerable<string> Recipients { get; set; }
 
