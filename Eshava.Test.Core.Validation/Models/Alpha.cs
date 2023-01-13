@@ -80,6 +80,9 @@ namespace Eshava.Test.Core.Validation.Models
 
 		[Range(0, 15)]
 		public long LambdaLong { get; set; }
+		
+		[Range(typeof(long), "0", "9223372036854775807")]
+		public long LambdaVeryLong { get; set; }
 
 		[Required]
 		[Unique]
