@@ -2,14 +2,14 @@
 Collection of methods, classes and helpers to simplify recurring standard actions
 
 ## core.communication
-Extension to http, ftp and mail functionality
+Extension to http, ftp and email functionality
 
 * Ftp
 	* FtpClient based on System.Net.WebRequest (Type: "System.Net.WebRequest");
 	* SftpClient based on SSH.NET (Type: "SSH.NET.FTP")
 * Http
 	* HttpClient based on System.Net.Http.HttpClient
-* Mail
+* Email
 	* MailClient based on System.Net.Mail.SmtpClient
 
 ## core.dynamic.fields
@@ -82,6 +82,20 @@ Extension to secure data worthy of protection
 	* Rijndael engine (symmetric)
 * Hash
 	* Password engine
+
+## core.storage
+Extension to execute ms sql database actions
+
+* create and drop login
+* create and drop database
+* backup and restore database
+* add user to database
+* drop user from database
+
+## core.storage.sql
+Extension to execute microsoft sql database actions
+
+* depends on Eshava.Core.Storage
 
 ## core.validation
 Extension for validation of objects based on default annotation attributes and additional custom annotation attributes

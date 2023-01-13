@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29424.173
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Core", "Eshava.Core\Eshava.Core.csproj", "{CF242659-86E2-479E-B1F0-6F34D1FBE86F}"
 EndProject
@@ -44,6 +44,13 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Core.Storage", "Eshava.Core.Storage\Eshava.Core.Storage.csproj", "{52211596-9F89-43C7-BA06-5201E9939179}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Eshava.Core.Storage.Sql", "Eshava.Core.Storage.Sql\Eshava.Core.Storage.Sql.csproj", "{D75A0C3F-B02E-422F-B0FF-D5A232DBB635}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F8134946-B770-4844-80CC-CA62FFB956D1}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		LICENSE.txt = LICENSE.txt
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
