@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Net.Mime;
 using System.Threading.Tasks;
-using Eshava.Core.Communication.Mail.Interfaces;
+using Eshava.Core.Communication.Email.Interfaces;
 using Eshava.Core.Communication.Models;
 using Eshava.Core.Extensions;
 using Eshava.Core.Models;
 
-namespace Eshava.Core.Communication.Mail
+namespace Eshava.Core.Communication.Email
 {
 	public class SystemNetMailEngine : IEmailEngine
 	{
@@ -22,7 +24,7 @@ namespace Eshava.Core.Communication.Mail
 
 		public string Type => "System.Net.Mail";
 
-		public Task<ResponseData<bool>> SendMailAsync(EmailData emailData, EmailAccount emailAccount)
+		public Task<ResponseData<bool>> SendEmailAsync(EmailData emailData, EmailAccount emailAccount)
 		{
 			var sender = emailData.Sender;
 			if (sender.IsNullOrEmpty())
@@ -36,15 +38,45 @@ namespace Eshava.Core.Communication.Mail
 				From = emailData.SenderDisplayName.IsNullOrEmpty()
 					? new MailAddress(sender?.Trim())
 					: new MailAddress(sender?.Trim(), emailData.SenderDisplayName),
-				Subject = emailData.Subject,
-				Body = emailData.Body,
-				IsBodyHtml = emailData.Html
+				Subject = emailData.Subject
 			};
 
-			return SendMailAsync(client, mailMessage, emailData,emailAccount.ChunkSize);
+			var alternateView = AlternateView.CreateAlternateViewFromString(
+				emailData.Body,
+				System.Text.Encoding.UTF8,
+				emailData.IsHtml
+					? MediaTypeNames.Text.Html
+					: MediaTypeNames.Text.Plain
+			);
+
+			if (emailData.LinkedResources.Any())
+			{
+				foreach (var emailLinkedResource in emailData.LinkedResources)
+				{
+					alternateView.LinkedResources.Add(new LinkedResource(ToMemoryStream(emailLinkedResource.Data), new ContentType(emailLinkedResource.ContentType))
+					{
+						ContentId = emailLinkedResource.FileName
+					});
+				}
+			}
+
+			if (emailData.Attachments.Any())
+			{
+				foreach (var emailAttachment in emailData.Attachments)
+				{
+					mailMessage.Attachments.Add(new Attachment(ToMemoryStream(emailAttachment.Data), new ContentType(emailAttachment.ContentType))
+					{
+						Name = emailAttachment.FileName
+					});
+				}
+			}
+
+			mailMessage.AlternateViews.Add(alternateView);
+
+			return SendMailAsync(client, mailMessage, emailData, emailAccount.ChunkSize);
 		}
 
-		public Task<ResponseData<bool>> SendMailAsync(EmailData emailData)
+		public Task<ResponseData<bool>> SendEmailAsync(EmailData emailData)
 		{
 			var emailAccount = new EmailAccount
 			{
@@ -57,7 +89,7 @@ namespace Eshava.Core.Communication.Mail
 				ChunkSize = _settings.ChunkSize,
 			};
 
-			return SendMailAsync(emailData, emailAccount);
+			return SendEmailAsync(emailData, emailAccount);
 		}
 
 		/// <summary>
@@ -72,15 +104,15 @@ namespace Eshava.Core.Communication.Mail
 
 			if (emailAccount.SendWithoutAuthentication)
 			{
-				//Authentication of the sender is required
-				client.UseDefaultCredentials = false;
-				client.Credentials =  new NetworkCredential(emailAccount.Username?.Trim(), emailAccount.Password);
-			}
-			else
-			{
 				//Anonymous sending the mail
 				client.UseDefaultCredentials = false;
 				client.Credentials = null;
+			}
+			else
+			{
+				//Authentication of the sender is required
+				client.UseDefaultCredentials = false;
+				client.Credentials = new NetworkCredential(emailAccount.Username?.Trim(), emailAccount.Password);
 			}
 
 			client.EnableSsl = emailAccount.SSL;
@@ -131,7 +163,11 @@ namespace Eshava.Core.Communication.Mail
 				mailMessage.Bcc.Clear();
 				mailMessage.To.Clear();
 
-				var availableRecipents = chunkSize;
+				var availableRecipents = chunkSize == 0
+					? recipients.Count() + recipientsCC.Count() + recipientsBCC.Count()
+					: chunkSize
+					;
+
 				recipients = AddRecipients(recipients, ref availableRecipents, recipient => mailMessage.To.Add(recipient));
 				recipientsCC = AddRecipients(recipientsCC, ref availableRecipents, recipient => mailMessage.CC.Add(recipient));
 				recipientsBCC = AddRecipients(recipientsBCC, ref availableRecipents, recipient => mailMessage.Bcc.Add(recipient));
@@ -181,6 +217,14 @@ namespace Eshava.Core.Communication.Mail
 			emailAddress = emailAddress.Trim().ToLower();
 
 			return _settings.DomainWhiteList.Any(domain => emailAddress.EndsWith(domain.ToLower()));
+		}
+
+		private MemoryStream ToMemoryStream(byte[] data)
+		{
+			return new MemoryStream(data)
+			{
+				Position = 0
+			};
 		}
 	}
 }
