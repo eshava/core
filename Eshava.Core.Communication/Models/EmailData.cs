@@ -9,6 +9,8 @@ namespace Eshava.Core.Communication.Models
 			Recipients = new List<string>();
 			RecipientsCC = new List<string>();
 			RecipientsBCC = new List<string>();
+			LinkedResources = new List<EmailAttachmentData>();
+			Attachments = new List<EmailAttachmentData>();
 		}
 
 		public string Sender { get; set; }
@@ -24,6 +26,9 @@ namespace Eshava.Core.Communication.Models
 
 		public string Body { get; set; }
 
-		public bool Html { get; set; }
+		public bool IsHtml { get; set; }
+
+		public IEnumerable<EmailAttachmentData> LinkedResources { get; set; }
+		public IEnumerable<EmailAttachmentData> Attachments { get; set; }
 	}
 }
