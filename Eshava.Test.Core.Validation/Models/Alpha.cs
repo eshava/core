@@ -111,6 +111,14 @@ namespace Eshava.Test.Core.Validation.Models
 		public decimal? MyNullableSix { get; set; }
 
 		[Required]
+		[RangeTo("MyNullableEight", false)]
+		public decimal? MyNullableSeven { get; set; }
+
+		[Required]
+		[RangeFrom("MyNullableSeven", false)]
+		public decimal? MyNullableEight { get; set; }
+
+		[Required]
 		[Range(0.25, 15.75)]
 		public float Ny { get; set; }
 		public float NyNullable { get; set; }
