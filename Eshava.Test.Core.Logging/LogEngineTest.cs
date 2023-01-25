@@ -79,7 +79,7 @@ namespace Eshava.Test.Core.Logging
 			logEntry.Host.Culture.Should().Be(System.Globalization.CultureInfo.CurrentCulture.Name);
 
 			logEntry.Process.ProcessName.Should().Be(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
-			logEntry.Process.ProcessStart.Should().Be(System.Diagnostics.Process.GetCurrentProcess().StartTime);
+			logEntry.Process.ProcessStartUtc.Should().Be(TimeZoneInfo.ConvertTimeToUtc(System.Diagnostics.Process.GetCurrentProcess().StartTime));
 			logEntry.Process.Process64Bit.Should().Be(Environment.Is64BitProcess);
 			logEntry.Process.MemoryUsage.Should().EndWith("MB");
 
@@ -97,9 +97,9 @@ namespace Eshava.Test.Core.Logging
 			logEntry.Exception.StackTrace.Should().Be(exception.StackTrace);
 			logEntry.Exception.InnerException.Message.Should().Be(exception.InnerException.Message);
 			logEntry.Exception.InnerException.StackTrace.Should().Be(exception.InnerException.StackTrace);
-			logEntry.Timestamp.Should().NotBe(DateTime.MinValue);
-			logEntry.Timestamp.Should().NotBe(DateTime.MaxValue);
-			logEntry.Timestamp.Kind.Should().Be(DateTimeKind.Utc);
+			logEntry.TimestampUtc.Should().NotBe(DateTime.MinValue);
+			logEntry.TimestampUtc.Should().NotBe(DateTime.MaxValue);
+			logEntry.TimestampUtc.Kind.Should().Be(DateTimeKind.Utc);
 		}
 
 		[TestMethod]

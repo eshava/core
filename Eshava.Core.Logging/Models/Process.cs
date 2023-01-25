@@ -6,7 +6,7 @@ namespace Eshava.Core.Logging.Models
 	{
 		public bool Process64Bit { get; set; }
 		public string ProcessName { get; set; }
-		public DateTime ProcessStart { get; set; }
+		public DateTime ProcessStartUtc { get; set; }
 		public string MemoryUsage { get; set; }
 	}
 }

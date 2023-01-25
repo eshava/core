@@ -138,7 +138,7 @@ namespace Eshava.Core.Logging
 				DataRecordName = property.DataRecordName,
 				DataRecordParentId = property.DataRecordParentId,
 				LogEntryGroupId = property.LogEntryGroupId,
-				Timestamp = property.Timestamp,
+				TimestampUtc = property.TimestampUtc,
 				UserId = property.UserId
 			};
 		}

@@ -5,7 +5,7 @@ namespace Eshava.Core.Logging.Models
 {
 	public class LogEntry
 	{
-		public DateTime Timestamp { get; set; }
+		public DateTime TimestampUtc { get; set; }
 		public Maschine Host { get; set; }
 		public Process Process { get; set; }
 		public string ApplicationId { get; set; }
