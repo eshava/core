@@ -49,7 +49,19 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
-			result.ValidationErrors.Should().HaveCount(21);
+			result.ValidationErrors.Should().HaveCount(23);
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required.ToString()
+				&& error.ErrorType == ValidationErrorType.IsNull.ToString()
+				&& error.PropertyName == nameof(Alpha.MyNullableSeven))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required.ToString()
+				&& error.ErrorType == ValidationErrorType.IsNull.ToString()
+				&& error.PropertyName == nameof(Alpha.MyNullableEight))
+			.Should().BeTrue();
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.Required.ToString()
@@ -204,6 +216,8 @@ namespace Eshava.Test.Core.Validation
 				MyNullableOne = 0m,
 				MyNullableTwo = 2m,
 				MyNullableSix = 1m,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -253,7 +267,19 @@ namespace Eshava.Test.Core.Validation
 
 			// Assert
 			result.IsValid.Should().BeFalse();
-			result.ValidationErrors.Should().HaveCount(10);
+			result.ValidationErrors.Should().HaveCount(12);
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required.ToString()
+				&& error.ErrorType == ValidationErrorType.IsNull.ToString()
+				&& error.PropertyName == nameof(Alpha.MyNullableSeven))
+			.Should().BeTrue();
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required.ToString()
+				&& error.ErrorType == ValidationErrorType.IsNull.ToString()
+				&& error.PropertyName == nameof(Alpha.MyNullableEight))
+			.Should().BeTrue();
 
 			result.ValidationErrors.Any(error =>
 				error.MethodType == ValidationMethodType.Required.ToString()
@@ -324,6 +350,8 @@ namespace Eshava.Test.Core.Validation
 				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -412,6 +440,8 @@ namespace Eshava.Test.Core.Validation
 				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Sigma = new List<int> { 1 },
@@ -508,6 +538,8 @@ namespace Eshava.Test.Core.Validation
 				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 7,
@@ -543,6 +575,8 @@ namespace Eshava.Test.Core.Validation
 				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -601,6 +635,8 @@ namespace Eshava.Test.Core.Validation
 				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -677,6 +713,8 @@ namespace Eshava.Test.Core.Validation
 				LambdaLong = -1L,
 				LambdaLongNullable = 1L,
 				My = -40.6m,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 0.24f,
 				Xi = -41,
 				Pi = 2,
@@ -758,6 +796,8 @@ namespace Eshava.Test.Core.Validation
 				LambdaLong = -1L,
 				LambdaLongNullable = 1L,
 				My = 70.6m,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 15.76f,
 				Xi = 71,
 				Omikron = (Alphabet)4,
@@ -838,6 +878,8 @@ namespace Eshava.Test.Core.Validation
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
 				My = 1.00001m,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Xi = 1.1,
 				Omikron = Alphabet.A,
@@ -890,6 +932,8 @@ namespace Eshava.Test.Core.Validation
 				LambdaLongNullable = 1L,
 				MyNullableOne = 1,
 				MyNullableTwo = 0,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -935,6 +979,8 @@ namespace Eshava.Test.Core.Validation
 				MyNullableThree = 1,
 				MyNullableFour = 0,
 				MyNullableFive = null,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -973,6 +1019,8 @@ namespace Eshava.Test.Core.Validation
 				MyNullableThree = 1,
 				MyNullableFour = null,
 				MyNullableFive = 0,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -1018,6 +1066,8 @@ namespace Eshava.Test.Core.Validation
 				MyNullableOne = 0,
 				MyNullableTwo = 2,
 				MyNullableSix = -1,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -1125,6 +1175,8 @@ namespace Eshava.Test.Core.Validation
 				MyNullableOne = 0,
 				MyNullableTwo = 2,
 				MyNullableSix = 3,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -1391,6 +1443,8 @@ namespace Eshava.Test.Core.Validation
 				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -1445,6 +1499,8 @@ namespace Eshava.Test.Core.Validation
 				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -1496,6 +1552,8 @@ namespace Eshava.Test.Core.Validation
 				EpsilonFour = "",
 				LambdaNullable = 1,
 				LambdaLongNullable = 1L,
+				MyNullableSeven = 123m,
+				MyNullableEight = 124m,
 				Ny = 1,
 				Omikron = Alphabet.A,
 				Pi = 2,
@@ -1563,6 +1621,60 @@ namespace Eshava.Test.Core.Validation
 				&& error.ErrorType == ValidationErrorType.Invalid.ToString()
 				&& error.PropertyName == nameof(ComplexData.BaseColor)
 				&& error.Value == "999")
+			.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void ValidateAllCheckRangeFromAndToWithNullValuesTest()
+		{
+			// Arrange
+			var source = new Alpha
+			{
+				Gamma = "QuackFu",
+				Delta = "QuackFu",
+				DeltaTwo = "Alpha",
+				EpsilonTwo = "Alpha",
+				EpsilonThree = "Alpha",
+				EpsilonFour = "",
+				LambdaNullable = 1,
+				LambdaLongNullable = 1L,
+				MyNullableOne = null,
+				MyNullableTwo = null,
+				MyNullableSix = 1m,
+				MyNullableSeven = 123m,
+				MyNullableEight = null,
+				Ny = 1,
+				Omikron = Alphabet.A,
+				Pi = 2,
+				Rho = 3,
+				Sigma = new List<int> { 1 },
+				OmegaIntegerNotEqual = 1,
+				OmegaLongNotEqual = 1L,
+				ChiNotNull = Guid.NewGuid(),
+				ChiNullable = Guid.NewGuid(),
+				PsiRequired = DateTime.UtcNow,
+				PsiRequiredNullable = DateTime.UtcNow
+			};
+
+			// Act
+			var result = _classUnderTest.Validate(source);
+
+			// Assert
+			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(3);
+
+			result.ValidationErrors.Count(error =>
+				error.MethodType == ValidationMethodType.Range.ToString()
+				&& error.ErrorType == ValidationErrorType.DataTypeDecimal.ToString()
+				&& error.PropertyNameFrom == nameof(Alpha.MyNullableSeven)
+				&& error.PropertyNameTo == nameof(Alpha.MyNullableEight)
+				&& error.Value == "123|null")
+			.Should().Be(2);
+
+			result.ValidationErrors.Any(error =>
+				error.MethodType == ValidationMethodType.Required.ToString()
+				&& error.ErrorType == ValidationErrorType.IsNull.ToString()
+				&& error.PropertyName == nameof(Alpha.MyNullableEight))
 			.Should().BeTrue();
 		}
 	}

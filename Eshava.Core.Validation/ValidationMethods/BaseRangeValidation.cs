@@ -173,7 +173,7 @@ namespace Eshava.Core.Validation.ValidationMethods
 		private static ValidationCheckResult GetErrorResult(ValidationErrorType errorType, string propertyNameFrom, string propertyNameTo, params object[] @values)
 		{
 			var propertyValue = @values != null && @values.Length > 0
-				? String.Join("|", @values.Select(v => v.ToString()))
+				? String.Join("|", @values.Select(v => v?.ToString() ?? "null"))
 				: null
 				;
 
