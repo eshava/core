@@ -47,7 +47,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = "DarkwingDuck",
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				},
 				new DataRecordLogProperty<int>
 				{
@@ -60,7 +60,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = 10.5m,
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				},
 				new DataRecordLogProperty<int>
 				{
@@ -73,7 +73,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 777,
 					UserId = 919,
 					Value = "222",
-					Timestamp = DateTime.Today.AddDays(-1)
+					TimestampUtc = DateTime.Today.AddDays(-1)
 				},
 				new DataRecordLogProperty<int>
 				{
@@ -86,7 +86,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 777,
 					UserId = 919,
 					Value = "MegaVolt",
-					Timestamp = DateTime.Today.AddDays(-1)
+					TimestampUtc = DateTime.Today.AddDays(-1)
 				}
 			};
 
@@ -104,7 +104,7 @@ namespace Eshava.Test.Core.Logging
 			logForInsert.DataRecordName.Should().Be(nameof(Alpha));
 			logForInsert.LogEntryGroupId.Should().Be(888);
 			logForInsert.UserId.Should().Be(999);
-			logForInsert.Timestamp.Should().Be(DateTime.Today);
+			logForInsert.TimestampUtc.Should().Be(DateTime.Today);
 			logForInsert.Properties[nameof(Alpha.Eta)].Value.Should().Be("10.5");
 			logForInsert.Properties[nameof(Alpha.Eta)].Type.Should().Be(FieldValueType.Decimal);
 			logForInsert.Properties[nameof(Alpha.Gamma)].Value.Should().Be("DarkwingDuck");
@@ -116,7 +116,7 @@ namespace Eshava.Test.Core.Logging
 			logForUpdate.DataRecordName.Should().Be(nameof(AdditionalInformation));
 			logForUpdate.LogEntryGroupId.Should().Be(777);
 			logForUpdate.UserId.Should().Be(919);
-			logForUpdate.Timestamp.Should().Be(DateTime.Today.AddDays(-1));
+			logForUpdate.TimestampUtc.Should().Be(DateTime.Today.AddDays(-1));
 			logForUpdate.Properties[nameof(AdditionalInformation.Message)].Value.Should().Be("222");
 			logForUpdate.Properties[nameof(AdditionalInformation.Message)].Type.Should().Be(FieldValueType.String);
 			logForUpdate.Properties[nameof(AdditionalInformation.Class)].Value.Should().Be("MegaVolt");
@@ -140,7 +140,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = null,
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				},
 				new DataRecordLogProperty<int>
 				{
@@ -153,7 +153,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = 10.5m,
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				},
 				new DataRecordLogProperty<int>
 				{
@@ -166,7 +166,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 777,
 					UserId = 919,
 					Value = null,
-					Timestamp = DateTime.Today.AddDays(-1)
+					TimestampUtc = DateTime.Today.AddDays(-1)
 				},
 				new DataRecordLogProperty<int>
 				{
@@ -179,7 +179,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 777,
 					UserId = 919,
 					Value = "MegaVolt",
-					Timestamp = DateTime.Today.AddDays(-1)
+					TimestampUtc = DateTime.Today.AddDays(-1)
 				}
 			};
 
@@ -197,7 +197,7 @@ namespace Eshava.Test.Core.Logging
 			logForInsert.DataRecordName.Should().Be(nameof(Alpha));
 			logForInsert.LogEntryGroupId.Should().Be(888);
 			logForInsert.UserId.Should().Be(999);
-			logForInsert.Timestamp.Should().Be(DateTime.Today);
+			logForInsert.TimestampUtc.Should().Be(DateTime.Today);
 			logForInsert.Properties[nameof(Alpha.Eta)].Value.Should().Be("10.5");
 			logForInsert.Properties[nameof(Alpha.Eta)].Type.Should().Be(FieldValueType.Decimal);
 			logForInsert.Properties[nameof(Alpha.Gamma)].Value.Should().BeNull();
@@ -209,7 +209,7 @@ namespace Eshava.Test.Core.Logging
 			logForUpdate.DataRecordName.Should().Be(nameof(AdditionalInformation));
 			logForUpdate.LogEntryGroupId.Should().Be(777);
 			logForUpdate.UserId.Should().Be(919);
-			logForUpdate.Timestamp.Should().Be(DateTime.Today.AddDays(-1));
+			logForUpdate.TimestampUtc.Should().Be(DateTime.Today.AddDays(-1));
 			logForUpdate.Properties[nameof(AdditionalInformation.Message)].Value.Should().BeNull();
 			logForUpdate.Properties[nameof(AdditionalInformation.Message)].Type.Should().Be(FieldValueType.String);
 			logForUpdate.Properties[nameof(AdditionalInformation.Class)].Value.Should().Be("MegaVolt");
@@ -233,7 +233,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = "MegaVolt",
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				},
 				new DataRecordLogProperty<int>
 				{
@@ -246,7 +246,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = "DarkwingDuck",
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				}
 			};
 
@@ -263,7 +263,7 @@ namespace Eshava.Test.Core.Logging
 			logForInsert.DataRecordName.Should().Be(nameof(Alpha));
 			logForInsert.LogEntryGroupId.Should().Be(888);
 			logForInsert.UserId.Should().Be(999);
-			logForInsert.Timestamp.Should().Be(DateTime.Today);
+			logForInsert.TimestampUtc.Should().Be(DateTime.Today);
 			logForInsert.Properties[nameof(Alpha.Gamma)].Value.Should().Be("DarkwingDuck");
 			logForInsert.Properties[nameof(Alpha.Gamma)].Type.Should().Be(FieldValueType.String);
 		}
@@ -285,7 +285,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = new AdditionalInformation { Message = "MegaVolt" },
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				},
 				new DataRecordLogProperty<int>
 				{
@@ -298,7 +298,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = "DarkwingDuck",
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				}
 			};
 
@@ -315,7 +315,7 @@ namespace Eshava.Test.Core.Logging
 			logForInsert.DataRecordName.Should().Be(nameof(Alpha));
 			logForInsert.LogEntryGroupId.Should().Be(888);
 			logForInsert.UserId.Should().Be(999);
-			logForInsert.Timestamp.Should().Be(DateTime.Today);
+			logForInsert.TimestampUtc.Should().Be(DateTime.Today);
 			logForInsert.Properties[nameof(Alpha.Gamma)].Value.Should().Be("DarkwingDuck");
 			logForInsert.Properties[nameof(Alpha.Gamma)].Type.Should().Be(FieldValueType.String);
 			logForInsert.Properties.ContainsKey(nameof(Alpha.Epsilon)).Should().BeFalse();
@@ -339,7 +339,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = new AdditionalInformation { Message = "MegaVolt" },
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				}
 			};
 
@@ -372,7 +372,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = LogLevel.Error,
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				}
 			};
 
@@ -389,7 +389,7 @@ namespace Eshava.Test.Core.Logging
 			logForInsert.DataRecordName.Should().Be(nameof(Alpha));
 			logForInsert.LogEntryGroupId.Should().Be(888);
 			logForInsert.UserId.Should().Be(999);
-			logForInsert.Timestamp.Should().Be(DateTime.Today);
+			logForInsert.TimestampUtc.Should().Be(DateTime.Today);
 			logForInsert.Properties[nameof(Alpha.Delta)].Value.Should().Be(((int)LogLevel.Error).ToString());
 			logForInsert.Properties[nameof(Alpha.Delta)].Type.Should().Be(FieldValueType.Integer);
 		}
@@ -411,7 +411,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = LogLevel.Error,
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				}
 			};
 
@@ -436,7 +436,7 @@ namespace Eshava.Test.Core.Logging
 			logForInsert.DataRecordName.Should().Be(nameof(Alpha));
 			logForInsert.LogEntryGroupId.Should().Be(888);
 			logForInsert.UserId.Should().Be(999);
-			logForInsert.Timestamp.Should().Be(DateTime.Today);
+			logForInsert.TimestampUtc.Should().Be(DateTime.Today);
 			logForInsert.Properties[nameof(Alpha.Delta)].Value.Should().Be(LogLevel.Error.ToString());
 			logForInsert.Properties[nameof(Alpha.Delta)].Type.Should().Be(FieldValueType.String);
 		}
@@ -466,7 +466,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = value,
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				}
 			};
 
@@ -498,7 +498,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = 10.5m,
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				}
 			};
 
@@ -530,7 +530,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = "e6541e3e-d555-41b8-9641-d436c38d038b",
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				}
 			};
 
@@ -562,7 +562,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = new DateTime(2019, 10, 23, 23, 10, 15, 123, DateTimeKind.Utc),
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				}
 			};
 
@@ -597,7 +597,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = document,
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				}
 			};
 
@@ -631,7 +631,7 @@ namespace Eshava.Test.Core.Logging
 					LogEntryGroupId = 888,
 					UserId = 999,
 					Value = binary,
-					Timestamp = DateTime.Today
+					TimestampUtc = DateTime.Today
 				}
 			};
 

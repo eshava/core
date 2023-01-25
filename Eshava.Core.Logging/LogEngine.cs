@@ -54,6 +54,8 @@ namespace Eshava.Core.Logging
 				Method = additionalInformation?.Method
 			};
 
+			
+
 			var log = new LogEntry
 			{
 				Host = new Maschine
@@ -67,7 +69,7 @@ namespace Eshava.Core.Logging
 				Process = new Process
 				{
 					ProcessName = System.Diagnostics.Process.GetCurrentProcess().ProcessName,
-					ProcessStart = System.Diagnostics.Process.GetCurrentProcess().StartTime,
+					ProcessStartUtc = TimeZoneInfo.ConvertTimeToUtc(System.Diagnostics.Process.GetCurrentProcess().StartTime),
 					Process64Bit = Environment.Is64BitProcess,
 					MemoryUsage = $"{Environment.WorkingSet / 1024 / 1024}MB"
 				},
@@ -77,7 +79,7 @@ namespace Eshava.Core.Logging
 				Message = logMessage,
 				Additional = additionalInformation?.Information == null ? null : JsonConvert.DeserializeObject<JToken>(JsonConvert.SerializeObject(additionalInformation?.Information)),
 				Exception = ConvertException(exception),
-				Timestamp = DateTime.UtcNow
+				TimestampUtc = DateTime.UtcNow
 			};
 
 			_logWriter.Write(log);
