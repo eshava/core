@@ -104,28 +104,14 @@ namespace Eshava.Core.Linq
 					continue;
 				}
 
-				var allowedCompareOperators = filterField.GetCustomAttributes<AllowedCompareOperatorAttribute>();
-				if (allowedCompareOperators.Any() && allowedCompareOperators.All(aco => aco.CompareOperator != field.Operator))
+				var allowedCompareOperators = filterField.GetCustomAttributes<AllowedCompareOperatorAttribute>() ?? new List<AllowedCompareOperatorAttribute>();
+				var whereQueryProperty = ConvertFilterFieldToWhereQueryProperty(filterField.Name, field, invalidFilterFields, allowedCompareOperators);
+				if (whereQueryProperty == null)
 				{
-					if (!_options.SkipInvalidWhereQueries)
-					{
-						invalidFilterFields.Add(new ValidationError
-						{
-							PropertyName = filterField.Name,
-							Value = field.Operator.ToString(),
-							ErrorType = "InvalidOperator"
-						});
-					}
-
 					continue;
 				}
 
-				whereQueryProperties.Add(new WhereQueryProperty
-				{
-					PropertyName = filterField.Name,
-					Operator = field.Operator,
-					SearchTerm = field.SearchTerm
-				});
+				whereQueryProperties.Add(whereQueryProperty);
 			}
 
 			if (invalidFilterFields.Count > 0)
@@ -265,53 +251,92 @@ namespace Eshava.Core.Linq
 
 			foreach (var property in queryContainer.WhereQueryProperties)
 			{
-				var conditions = new List<Expression<Func<T, bool>>>();
-
-				if (queryContainer.Mappings.ContainsKey(property.PropertyName))
+				var propertyResult = BuildPropertyQueryConditions(property, queryContainer);
+				if (propertyResult.IsFaulty)
 				{
-					var members = new List<Expression<Func<T, bool>>>();
-					foreach (var mapping in queryContainer.Mappings[property.PropertyName])
-					{
-						var mappingResult = GetMappingCondition(property, mapping);
-						if (mappingResult.IsFaulty)
-						{
-							return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse(mappingResult);
-						}
-
-						var joinResult = JoinAndExpressions(mappingResult.Data);
-						if (joinResult != null)
-						{
-							members.Add(joinResult);
-						}
-					}
-
-					if (members.Count == 1)
-					{
-						conditions.Add(members.Single());
-					}
-					else if (members.Count > 1)
-					{
-						var joinResult = JoinOrExpressions(members);
-						if (joinResult != null)
-						{
-							conditions.Add(joinResult);
-						}
-					}
-				}
-				else
-				{
-					var conditionResult = GetPropertyCondition<T>(property, queryContainer.PropertyInfos, queryContainer.Parameter);
-					if (conditionResult.IsFaulty)
-					{
-						return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse(conditionResult);
-					}
-
-					conditions.AddRange(conditionResult.Data);
+					return propertyResult;
 				}
 
-				if (conditions.Any())
+				if (propertyResult.Data.Any())
 				{
-					where.AddRange(conditions);
+					where.AddRange(propertyResult.Data);
+				}
+			}
+
+			return new ResponseData<IEnumerable<Expression<Func<T, bool>>>>(where);
+		}
+
+		private ResponseData<IEnumerable<Expression<Func<T, bool>>>> BuildPropertyQueryConditions<T>(WhereQueryProperty property, BuildQueryContainer<T> queryContainer) where T : class
+		{
+			var where = new List<Expression<Func<T, bool>>>();
+
+			// operator overrules link operator
+			if (property.Operator != CompareOperator.None)
+			{
+				// process field property
+				var propertyResult = ProcessProperty(property, queryContainer);
+				if (propertyResult.IsFaulty)
+				{
+					return propertyResult;
+				}
+
+				if (propertyResult.Data.Any())
+				{
+					where.AddRange(propertyResult.Data);
+				}
+			}
+			else if (property.LinkOperator == LinkOperator.None)
+			{
+				// invalid property 
+				if (_options.SkipInvalidWhereQueries)
+				{
+					return new ResponseData<IEnumerable<Expression<Func<T, bool>>>>(new List<Expression<Func<T, bool>>>());
+				}
+
+				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidLinkOperator");
+			}
+			else if (!(property.LinkOperations?.Any() ?? false))
+			{
+				// invalid property 
+				if (_options.SkipInvalidWhereQueries)
+				{
+					return new ResponseData<IEnumerable<Expression<Func<T, bool>>>>(new List<Expression<Func<T, bool>>>());
+				}
+
+				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("LinkOperationsRequired");
+			}
+			else
+			{
+				// process group property
+				var groupConditions = new List<Expression<Func<T, bool>>>();
+				foreach (var linkOperationProperty in property.LinkOperations)
+				{
+					var propertyResult = BuildPropertyQueryConditions(linkOperationProperty, queryContainer);
+					if (propertyResult.IsFaulty)
+					{
+						return propertyResult;
+					}
+
+					groupConditions.AddRange(propertyResult.Data);
+				}
+
+				if (groupConditions.Any())
+				{
+					Expression<Func<T, bool>> joinResult = null;
+					switch (property.LinkOperator)
+					{
+						case LinkOperator.And:
+							joinResult = JoinAndExpressions(groupConditions);
+							break;
+						case LinkOperator.Or:
+							joinResult = JoinOrExpressions(groupConditions);
+							break;
+					}
+
+					if (joinResult != null)
+					{
+						where.Add(joinResult);
+					}
 				}
 			}
 
@@ -1053,6 +1078,158 @@ namespace Eshava.Core.Linq
 			}
 
 			return Expression.Call(constant, enumerableMemberMethod, memberExpression);
+		}
+
+		private WhereQueryProperty ConvertFilterFieldToWhereQueryProperty(string rootFieldName, FilterField filterField, IList<ValidationError> invalidFilterFields, IEnumerable<AllowedCompareOperatorAttribute> allowedCompareOperators)
+		{
+			if (filterField == null)
+			{
+				if (!_options.SkipInvalidWhereQueries)
+				{
+					invalidFilterFields.Add(new ValidationError
+					{
+						PropertyName = rootFieldName,
+						ErrorType = "IsNull"
+					});
+				}
+
+				return null;
+			}
+
+			// operator overrules link operator
+			if (filterField.Operator != CompareOperator.None)
+			{
+				if (allowedCompareOperators.Any() && allowedCompareOperators.All(aco => aco.CompareOperator != filterField.Operator))
+				{
+					if (!_options.SkipInvalidWhereQueries)
+					{
+						invalidFilterFields.Add(new ValidationError
+						{
+							PropertyName = rootFieldName,
+							Value = filterField.Operator.ToString(),
+							ErrorType = "InvalidOperator"
+						});
+					}
+
+					return null;
+				}
+
+				return new WhereQueryProperty
+				{
+					PropertyName = rootFieldName,
+					Operator = filterField.Operator,
+					SearchTerm = filterField.SearchTerm
+				};
+			}
+
+			if (filterField.LinkOperator == LinkOperator.None)
+			{
+				if (!_options.SkipInvalidWhereQueries)
+				{
+					invalidFilterFields.Add(new ValidationError
+					{
+						PropertyName = rootFieldName,
+						ErrorType = "InvalidLinkOperator"
+					});
+				}
+
+				return null;
+			}
+
+			if (!(filterField.LinkOperations?.Any() ?? false))
+			{
+				if (!_options.SkipInvalidWhereQueries)
+				{
+					invalidFilterFields.Add(new ValidationError
+					{
+						PropertyName = rootFieldName,
+						ErrorType = "LinkOperationsRequired"
+					});
+				}
+
+				return null;
+			}
+
+			var whereQueryPropertyGroup = new WhereQueryProperty
+			{
+				Operator = CompareOperator.None,
+				LinkOperator = filterField.LinkOperator,
+				LinkOperations = new List<WhereQueryProperty>()
+			};
+
+			foreach (var linkOperationFilterField in filterField.LinkOperations)
+			{
+				var whereQueryProperty = ConvertFilterFieldToWhereQueryProperty(rootFieldName, linkOperationFilterField, invalidFilterFields, allowedCompareOperators);
+				if (whereQueryProperty != null)
+				{
+					whereQueryPropertyGroup.LinkOperations.Add(whereQueryProperty);
+				}
+			}
+
+			if (whereQueryPropertyGroup.LinkOperations.Count > 0)
+			{
+				return whereQueryPropertyGroup;
+			}
+
+			if (!_options.SkipInvalidWhereQueries)
+			{
+				invalidFilterFields.Add(new ValidationError
+				{
+					PropertyName = rootFieldName,
+					ErrorType = "NoValidLinkOperations"
+				});
+			}
+
+			return null;
+		}
+
+		private ResponseData<IEnumerable<Expression<Func<T, bool>>>> ProcessProperty<T>(WhereQueryProperty property, BuildQueryContainer<T> queryContainer) where T : class
+		{
+			var conditions = new List<Expression<Func<T, bool>>>();
+
+			if (queryContainer.Mappings.ContainsKey(property.PropertyName))
+			{
+				var members = new List<Expression<Func<T, bool>>>();
+				foreach (var mapping in queryContainer.Mappings[property.PropertyName])
+				{
+					var mappingResult = GetMappingCondition(property, mapping);
+					if (mappingResult.IsFaulty)
+					{
+						return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse(mappingResult);
+					}
+
+					var joinResult = JoinAndExpressions(mappingResult.Data);
+					if (joinResult != null)
+					{
+						members.Add(joinResult);
+					}
+				}
+
+				if (members.Count == 1)
+				{
+					conditions.Add(members.Single());
+				}
+				else if (members.Count > 1)
+				{
+					var joinResult = JoinOrExpressions(members);
+					if (joinResult != null)
+					{
+						conditions.Add(joinResult);
+					}
+				}
+			}
+			else
+			{
+				var conditionResult = GetPropertyCondition<T>(property, queryContainer.PropertyInfos, queryContainer.Parameter);
+				if (conditionResult.IsFaulty)
+				{
+					return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse(conditionResult);
+				}
+
+				conditions.AddRange(conditionResult.Data);
+			}
+
+			return new ResponseData<IEnumerable<Expression<Func<T, bool>>>>(conditions);
 		}
 	}
 }
