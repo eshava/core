@@ -2086,6 +2086,98 @@ namespace Eshava.Test.Core.Linq
 		}
 
 		[TestMethod]
+		public void BuildQueryExpressionsStringPropertyByFilterObjectWithFilterGroupTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new Alpha
+				{
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "Quack_Fu better than Kung-Fu"
+				},
+				new Alpha
+				{
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Delta = "Quack-Fu better than Kung-Fu"
+				},
+				new Alpha
+				{
+					Beta = 3,
+					Gamma = "DD",
+					Delta = "Quack_Fu better than KungFu"
+				},
+				new Alpha
+				{
+					Beta = 4,
+					Gamma = "Darkwing Duck",
+					Delta = "Quack-Fu better than KungFu"
+				},
+				new Alpha
+				{
+					Beta = 5,
+					Gamma = "Darkwing Duck",
+					Delta = "QuackFu better than Kung-Fu"
+				},
+				new Alpha
+				{
+					Beta = 6,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu"
+				}
+			};
+
+			var filter = new FilterModel
+			{
+				Delta = new FilterField
+				{
+					Operator = CompareOperator.None,
+					LinkOperator = LinkOperator.And,
+					LinkOperations = new List<FilterField>
+					{
+						new FilterField
+						{
+							Operator = CompareOperator.None,
+							LinkOperator = LinkOperator.Or,
+							LinkOperations = new List<FilterField>
+							{
+								new FilterField
+								{
+									Operator = CompareOperator.Contains,
+									SearchTerm = "Quack_Fu"
+								},
+								new FilterField
+								{
+									Operator = CompareOperator.Contains,
+									SearchTerm = "Quack-Fu"
+								}
+							}
+						},
+						new FilterField
+						{
+							Operator = CompareOperator.ContainsNot,
+							SearchTerm = "KungFu"
+						}
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(filter, null);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Beta.Should().Be(1);
+			resultWhere.Last().Beta.Should().Be(2);
+		}
+
+		[TestMethod]
 		public void BuildQueryExpressionsStringPropertyByFilterObjectWithNotAllowedCompareOperationsTest()
 		{
 			// Arrange

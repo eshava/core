@@ -18,6 +18,7 @@ namespace Eshava.Test.Core.Linq.Models
 
 		[AllowedCompareOperator(CompareOperator.Equal)]
 		[AllowedCompareOperator(CompareOperator.Contains)]
+		[AllowedCompareOperator(CompareOperator.ContainsNot)]
 		
 		public FilterField Delta { get; set; }
 		
