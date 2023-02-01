@@ -7,9 +7,9 @@ namespace Eshava.Test.Core.Linq.Models
 	public class FilterModel
 	{
 		public string SearchTerm { get; set; }
-		
+
 		public FilterField Beta { get; set; }
-		
+
 		public FilterField Chi { get; set; }
 
 		[AllowedCompareOperator(CompareOperator.Equal)]
@@ -19,15 +19,18 @@ namespace Eshava.Test.Core.Linq.Models
 		[AllowedCompareOperator(CompareOperator.Equal)]
 		[AllowedCompareOperator(CompareOperator.Contains)]
 		[AllowedCompareOperator(CompareOperator.ContainsNot)]
-		
+
 		public FilterField Delta { get; set; }
-		
+
 		public FilterField Epsilon { get; set; }
-		
+
 		public FilterField Kappa { get; set; }
-		
+
 		public FilterField Rho { get; set; }
-		
+
 		public FilterField Sigma { get; set; }
+
+		[AllowedComplexFilterField("Delta")]
+		public ComplexFilterField ComplexFilterField { get; set; }
 	}
 }
