@@ -98,14 +98,38 @@ namespace Eshava.Core.Linq
 					continue;
 				}
 
+				var completeField = filterField.GetValue(filter) as ComplexFilterField;
 				var field = filterField.GetValue(filter) as FilterField;
-				if (field == null)
+				if (completeField == null && field == null)
 				{
 					continue;
 				}
 
-				var allowedCompareOperators = filterField.GetCustomAttributes<AllowedCompareOperatorAttribute>() ?? new List<AllowedCompareOperatorAttribute>();
-				var whereQueryProperty = ConvertFilterFieldToWhereQueryProperty(filterField.Name, field, invalidFilterFields, allowedCompareOperators);
+				var allowedCompareOperators = filterField.GetCustomAttributes<AllowedCompareOperatorAttribute>()?.Select(attribute => attribute.CompareOperator).ToList();
+				var allowedFitlerFields = filterField.GetCustomAttributes<AllowedComplexFilterFieldAttribute>()?.Select(attribute => attribute.Field).ToList();
+
+				var allowedCompareOperatorsHashSet = allowedCompareOperators == null
+					? new HashSet<CompareOperator>()
+					: new HashSet<CompareOperator>(allowedCompareOperators);
+
+				var allowedFitlerFieldsHashSet = allowedFitlerFields == null
+					? new HashSet<string>()
+					: new HashSet<string>(allowedFitlerFields);
+
+				if (completeField == null)
+				{
+					completeField = new ComplexFilterField
+					{
+						Field = filterField.Name,
+						Operator = field.Operator,
+						SearchTerm = field.SearchTerm,
+						LinkOperator = LinkOperator.None
+					};
+
+					allowedFitlerFieldsHashSet.Add(filterField.Name);
+				}
+
+				var whereQueryProperty = ConvertFilterFieldToWhereQueryProperty(completeField, invalidFilterFields, allowedCompareOperatorsHashSet, allowedFitlerFieldsHashSet);
 				if (whereQueryProperty == null)
 				{
 					continue;
@@ -1080,7 +1104,7 @@ namespace Eshava.Core.Linq
 			return Expression.Call(constant, enumerableMemberMethod, memberExpression);
 		}
 
-		private WhereQueryProperty ConvertFilterFieldToWhereQueryProperty(string rootFieldName, FilterField filterField, IList<ValidationError> invalidFilterFields, IEnumerable<AllowedCompareOperatorAttribute> allowedCompareOperators)
+		private WhereQueryProperty ConvertFilterFieldToWhereQueryProperty(ComplexFilterField filterField, IList<ValidationError> invalidFilterFields, HashSet<CompareOperator> allowedCompareOperators, HashSet<string> allowedFields)
 		{
 			if (filterField == null)
 			{
@@ -1088,7 +1112,7 @@ namespace Eshava.Core.Linq
 				{
 					invalidFilterFields.Add(new ValidationError
 					{
-						PropertyName = rootFieldName,
+						PropertyName = nameof(FilterField),
 						ErrorType = "IsNull"
 					});
 				}
@@ -1099,13 +1123,27 @@ namespace Eshava.Core.Linq
 			// operator overrules link operator
 			if (filterField.Operator != CompareOperator.None)
 			{
-				if (allowedCompareOperators.Any() && allowedCompareOperators.All(aco => aco.CompareOperator != filterField.Operator))
+				if (allowedFields.Count > 0 && !allowedFields.Contains(filterField.Field))
 				{
 					if (!_options.SkipInvalidWhereQueries)
 					{
 						invalidFilterFields.Add(new ValidationError
 						{
-							PropertyName = rootFieldName,
+							PropertyName = filterField.Field,
+							ErrorType = "NotAllowed"
+						});
+					}
+
+					return null;
+				}
+
+				if (allowedCompareOperators.Count > 0 && !allowedCompareOperators.Contains(filterField.Operator))
+				{
+					if (!_options.SkipInvalidWhereQueries)
+					{
+						invalidFilterFields.Add(new ValidationError
+						{
+							PropertyName = filterField.Field,
 							Value = filterField.Operator.ToString(),
 							ErrorType = "InvalidOperator"
 						});
@@ -1116,7 +1154,7 @@ namespace Eshava.Core.Linq
 
 				return new WhereQueryProperty
 				{
-					PropertyName = rootFieldName,
+					PropertyName = filterField.Field,
 					Operator = filterField.Operator,
 					SearchTerm = filterField.SearchTerm
 				};
@@ -1128,7 +1166,7 @@ namespace Eshava.Core.Linq
 				{
 					invalidFilterFields.Add(new ValidationError
 					{
-						PropertyName = rootFieldName,
+						PropertyName = filterField.Field,
 						ErrorType = "InvalidLinkOperator"
 					});
 				}
@@ -1142,7 +1180,7 @@ namespace Eshava.Core.Linq
 				{
 					invalidFilterFields.Add(new ValidationError
 					{
-						PropertyName = rootFieldName,
+						PropertyName = filterField.Field,
 						ErrorType = "LinkOperationsRequired"
 					});
 				}
@@ -1159,7 +1197,7 @@ namespace Eshava.Core.Linq
 
 			foreach (var linkOperationFilterField in filterField.LinkOperations)
 			{
-				var whereQueryProperty = ConvertFilterFieldToWhereQueryProperty(rootFieldName, linkOperationFilterField, invalidFilterFields, allowedCompareOperators);
+				var whereQueryProperty = ConvertFilterFieldToWhereQueryProperty(linkOperationFilterField, invalidFilterFields, allowedCompareOperators, allowedFields);
 				if (whereQueryProperty != null)
 				{
 					whereQueryPropertyGroup.LinkOperations.Add(whereQueryProperty);
@@ -1175,7 +1213,7 @@ namespace Eshava.Core.Linq
 			{
 				invalidFilterFields.Add(new ValidationError
 				{
-					PropertyName = rootFieldName,
+					PropertyName = filterField.Field,
 					ErrorType = "NoValidLinkOperations"
 				});
 			}

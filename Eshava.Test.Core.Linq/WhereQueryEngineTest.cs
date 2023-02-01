@@ -2131,32 +2131,35 @@ namespace Eshava.Test.Core.Linq
 
 			var filter = new FilterModel
 			{
-				Delta = new FilterField
+				ComplexFilterField = new ComplexFilterField
 				{
 					Operator = CompareOperator.None,
 					LinkOperator = LinkOperator.And,
-					LinkOperations = new List<FilterField>
+					LinkOperations = new List<ComplexFilterField>
 					{
-						new FilterField
+						new ComplexFilterField
 						{
 							Operator = CompareOperator.None,
 							LinkOperator = LinkOperator.Or,
-							LinkOperations = new List<FilterField>
+							LinkOperations = new List<ComplexFilterField>
 							{
-								new FilterField
+								new ComplexFilterField
 								{
+									Field = "Delta",
 									Operator = CompareOperator.Contains,
 									SearchTerm = "Quack_Fu"
 								},
-								new FilterField
+								new ComplexFilterField
 								{
+									Field = "Delta",
 									Operator = CompareOperator.Contains,
 									SearchTerm = "Quack-Fu"
 								}
 							}
 						},
-						new FilterField
+						new ComplexFilterField
 						{
+							Field = "Delta",
 							Operator = CompareOperator.ContainsNot,
 							SearchTerm = "KungFu"
 						}
@@ -2175,6 +2178,100 @@ namespace Eshava.Test.Core.Linq
 			resultWhere.Should().HaveCount(2);
 			resultWhere.First().Beta.Should().Be(1);
 			resultWhere.Last().Beta.Should().Be(2);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringPropertyByFilterObjectWithFilterGroupNotAllowedFilterFieldTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new Alpha
+				{
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "Quack_Fu better than Kung-Fu"
+				},
+				new Alpha
+				{
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Delta = "Quack-Fu better than Kung-Fu"
+				},
+				new Alpha
+				{
+					Beta = 3,
+					Gamma = "DD",
+					Delta = "Quack_Fu better than KungFu"
+				},
+				new Alpha
+				{
+					Beta = 4,
+					Gamma = "Darkwing Duck",
+					Delta = "Quack-Fu better than KungFu"
+				},
+				new Alpha
+				{
+					Beta = 5,
+					Gamma = "Darkwing Duck",
+					Delta = "QuackFu better than Kung-Fu"
+				},
+				new Alpha
+				{
+					Beta = 6,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu"
+				}
+			};
+
+			var filter = new FilterModel
+			{
+				ComplexFilterField = new ComplexFilterField
+				{
+					Operator = CompareOperator.None,
+					LinkOperator = LinkOperator.And,
+					LinkOperations = new List<ComplexFilterField>
+					{
+						new ComplexFilterField
+						{
+							Operator = CompareOperator.None,
+							LinkOperator = LinkOperator.Or,
+							LinkOperations = new List<ComplexFilterField>
+							{
+								new ComplexFilterField
+								{
+									Field = "Delta",
+									Operator = CompareOperator.Contains,
+									SearchTerm = "Quack_Fu"
+								},
+								new ComplexFilterField
+								{
+									Field = "Delta",
+									Operator = CompareOperator.Contains,
+									SearchTerm = "Quack-Fu"
+								}
+							}
+						},
+						new ComplexFilterField
+						{
+							Field = "Gamma",
+							Operator = CompareOperator.ContainsNot,
+							SearchTerm = "KungFu"
+						}
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(filter, null);
+
+			// Assert
+			result.IsFaulty.Should().BeTrue();
+			result.Data.Should().BeNull();
+
+			result.ValidationErrors.Should().HaveCount(1);
+			result.ValidationErrors.First().PropertyName.Should().Be("Gamma");
+			result.ValidationErrors.First().ErrorType.Should().Be("NotAllowed");
 		}
 
 		[TestMethod]
@@ -2330,7 +2427,7 @@ namespace Eshava.Test.Core.Linq
 			};
 
 			Expression<Func<Alpha, bool>> expectedResultEqual = p => p.Kappa.Psi == "Darkwing Duck";
-			
+
 			// Act
 			var result = _classUnderTest.BuildQueryExpressions(filter, null, mappings);
 
@@ -2338,7 +2435,7 @@ namespace Eshava.Test.Core.Linq
 			result.IsFaulty.Should().BeFalse();
 			result.Data.Should().HaveCount(1);
 			result.Data.First().Should().BeEquivalentTo(expectedResultEqual);
-			
+
 			exampleList.Where(result.Data.First().Compile()).Single().Beta.Should().Be(3);
 		}
 
