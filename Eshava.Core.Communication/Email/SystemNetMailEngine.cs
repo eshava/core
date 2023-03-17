@@ -24,69 +24,79 @@ namespace Eshava.Core.Communication.Email
 
 		public string Type => "System.Net.Mail";
 
-		public Task<ResponseData<bool>> SendEmailAsync(EmailData emailData, EmailAccount emailAccount)
+		public async Task<ResponseData<bool>> SendEmailAsync(EmailData emailData, EmailAccount emailAccount)
 		{
-			var sender = emailData.Sender;
-			if (sender.IsNullOrEmpty())
+			try
 			{
-				sender = emailAccount.Username;
-			}
-
-			var client = CreateSmtpClient(emailAccount);
-			var mailMessage = new MailMessage
-			{
-				From = emailData.SenderDisplayName.IsNullOrEmpty()
-					? new MailAddress(sender?.Trim())
-					: new MailAddress(sender?.Trim(), emailData.SenderDisplayName),
-				Subject = emailData.Subject
-			};
-
-			var alternateView = AlternateView.CreateAlternateViewFromString(
-				emailData.Body,
-				System.Text.Encoding.UTF8,
-				emailData.IsHtml
-					? MediaTypeNames.Text.Html
-					: MediaTypeNames.Text.Plain
-			);
-
-			if (emailData.LinkedResources.Any())
-			{
-				foreach (var emailLinkedResource in emailData.LinkedResources)
+				var sender = emailData.Sender;
+				if (sender.IsNullOrEmpty())
 				{
-					alternateView.LinkedResources.Add(new LinkedResource(ToMemoryStream(emailLinkedResource.Data), new ContentType(emailLinkedResource.ContentType))
-					{
-						ContentId = emailLinkedResource.FileName
-					});
+					sender = emailAccount.Username;
 				}
-			}
 
-			if (emailData.Attachments.Any())
-			{
-				foreach (var emailAttachment in emailData.Attachments)
+				var client = CreateSmtpClient(emailAccount);
+				var mailMessage = new MailMessage
 				{
-					mailMessage.Attachments.Add(new Attachment(ToMemoryStream(emailAttachment.Data), new ContentType(emailAttachment.ContentType))
+					From = emailData.SenderDisplayName.IsNullOrEmpty()
+						? new MailAddress(sender?.Trim())
+						: new MailAddress(sender?.Trim(), emailData.SenderDisplayName),
+					Subject = emailData.Subject
+				};
+
+				var alternateView = AlternateView.CreateAlternateViewFromString(
+					emailData.Body,
+					System.Text.Encoding.UTF8,
+					emailData.IsHtml
+						? MediaTypeNames.Text.Html
+						: MediaTypeNames.Text.Plain
+				);
+
+				if (emailData.LinkedResources.Any())
+				{
+					foreach (var emailLinkedResource in emailData.LinkedResources)
 					{
-						Name = emailAttachment.FileName
-					});
+						alternateView.LinkedResources.Add(new LinkedResource(ToMemoryStream(emailLinkedResource.Data), new ContentType(emailLinkedResource.ContentType))
+						{
+							ContentId = emailLinkedResource.FileName
+						});
+					}
 				}
+
+				if (emailData.Attachments.Any())
+				{
+					foreach (var emailAttachment in emailData.Attachments)
+					{
+						mailMessage.Attachments.Add(new Attachment(ToMemoryStream(emailAttachment.Data), new ContentType(emailAttachment.ContentType))
+						{
+							Name = emailAttachment.FileName
+						});
+					}
+				}
+
+				mailMessage.AlternateViews.Add(alternateView);
+
+				return await SendMailAsync(client, mailMessage, emailData, emailAccount.ChunkSize);
 			}
+			catch (Exception ex)
+			{
+				var errorResult = ResponseData<bool>.CreateFaultyResponse("UnexpectedError", rawMessage: ex.Message, statusCode: (int)HttpStatusCode.InternalServerError);
+				errorResult.Exception = ex;
 
-			mailMessage.AlternateViews.Add(alternateView);
-
-			return SendMailAsync(client, mailMessage, emailData, emailAccount.ChunkSize);
+				return errorResult;
+			}
 		}
 
 		public Task<ResponseData<bool>> SendEmailAsync(EmailData emailData)
 		{
 			var emailAccount = new EmailAccount
 			{
-				SmtpServer = _settings.SmtpServer,
-				Username = _settings.Username,
-				Password = _settings.Password,
-				Port = _settings.Port,
-				SSL = _settings.SSL,
-				SendWithoutAuthentication = _settings.SendWithoutAuthentication,
-				ChunkSize = _settings.ChunkSize,
+				SmtpServer = _settings?.SmtpServer,
+				Username = _settings?.Username,
+				Password = _settings?.Password,
+				Port = _settings?.Port ?? 0,
+				SSL = _settings?.SSL ?? false,
+				SendWithoutAuthentication = _settings?.SendWithoutAuthentication ?? false,
+				ChunkSize = _settings?.ChunkSize ?? 0,
 			};
 
 			return SendEmailAsync(emailData, emailAccount);
@@ -144,7 +154,7 @@ namespace Eshava.Core.Communication.Email
 			{
 				if (_settings.FallbackReceiverEmailAddress.IsNullOrEmpty())
 				{
-					return ResponseData<bool>.CreateFaultyResponse("INVALIDDATA", validationResult: new List<ValidationError>
+					return ResponseData<bool>.CreateFaultyResponse("INVALIDDATA", validationErrors: new List<ValidationError>
 					{
 						new ValidationError
 						{

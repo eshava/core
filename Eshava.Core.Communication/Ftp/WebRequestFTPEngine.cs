@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Eshava.Core.Communication.Ftp.Interfaces;
 using Eshava.Core.Communication.Models;
 using Eshava.Core.Extensions;
+using Eshava.Core.Models;
 
 namespace Eshava.Core.Communication.Ftp
 {
@@ -21,31 +22,44 @@ namespace Eshava.Core.Communication.Ftp
 		/// <param name="fileName">Name of the file on ftp server</param>
 		/// <param name="targetPath">Path of the target directory on local file system</param>
 		/// <returns></returns>
-		public async Task<bool> DownloadAsync(FTPSettings settings, string fileName, string targetPath)
+		public async Task<ResponseData<bool>> DownloadAsync(FTPSettings settings, string fileName, string targetPath)
 		{
-			var directoryInfo = new DirectoryInfo(targetPath);
-			if (!directoryInfo.Exists)
+			try
 			{
-				directoryInfo.Create();
+				var directoryInfo = new DirectoryInfo(targetPath);
+				if (!directoryInfo.Exists)
+				{
+					directoryInfo.Create();
+				}
+
+				var request = CreateRequest(settings, fileName, WebRequestMethods.Ftp.DownloadFile);
+				var response = await request.GetResponseAsync();
+
+				if (!(response is FtpWebResponse ftpWebResponse))
+				{
+					throw new NotSupportedException($"Unexpected request response. Expected: {nameof(FtpWebResponse)}, but found {response.GetType()}");
+				}
+
+				var responseStream = ftpWebResponse.GetResponseStream();
+
+				using (var fsStream = File.Open(Path.Combine(targetPath, fileName), FileMode.Create, FileAccess.Write, FileShare.None))
+				{
+					await WriteAsync(responseStream, fsStream);
+					fsStream.Close();
+				}
+
+				return new ResponseData<bool>
+				{
+					Data = ftpWebResponse.StatusCode == FtpStatusCode.ClosingData
+				};
 			}
-
-			var request = CreateRequest(settings, fileName, WebRequestMethods.Ftp.DownloadFile);
-			var response = await request.GetResponseAsync();
-
-			if (!(response is FtpWebResponse ftpWebResponse))
+			catch (Exception ex)
 			{
-				throw new NotSupportedException($"Unexpected request response. Expected: {nameof(FtpWebResponse)}, but found {response.GetType()}");
+				var errorResult = ResponseData<bool>.CreateFaultyResponse("UnexpectedError", rawMessage: ex.Message, statusCode: (int)HttpStatusCode.InternalServerError);
+				errorResult.Exception = ex;
+
+				return errorResult;
 			}
-
-			var responseStream = ftpWebResponse.GetResponseStream();
-
-			using (var fsStream = File.Open(Path.Combine(targetPath, fileName), FileMode.Create, FileAccess.Write, FileShare.None))
-			{
-				await WriteAsync(responseStream, fsStream);
-				fsStream.Close();
-			}
-
-			return ftpWebResponse.StatusCode == FtpStatusCode.ClosingData;
 		}
 
 		/// <summary>
@@ -55,21 +69,34 @@ namespace Eshava.Core.Communication.Ftp
 		/// <param name="fileName">Name of the file on ftp server</param>
 		/// <param name="fullFileName">Name of the file, inclusive path, of the file</param>
 		/// <returns></returns>
-		public async Task<bool> UploadAsync(FTPSettings settings, string fileName, string fullFileName)
+		public async Task<ResponseData<bool>> UploadAsync(FTPSettings settings, string fileName, string fullFileName)
 		{
-			var request = CreateRequest(settings, fileName, WebRequestMethods.Ftp.UploadFile);
-			var ftpStream = await request.GetRequestStreamAsync();
-			var fsStream = File.OpenRead(fullFileName);
+			try
+			{
+				var request = CreateRequest(settings, fileName, WebRequestMethods.Ftp.UploadFile);
+				var ftpStream = await request.GetRequestStreamAsync();
+				var fsStream = File.OpenRead(fullFileName);
 
-			await WriteAsync(fsStream, ftpStream);
+				await WriteAsync(fsStream, ftpStream);
 
-			fsStream.Close();
+				fsStream.Close();
 
-			var response = (FtpWebResponse)request.GetResponse();
+				var response = (FtpWebResponse)request.GetResponse();
 
-			ftpStream.Close();
+				ftpStream.Close();
 
-			return response.StatusCode == FtpStatusCode.ClosingData;
+				return new ResponseData<bool>
+				{
+					Data = response.StatusCode == FtpStatusCode.ClosingData
+				};
+			}
+			catch (Exception ex)
+			{
+				var errorResult = ResponseData<bool>.CreateFaultyResponse("UnexpectedError", rawMessage: ex.Message, statusCode: (int)HttpStatusCode.InternalServerError);
+				errorResult.Exception = ex;
+
+				return errorResult;
+			}
 		}
 
 		/// <summary>
@@ -78,19 +105,29 @@ namespace Eshava.Core.Communication.Ftp
 		/// <param name="settings">ftp server settings</param>
 		/// <param name="directoryOrFileName">Name of the directory or file</param>
 		/// <returns></returns>
-		public async Task<bool> DeleteAsync(FTPSettings settings, string directoryOrFileName)
+		public async Task<ResponseData<bool>> DeleteAsync(FTPSettings settings, string directoryOrFileName)
 		{
-			var request = CreateRequest(settings, directoryOrFileName, WebRequestMethods.Ftp.DeleteFile);
-			var response = await request.GetResponseAsync();
-
-			response.Close();
-
-			if (!(response is FtpWebResponse ftpWebResponse))
+			try
 			{
-				throw new NotSupportedException($"Unexpected request response. Expected: {nameof(FtpWebResponse)}, but found {response.GetType()}");
-			}
+				var request = CreateRequest(settings, directoryOrFileName, WebRequestMethods.Ftp.DeleteFile);
+				var response = await request.GetResponseAsync();
 
-			return true;
+				response.Close();
+
+				if (!(response is FtpWebResponse ftpWebResponse))
+				{
+					throw new NotSupportedException($"Unexpected request response. Expected: {nameof(FtpWebResponse)}, but found {response.GetType()}");
+				}
+
+				return new ResponseData<bool>(true);
+			}
+			catch (Exception ex)
+			{
+				var errorResult = ResponseData<bool>.CreateFaultyResponse("UnexpectedError", rawMessage: ex.Message, statusCode: (int)HttpStatusCode.InternalServerError);
+				errorResult.Exception = ex;
+
+				return errorResult;
+			}
 		}
 
 		/// <summary>
@@ -99,36 +136,53 @@ namespace Eshava.Core.Communication.Ftp
 		/// <param name="settings">ftp server settings</param>
 		/// <param name="recursive">Enumerate sub directories</param>
 		/// <returns></returns>
-		public async Task<IEnumerable<string>> GetFileNamesAsync(FTPSettings settings, bool recursive)
+		public async Task<ResponseData<IEnumerable<string>>> GetFileNamesAsync(FTPSettings settings, bool recursive)
+		{
+			try
+			{
+				var fileNameResult = await ReadFileNamesAsync(settings, recursive);
+
+				return new ResponseData<IEnumerable<string>>(fileNameResult);
+			}
+			catch (Exception ex)
+			{
+				var errorResult = ResponseData<IEnumerable<string>>.CreateFaultyResponse("UnexpectedError", rawMessage: ex.Message, statusCode: (int)HttpStatusCode.InternalServerError);
+				errorResult.Exception = ex;
+
+				return errorResult;
+			}
+		}
+
+		private async Task<IEnumerable<string>> ReadFileNamesAsync(FTPSettings settings, bool recursive)
 		{
 			var request = CreateRequest(settings, "", WebRequestMethods.Ftp.ListDirectoryDetails);
-			var response = await request.GetResponseAsync();
+				var response = await request.GetResponseAsync();
 
-			if (!(response is FtpWebResponse ftpWebResponse))
-			{
-				throw new NotSupportedException($"Unexpected request response. Expected: {nameof(FtpWebResponse)}, but found {response.GetType()}");
-			}
-
-			var responseStream = ftpWebResponse.GetResponseStream();
-			var reader = new StreamReader(responseStream);
-			var fileNames = await ProcessFileInformationResultsAsync(
-				reader.ReadToEnd(),
-				recursive, settings.ServerPath,
-				async newServerPath =>
+				if (!(response is FtpWebResponse ftpWebResponse))
 				{
-					var subFileSettigs = new FTPSettings
+					throw new NotSupportedException($"Unexpected request response. Expected: {nameof(FtpWebResponse)}, but found {response.GetType()}");
+				}
+
+				var responseStream = ftpWebResponse.GetResponseStream();
+				var reader = new StreamReader(responseStream);
+				var fileNames = await ProcessFileInformationResultsAsync(
+					reader.ReadToEnd(),
+					recursive, settings.ServerPath,
+					async newServerPath =>
 					{
-						ServerUrl = settings.ServerUrl,
-						ServerPort = settings.ServerPort,
-						ServerPath = newServerPath,
-						Username = settings.Username,
-						Password = settings.Password
-					};
+						var subFileSettigs = new FTPSettings
+						{
+							ServerUrl = settings.ServerUrl,
+							ServerPort = settings.ServerPort,
+							ServerPath = newServerPath,
+							Username = settings.Username,
+							Password = settings.Password
+						};
 
-					return await GetFileNamesAsync(subFileSettigs, true);
-				});
+						return await ReadFileNamesAsync(subFileSettigs, true);
+					});
 
-			return fileNames.OrderBy(f => f).ToList();
+				return fileNames.OrderBy(f => f).ToList();
 		}
 
 		private async Task<IEnumerable<string>> ProcessFileInformationResultsAsync(string responseString, bool recursive, string servicePath, Func<string, Task<IEnumerable<string>>> readFileNames)
