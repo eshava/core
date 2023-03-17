@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Eshava.Core.Models
@@ -23,12 +24,14 @@ namespace Eshava.Core.Models
 
 		[JsonIgnore]
 		public string RawMessage { get; set; }
+		[JsonIgnore]
+		public Exception Exception { get; set; }
 
 		public IList<ValidationError> ValidationErrors { get; set; }
 
 		public int StatusCode { get; set; }
 
-		public static ResponseData<T> CreateFaultyResponse(string message, string rawMessage = null, IList<ValidationError> validationResult = null, int statusCode = 400)
+		public static ResponseData<T> CreateFaultyResponse(string message, string rawMessage = null, IList<ValidationError> validationErrors = null, int statusCode = 400)
 		{
 			return new ResponseData<T>
 			{
@@ -36,11 +39,11 @@ namespace Eshava.Core.Models
 				Message = message,
 				RawMessage = rawMessage,
 				StatusCode = statusCode,
-				ValidationErrors = validationResult
+				ValidationErrors = validationErrors
 			};
 		}
 
-		public static ResponseData<T> CreateFaultyResponse<T1>(ResponseData<T1> responseData, IList<ValidationError> validationResult = null, int? statusCode = null)
+		public static ResponseData<T> CreateFaultyResponse<T1>(ResponseData<T1> responseData, IList<ValidationError> validationErrors = null, int? statusCode = null)
 		{
 			return new ResponseData<T>
 			{
@@ -48,7 +51,7 @@ namespace Eshava.Core.Models
 				Message = responseData.Message,
 				RawMessage = responseData.RawMessage,
 				StatusCode = statusCode ?? responseData.StatusCode,
-				ValidationErrors = validationResult ?? responseData.ValidationErrors
+				ValidationErrors = validationErrors ?? responseData.ValidationErrors
 			};
 		}
 	}
