@@ -379,10 +379,10 @@ namespace Eshava.Core.Storage.Sql
 		{
 			var builder = new SqlConnectionStringBuilder
 			{
-				CurrentLanguage = "German",
 				DataSource = server.ServerInstance,
 				InitialCatalog = databasename ?? server.DatabaseName,
-				IntegratedSecurity = server.IntegratedSecurity
+				IntegratedSecurity = server.IntegratedSecurity,
+				TrustServerCertificate = server.TrustServerCertificate
 			};
 
 			if (!server.IntegratedSecurity)

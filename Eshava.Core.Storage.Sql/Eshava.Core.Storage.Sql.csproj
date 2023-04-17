@@ -9,14 +9,14 @@
 		<PackageProjectUrl>https://github.com/eshava/core</PackageProjectUrl>
 		<Description>Collection of methods, classes and helpers to simplify recurring standard actions</Description>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-		<Version>1.0.1</Version>
+		<Version>1.0.2</Version>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Eshava.Core.Storage" Version="1.0.0" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="4.1.0" />
+		<PackageReference Include="Eshava.Core.Storage" Version="1.0.1" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
 	</ItemGroup>
 	
 	<ItemGroup>
