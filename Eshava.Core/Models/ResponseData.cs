@@ -31,6 +31,18 @@ namespace Eshava.Core.Models
 
 		public int StatusCode { get; set; }
 
+		public ResponseData<U> ConvertTo<U>()
+		{
+			return new ResponseData<U>
+			{
+				IsFaulty = IsFaulty,
+				Message = Message,
+				RawMessage = RawMessage,
+				StatusCode = StatusCode,
+				ValidationErrors = ValidationErrors
+			};
+		}
+
 		public static ResponseData<T> CreateFaultyResponse(string message, string rawMessage = null, IList<ValidationError> validationErrors = null, int statusCode = 400)
 		{
 			return new ResponseData<T>
