@@ -174,15 +174,15 @@ namespace Eshava.Core.Storage.Sql
 
 		public async Task<StorageResponse<BackupDatabaseResponse>> BackupDatabaseAsync(BackupDatabaseRequest request, string fileNameWithoutExtension)
 		{
-			var filePath = request.BackupPath.SetValidDirectoryPathEnd();
+			var filePath = request.BackupPath;
 
 			try
 			{
 				fileNameWithoutExtension += ConstantsMsSql.FILE_EXTENSION_BAK;
 
 				var sqlCommand = new StringBuilder();
-				sqlCommand.AppendLine($"{ConstantsMsSql.BACKUP} {ConstantsMsSql.DATABASE} [{ request.Server.DatabaseName}]");
-				sqlCommand.AppendLine(JoinStatement(ConstantsMsSql.TODISK, filePath + fileNameWithoutExtension));
+				sqlCommand.AppendLine($"{ConstantsMsSql.BACKUP} {ConstantsMsSql.DATABASE} [{request.Server.DatabaseName}]");
+				sqlCommand.AppendLine(JoinStatement(ConstantsMsSql.TODISK, System.IO.Path.Combine(filePath, fileNameWithoutExtension)));
 				sqlCommand.AppendLine($"{ConstantsMsSql.WITHFORMAT},");
 				sqlCommand.Append(JoinStatement(ConstantsMsSql.MEDIANAME, request.Server.DatabaseName));
 				sqlCommand.AppendLine(",");
@@ -218,11 +218,8 @@ namespace Eshava.Core.Storage.Sql
 				var dataFileName = GetDatabaseName(DatabaseFileType.Data, request.Server.DatabaseName);
 				var logFileName = GetDatabaseName(DatabaseFileType.Log, request.Server.DatabaseName);
 
-				var dataFullFileName = request.FilePathData.SetValidDirectoryPathEnd();
-				var logFullFileName = request.FilePathLog.SetValidDirectoryPathEnd();
-
-				dataFullFileName += dataFileName + ConstantsMsSql.FILE_EXTENSION_MDF;
-				logFullFileName += logFileName + ConstantsMsSql.FILE_EXTENSION_LDF;
+				var dataFullFileName = System.IO.Path.Combine(request.FilePathData, dataFileName + ConstantsMsSql.FILE_EXTENSION_MDF);
+				var logFullFileName = System.IO.Path.Combine(request.FilePathLog, logFileName + ConstantsMsSql.FILE_EXTENSION_LDF);
 
 				var sqlCommand = new StringBuilder();
 				sqlCommand.AppendLine($"{ConstantsMsSql.IF} DB_ID('{request.Server.DatabaseName}') {ConstantsMsSql.ISNOTNULL}");
@@ -437,7 +434,7 @@ namespace Eshava.Core.Storage.Sql
 			var databasename = GetDatabaseName(type, server.DatabaseName);
 			var initString = ConstantsMsSql.ON;
 			var fileExtension = ConstantsMsSql.FILE_EXTENSION_MDF;
-			var path = option.FilePath.SetValidDirectoryPathEnd();
+			var path = option.FilePath;
 
 			if (type == DatabaseFileType.Log)
 			{
@@ -449,7 +446,7 @@ namespace Eshava.Core.Storage.Sql
 			sqlCommand.AppendLine("(");
 			sqlCommand.Append(JoinStatement(ConstantsMsSql.NAME, databasename));
 			sqlCommand.AppendLine(",");
-			sqlCommand.AppendLine(JoinStatement(ConstantsMsSql.FILENAME, $"{path}{databasename}{fileExtension}"));
+			sqlCommand.AppendLine(JoinStatement(ConstantsMsSql.FILENAME, System.IO.Path.Combine(path, $"{databasename}{fileExtension}")));
 
 			CheckOption(ConstantsMsSql.SIZE, option.Size, sqlCommand);
 			CheckOption(ConstantsMsSql.MAXSIZE, option.MaxSize, sqlCommand);
