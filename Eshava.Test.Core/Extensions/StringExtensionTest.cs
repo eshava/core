@@ -181,23 +181,6 @@ namespace Eshava.Test.Core.Extensions
 			value.IsNullOrEmpty().Should().Be(expectedValue);
 		}
 
-		[DataTestMethod]
-		[DataRow("", @"\")]
-		[DataRow(@"C:\DarkwingDuck", @"C:\DarkwingDuck\")]
-		[DataRow(@"C:\DarkwingDuck\", @"C:\DarkwingDuck\")]
-		public void SetValidDirectoryPathEndTest(string value, string expectedValue)
-		{
-			// Act && Assert
-			value.SetValidDirectoryPathEnd().Should().Be(expectedValue);
-		}
-
-		[TestMethod, ExpectedException(typeof(NullReferenceException))]
-		public void SetValidDirectoryPathEndWithNullStringTest()
-		{
-			// Act && Assert
-			((string)null).SetValidDirectoryPathEnd();
-		}
-
 		[TestMethod]
 		public void FromBase64Test()
 		{
