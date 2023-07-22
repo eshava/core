@@ -8,7 +8,6 @@ namespace Eshava.Core.Extensions
 	public static class StringExtension
 	{
 		public static bool IsNullOrEmpty(this string value) => String.IsNullOrEmpty(value);
-		public static string SetValidDirectoryPathEnd(this string path) => path.EndsWith("\\") ? path : path + "\\";
 
 		public static byte[] FromBase64(this string base64Value) => base64Value.IsNullOrEmpty() ? Array.Empty<byte>() : Convert.FromBase64String(base64Value);
 
