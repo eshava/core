@@ -9,15 +9,17 @@ namespace Eshava.Core.Logging
 {
 	public class LogEngine : ILogger
 	{
+		private JsonSerializerSettings _jsonSerializerSettings;
 		private readonly string _categoryName;
 		private readonly ILogWriter _logWriter;
 		private readonly LogLevel _logLevel;
 
-		public LogEngine(string categoryName, LogLevel logLevel, ILogWriter logWriter)
+		public LogEngine(string categoryName, LogLevel logLevel, ILogWriter logWriter, ReferenceLoopHandling referenceLoopHandling)
 		{
 			_categoryName = categoryName;
 			_logWriter = logWriter;
 			_logLevel = logLevel;
+			_jsonSerializerSettings = new() { ReferenceLoopHandling = referenceLoopHandling };
 		}
 
 		public IDisposable BeginScope<TState>(TState state)
@@ -54,7 +56,7 @@ namespace Eshava.Core.Logging
 				Method = additionalInformation?.Method
 			};
 
-			
+
 
 			var log = new LogEntry
 			{
@@ -77,7 +79,9 @@ namespace Eshava.Core.Logging
 				ApplicationId = eventId.Name,
 				Category = _categoryName,
 				Message = logMessage,
-				Additional = additionalInformation?.Information == null ? null : JsonConvert.DeserializeObject<JToken>(JsonConvert.SerializeObject(additionalInformation?.Information)),
+				Additional = additionalInformation?.Information == null
+					? null
+					: JsonConvert.DeserializeObject<JToken>(JsonConvert.SerializeObject(additionalInformation?.Information, _jsonSerializerSettings)),
 				Exception = ConvertException(exception),
 				TimestampUtc = DateTime.UtcNow
 			};
