@@ -49,7 +49,7 @@ namespace Eshava.Core.Logging
 
 		private LogEngine GenerateLogEngine(string categoryName, LogLevel logLevel)
 		{
-			return new LogEngine(categoryName, logLevel, _logWriter);
+			return new LogEngine(categoryName, logLevel, _logWriter, _logSettings.ReferenceLoopHandling);
 		}
 
 		private LogLevel GetLogLevel(string categoryName)
@@ -62,6 +62,11 @@ namespace Eshava.Core.Logging
 			if (_logSettings.IgnoredCategories.Any(category => categoryName.ToLower().Contains(category)))
 			{
 				return GARBAGE_CATEGORY;
+			}
+
+			if (_logSettings.PrintLoggerCategories)
+			{
+				System.Console.WriteLine("Accepted logger category: " + categoryName);
 			}
 
 			return categoryName.IsNullOrEmpty() ? DEFAULT_CATEGORY : categoryName.Split('.').Last();

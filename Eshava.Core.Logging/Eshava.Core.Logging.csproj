@@ -8,15 +8,14 @@
 		<Authors>Eshava</Authors>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageProjectUrl>https://github.com/eshava/core</PackageProjectUrl>
-		<Version>1.0.1</Version>
+		<Version>1.0.3</Version>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Eshava.Core" Version="1.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.22" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+		<PackageReference Include="Eshava.Core" Version="1.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.4" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
 	</ItemGroup>
 
