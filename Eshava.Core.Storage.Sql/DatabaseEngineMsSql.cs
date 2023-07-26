@@ -178,11 +178,11 @@ namespace Eshava.Core.Storage.Sql
 
 			try
 			{
-				fileNameWithoutExtension += ConstantsMsSql.FILE_EXTENSION_BAK;
+				var fullFileName = System.IO.Path.Combine(filePath, fileNameWithoutExtension + ConstantsMsSql.FILE_EXTENSION_BAK);
 
 				var sqlCommand = new StringBuilder();
 				sqlCommand.AppendLine($"{ConstantsMsSql.BACKUP} {ConstantsMsSql.DATABASE} [{request.Server.DatabaseName}]");
-				sqlCommand.AppendLine(JoinStatement(ConstantsMsSql.TODISK, System.IO.Path.Combine(filePath, fileNameWithoutExtension)));
+				sqlCommand.AppendLine(JoinStatement(ConstantsMsSql.TODISK, fullFileName));
 				sqlCommand.AppendLine($"{ConstantsMsSql.WITHFORMAT},");
 				sqlCommand.Append(JoinStatement(ConstantsMsSql.MEDIANAME, request.Server.DatabaseName));
 				sqlCommand.AppendLine(",");
@@ -195,7 +195,7 @@ namespace Eshava.Core.Storage.Sql
 					Data = new BackupDatabaseResponse
 					{
 						IsSuccessful = true,
-						BackupFullFileName = filePath + fileNameWithoutExtension
+						BackupFullFileName = fullFileName
 					}
 				};
 			}
