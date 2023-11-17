@@ -16,6 +16,7 @@ namespace Eshava.Core.Storage.Interfaces
 
 		Task<StorageResponse<bool>> CreateDatabaseAsync(CreateDatabaseRequest request);
 		Task<StorageResponse<bool>> DropDatabaseAsync(DatabaseConnectionOptions server);
+		Task<StorageResponse<bool>> CopyDatabaseAsync(CopyDatabaseRequest request);
 
 		Task<StorageResponse<BackupDatabaseResponse>> BackupDatabaseAsync(BackupDatabaseRequest request, string fileNameWithoutExtension);
 		Task<StorageResponse<bool>> RestoreDatabaseAsync(RestoreDatabaseRequest request);
