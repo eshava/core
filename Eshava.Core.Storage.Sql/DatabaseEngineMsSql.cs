@@ -242,6 +242,79 @@ namespace Eshava.Core.Storage.Sql
 			return new StorageResponse<bool> { Data = true };
 		}
 
+		public async Task<StorageResponse<bool>> CopyDatabaseAsync(CopyDatabaseRequest request)
+		{
+			// 1) Create database backup
+			var databaseBackupFilePath = System.IO.Path.Combine(request.BackupPath,  $"{request.DatabaseNameSource}_{Guid.NewGuid()}{ConstantsMsSql.FILE_EXTENSION_BAK}");
+			var sourceDataFileName = GetDatabaseName(DatabaseFileType.Data, request.DatabaseNameSource);
+			var sourceLogFileName = GetDatabaseName(DatabaseFileType.Log, request.DatabaseNameSource);
+
+			try
+			{
+				var sqlCommand = new StringBuilder();
+				sqlCommand.AppendLine($"{ConstantsMsSql.BACKUP} {ConstantsMsSql.DATABASE} [{request.DatabaseNameSource}]");
+				sqlCommand.AppendLine(JoinStatement(ConstantsMsSql.TODISK, databaseBackupFilePath));
+				sqlCommand.AppendLine(ConstantsMsSql.WITHCOPYONLY);
+				
+				await ExecuteNonQueryAsync(request.Server, sqlCommand.ToString(), ConstantsMsSql.MASTER);
+			}
+			catch (Exception ex)
+			{
+				return new StorageResponse<bool>
+				{
+					IsFaulty = true,
+					Exception = ex
+				};
+			}
+
+			// 2) Restore backup as new database
+			try
+			{
+				var targetDataFileName = GetDatabaseName(DatabaseFileType.Data, request.DatabaseNameTarget);
+				var targetlogFileName = GetDatabaseName(DatabaseFileType.Log, request.DatabaseNameTarget);
+
+				var targetDataFullFileName = System.IO.Path.Combine(request.TargetFilePathData, targetDataFileName + ConstantsMsSql.FILE_EXTENSION_MDF);
+				var targetLogFullFileName = System.IO.Path.Combine(request.TargetFilePathLog, targetlogFileName + ConstantsMsSql.FILE_EXTENSION_LDF);
+
+				var sqlCommand = new StringBuilder();
+				sqlCommand.AppendLine($"{ConstantsMsSql.RESTORE} {ConstantsMsSql.DATABASE} [{request.DatabaseNameTarget}]");
+				sqlCommand.AppendLine($"{ConstantsMsSql.FROM} {ConstantsMsSql.DISK} = '{databaseBackupFilePath}'");
+				sqlCommand.AppendLine($"{ConstantsMsSql.WITH} {ConstantsMsSql.MOVE} '{sourceDataFileName}' {ConstantsMsSql.TO} '{targetDataFullFileName}',");
+				sqlCommand.AppendLine($"{ConstantsMsSql.MOVE} '{sourceLogFileName}' {ConstantsMsSql.TO} '{targetLogFullFileName}',");
+				sqlCommand.AppendLine(ConstantsMsSql.REPLACE);
+
+				await ExecuteNonQueryAsync(request.Server, sqlCommand.ToString(), ConstantsMsSql.MASTER);
+			}
+			catch (Exception ex)
+			{
+				return new StorageResponse<bool>
+				{
+					IsFaulty = true,
+					Exception = ex
+				};
+			}
+
+			// 3) Delete backup file
+			try
+			{
+				System.IO.File.Delete(databaseBackupFilePath);
+			}
+			catch (Exception ex)
+			{
+				return new StorageResponse<bool>
+				{
+					Data = true,
+					IsFaulty = false,
+					Exception = ex
+				};
+			}
+
+			return new StorageResponse<bool>
+			{
+				Data = true
+			};
+		}
+
 		public async Task<StorageResponse<IEnumerable<StatisticsDatabase>>> GetDatabasesAsync(DatabaseConnectionOptions server)
 		{
 			try

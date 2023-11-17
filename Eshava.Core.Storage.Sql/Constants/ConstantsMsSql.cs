@@ -33,6 +33,7 @@
 		public const string STATS = "STATS";
 		public const string CONVERT = "CONVERT";
 		public const string AS = "AS";
+		public const string REPLACE = "REPLACE";
 
 		public const string MAX = "MAX";
 
@@ -64,6 +65,7 @@
 		public const string LOG = "LOG";
 		public const string TODISK = "TO DISK";
 		public const string WITHFORMAT = "WITH FORMAT";
+		public const string WITHCOPYONLY = "WITH COPY_ONLY";
 		public const string MEDIANAME = "MEDIANAME";
 		public const string NAME = "NAME";
 		public const string FILENAME = "FILENAME";
