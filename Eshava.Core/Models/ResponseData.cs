@@ -99,7 +99,7 @@ namespace Eshava.Core.Models
 			};
 		}
 
-		public static ResponseData<T> CreateFaultyResponse(string message, string rawMessage = null, IEnumerable<ValidationError> validationErrors = null, int statusCode = 400)
+		public static ResponseData<T> CreateFaultyResponse(string message, string rawMessage, IEnumerable<ValidationError> validationErrors = null, int statusCode = 400)
 		{
 			return new ResponseData<T>
 			{
@@ -111,13 +111,13 @@ namespace Eshava.Core.Models
 			};
 		}
 
-		public static ResponseData<T> CreateFaultyResponse(string message, Exception exception = null, IEnumerable<ValidationError> validationErrors = null, int statusCode = 400)
+		public static ResponseData<T> CreateFaultyResponse(string message, Exception exception, IEnumerable<ValidationError> validationErrors = null, int statusCode = 400)
 		{
 			return new ResponseData<T>
 			{
 				IsFaulty = true,
 				Message = message,
-				RawMessage = exception?.Message,
+				RawMessage = exception.Message,
 				Exception = exception,
 				StatusCode = statusCode,
 				ValidationErrors = validationErrors
