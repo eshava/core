@@ -79,10 +79,7 @@ namespace Eshava.Core.Communication.Email
 			}
 			catch (Exception ex)
 			{
-				var errorResult = ResponseData<bool>.CreateFaultyResponse("UnexpectedError", rawMessage: ex.Message, statusCode: (int)HttpStatusCode.InternalServerError);
-				errorResult.Exception = ex;
-
-				return errorResult;
+				return ResponseData<bool>.CreateFaultyResponse("UnexpectedError", ex, statusCode: (int)HttpStatusCode.InternalServerError);
 			}
 		}
 
