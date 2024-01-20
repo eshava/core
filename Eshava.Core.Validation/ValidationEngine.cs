@@ -16,8 +16,8 @@ namespace Eshava.Core.Validation
 {
 	public class ValidationEngine : IValidationEngine
 	{
-		private readonly List<Func<ValidationCheckParameters, ValidationCheckResult>> _validationMethods = new List<Func<ValidationCheckParameters, ValidationCheckResult>>
-		{
+		private readonly List<Func<ValidationCheckParameters, ValidationCheckResult>> _validationMethods =
+		[
 			RequiredValidation.CheckRequired,
 			StringValidation.CheckStringLength,
 			StringValidation.CheckMailAddress,
@@ -31,7 +31,7 @@ namespace Eshava.Core.Validation
 			EnumerationValidation.CheckEnumeration,
 			parameter => { parameter.NotEquals = false; return EqualsValidation.CheckEqualsTo(parameter); },
 			parameter => { parameter.NotEquals = true; return EqualsValidation.CheckEqualsTo(parameter); }
-		};
+		];
 
 		public ValidationCheckResult Validate(object model)
 		{
@@ -54,43 +54,58 @@ namespace Eshava.Core.Validation
 			var results = new List<ValidationCheckResult>();
 			var modelType = model.GetType();
 
-			foreach (var propertyInfo in modelType.GetProperties())
+			if (modelType.ImplementsIEnumerable())
 			{
-				if (propertyInfo.HasAttribute<ValidationIgnoreAttribute>())
-				{
-					continue;
-				}
-
-				var propertyValue = propertyInfo.GetValue(model);
 				var validationParameter = new ValidationCheckParameters
 				{
 					Model = model,
 					DataType = modelType,
-					PropertyInfo = propertyInfo
+					PropertyInfo = null
 				};
 
-				if (propertyValue != null && propertyInfo.PropertyType.ImplementsIEnumerable())
-				{
-					results.AddRange(ValidateEnumerable(propertyValue, propertyInfo, validationParameter));
-				}
-				validationParameter.PropertyValue = propertyValue;
+				results.AddRange(ValidateEnumerable(model, null, validationParameter));
+			}
+			else
+			{
 
-				if (propertyValue != null && propertyInfo.PropertyType.IsClass && propertyInfo.PropertyType != typeof(string) && !propertyInfo.PropertyType.ImplementsIEnumerable())
+				foreach (var propertyInfo in modelType.GetProperties())
 				{
-					results.Add(Validate(propertyValue));
-				}
-				else
-				{
-					var validationMethodResult = _validationMethods.Select(method =>
+					if (propertyInfo.HasAttribute<ValidationIgnoreAttribute>())
 					{
-						validationParameter.DataType = modelType;
+						continue;
+					}
 
-						return method(validationParameter);
-					}).ToList();
-
-					if (validationMethodResult.Any())
+					var propertyValue = propertyInfo.GetValue(model);
+					var validationParameter = new ValidationCheckParameters
 					{
-						results.AddRange(validationMethodResult);
+						Model = model,
+						DataType = modelType,
+						PropertyInfo = propertyInfo
+					};
+
+					if (propertyValue != null && propertyInfo.PropertyType.ImplementsIEnumerable())
+					{
+						results.AddRange(ValidateEnumerable(propertyValue, propertyInfo, validationParameter));
+					}
+					validationParameter.PropertyValue = propertyValue;
+
+					if (propertyValue != null && propertyInfo.PropertyType.IsClass && propertyInfo.PropertyType != typeof(string) && !propertyInfo.PropertyType.ImplementsIEnumerable())
+					{
+						results.Add(Validate(propertyValue));
+					}
+					else
+					{
+						var validationMethodResult = _validationMethods.Select(method =>
+						{
+							validationParameter.DataType = modelType;
+
+							return method(validationParameter);
+						}).ToList();
+
+						if (validationMethodResult.Any())
+						{
+							results.AddRange(validationMethodResult);
+						}
 					}
 				}
 			}
@@ -106,8 +121,9 @@ namespace Eshava.Core.Validation
 		private IEnumerable<ValidationCheckResult> ValidateEnumerable(object propertyValue, PropertyInfo propertyInfo, ValidationCheckParameters validationParameter)
 		{
 			var results = new List<ValidationCheckResult>();
-			var dataType = propertyInfo.PropertyType.GetDataTypeFromIEnumerable();
-
+			var dataType = propertyInfo?.PropertyType.GetDataTypeFromIEnumerable()
+				?? propertyValue.GetType().GetDataTypeFromIEnumerable();
+			
 			if (dataType.IsClass && propertyValue is IEnumerable elements)
 			{
 				if (dataType == typeof(string))
