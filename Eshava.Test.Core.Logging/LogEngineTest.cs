@@ -22,7 +22,7 @@ namespace Eshava.Test.Core.Logging
 		public void Setup()
 		{
 			_logWriterFake = A.Fake<ILogWriter>();
-			_classUnderTest = new LogEngine("DarkwingDuck", LogLevel.Error, _logWriterFake);
+			_classUnderTest = new LogEngine("DarkwingDuck", LogLevel.Error, _logWriterFake, ReferenceLoopHandling.Ignore);
 		}
 
 		[DataTestMethod]
@@ -136,7 +136,7 @@ namespace Eshava.Test.Core.Logging
 				Message = "DarkwingDuck is late",
 				Information = null
 			};
-			
+
 			var logEntry = default(LogEntry);
 			A.CallTo(() => _logWriterFake.Write(A<LogEntry>.Ignored)).Invokes(fakeCallObject =>
 			{
@@ -170,7 +170,7 @@ namespace Eshava.Test.Core.Logging
 				Message = "DarkwingDuck is late",
 				Information = alpha
 			};
-			
+
 			var logEntry = default(LogEntry);
 			A.CallTo(() => _logWriterFake.Write(A<LogEntry>.Ignored)).Invokes(fakeCallObject =>
 			{
