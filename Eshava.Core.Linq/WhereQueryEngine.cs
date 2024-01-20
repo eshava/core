@@ -140,7 +140,7 @@ namespace Eshava.Core.Linq
 
 			if (invalidFilterFields.Count > 0)
 			{
-				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidFilter", validationResult: invalidFilterFields);
+				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidFilter", validationErrors: invalidFilterFields);
 			}
 
 			return BuildQueryExpressions(whereQueryProperties, globalSearchTerm, mappings);
@@ -458,14 +458,8 @@ namespace Eshava.Core.Linq
 					return new ResponseData<IList<Expression<Func<T, bool>>>>(new List<Expression<Func<T, bool>>>());
 				}
 
-				return ResponseData<IList<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData", validationResult: new List<ValidationError>
-				{
-					new ValidationError
-					{
-						PropertyName = property.PropertyName,
-						ErrorType = "InvalidPropertyMapping"
-					}
-				});
+				return ResponseData<IList<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData")
+					.AddValidationError(property.PropertyName, "InvalidPropertyMapping");
 			}
 
 			if (expectedDataType != null && memberExpression.Type != expectedDataType)
@@ -475,14 +469,8 @@ namespace Eshava.Core.Linq
 					return new ResponseData<IList<Expression<Func<T, bool>>>>(new List<Expression<Func<T, bool>>>());
 				}
 
-				return ResponseData<IList<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData", validationResult: new List<ValidationError>
-				{
-					new ValidationError
-					{
-						PropertyName = property.PropertyName,
-						ErrorType = "InvalidPropertyMappingType"
-					}
-				});
+				return ResponseData<IList<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData")
+					.AddValidationError(property.PropertyName, "InvalidPropertyMappingType");
 			}
 
 			var memberType = memberExpression.Type;
@@ -531,7 +519,7 @@ namespace Eshava.Core.Linq
 
 			if (validationErrors.Count > 0)
 			{
-				return ResponseData<IList<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData", validationResult: validationErrors);
+				return ResponseData<IList<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData", validationErrors: validationErrors);
 			}
 
 			return new ResponseData<IList<Expression<Func<T, bool>>>>(expressions);
@@ -547,7 +535,7 @@ namespace Eshava.Core.Linq
 					return new ResponseData<IEnumerable<Expression<Func<T, bool>>>>(new List<Expression<Func<T, bool>>>());
 				}
 
-				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData", validationResult: new List<ValidationError>
+				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData", validationErrors: new List<ValidationError>
 				{
 					new ValidationError
 					{
@@ -608,7 +596,7 @@ namespace Eshava.Core.Linq
 
 			if (validationErrors.Count > 0)
 			{
-				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData", validationResult: validationErrors);
+				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData", validationErrors: validationErrors);
 			}
 
 			return new ResponseData<IEnumerable<Expression<Func<T, bool>>>>(expressions);
@@ -908,7 +896,7 @@ namespace Eshava.Core.Linq
 		{
 			if (data.ConstantValue == null && !(data.Member.Type == _typeString || data.Member.Type.IsDataTypeNullable()))
 			{
-				return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse("InvalidData", validationResult: new List<ValidationError>
+				return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse("InvalidData", validationErrors: new List<ValidationError>
 				{
 					new ValidationError
 					{
@@ -920,7 +908,7 @@ namespace Eshava.Core.Linq
 
 			if (!_compareOperatorExpressions.ContainsKey(data.Operator))
 			{
-				return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse("InvalidData", validationResult: new List<ValidationError>
+				return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse("InvalidData", validationErrors: new List<ValidationError>
 				{
 					new ValidationError
 					{
@@ -949,7 +937,7 @@ namespace Eshava.Core.Linq
 			}
 			catch (Exception ex)
 			{
-				return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse("InvalidData", rawMessage: ex.Message, validationResult: new List<ValidationError>
+				return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse("InvalidData", rawMessage: ex.Message, validationErrors: new List<ValidationError>
 				{
 					new ValidationError
 					{
