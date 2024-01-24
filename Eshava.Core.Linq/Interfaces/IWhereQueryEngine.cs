@@ -14,10 +14,11 @@ namespace Eshava.Core.Linq.Interfaces
 		/// </summary>
 		/// <typeparam name="T">Target class data type</typeparam>
 		/// <param name="filter">Filter object</param>
-		/// <param name="globalSearchTerm">Search termn, will apply on all string properties</param>
+		/// <param name="globalSearchTerm">Search term, will apply on all string properties</param>
 		/// <param name="mappings">Mappings for foreign key properties</param>
+		/// <param name="options">local execution options</param>
 		/// <returns></returns>
-		ResponseData<IEnumerable<Expression<Func<T, bool>>>> BuildQueryExpressions<T>(object filter, string globalSearchTerm, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class;
+		ResponseData<IEnumerable<Expression<Func<T, bool>>>> BuildQueryExpressions<T>(object filter, string globalSearchTerm, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null, WhereQueryEngineOptions options = null) where T : class;
 
 		/// <summary>
 		/// Creates a list of where expression based on passed query parameters
@@ -29,19 +30,21 @@ namespace Eshava.Core.Linq.Interfaces
 		/// <typeparam name="T">Target class data type</typeparam>
 		/// <param name="queryParameters">queryParameters</param>
 		/// <param name="mappings">Mappings for foreign key properties</param>
+		/// <param name="options">local execution options</param>
 		/// <exception cref="ArgumentNullException">Thrown if <see cref="QueryParameters">queryParameters</see> is null.</exception>
 		/// <returns> where expressions</returns>
-		ResponseData<IEnumerable<Expression<Func<T, bool>>>> BuildQueryExpressions<T>(QueryParameters queryParameters, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class;
+		ResponseData<IEnumerable<Expression<Func<T, bool>>>> BuildQueryExpressions<T>(QueryParameters queryParameters, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null, WhereQueryEngineOptions options = null) where T : class;
 
 		/// <summary>
 		/// Creates a list of where expression based on passed where query properties and search term
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="whereQueryProperties">filter statements</param>
-		/// <param name="globalSearchTerm">Search termn, will apply on all string properties</param>
+		/// <param name="globalSearchTerm">Search term, will apply on all string properties</param>
 		/// <param name="mappings"></param>
+		/// <param name="options">local execution options</param>
 		/// <returns></returns>
-		ResponseData<IEnumerable<Expression<Func<T, bool>>>> BuildQueryExpressions<T>(IEnumerable<WhereQueryProperty> whereQueryProperties, string globalSearchTerm, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class;
+		ResponseData<IEnumerable<Expression<Func<T, bool>>>> BuildQueryExpressions<T>(IEnumerable<WhereQueryProperty> whereQueryProperties, string globalSearchTerm, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null, WhereQueryEngineOptions options = null) where T : class;
 
 		/// <summary>
 		/// Removes all properties for which a GUID search term was passed

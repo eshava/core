@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Eshava.Core.Extensions;
+using Eshava.Core.Linq.Constants;
 using Eshava.Core.Linq.Extensions;
 using Eshava.Core.Linq.Interfaces;
 using Eshava.Core.Linq.Models;
@@ -396,18 +397,8 @@ namespace Eshava.Core.Linq
 			var valueArray = GetValueFromDisplayClass(memberExpression.Member, constantExpression);
 			constantExpression = Expression.Constant(valueArray, valueArray.GetType());
 
-			var method = typeof(Enumerable)
-				.GetMethods()
-				.FirstOrDefault(m => m.Name == "Any"
-					&& m.GetParameters().Length == 2
-					&& m.GetParameters()[0].ParameterType.IsGenericType
-					&& m.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>)
-					&& m.GetParameters()[1].ParameterType.IsGenericType
-					&& m.GetParameters()[1].ParameterType.GetGenericTypeDefinition() == typeof(Func<,>)
-				)
-				.MakeGenericMethod(innerType)
-				;
-
+			var method = MethodInfoConstants.GetGenericAny(innerType);
+			
 			return Expression.Call(method, constantExpression, lambdaExpression);
 		}
 

@@ -96,6 +96,94 @@ namespace Eshava.Test.Core.Linq
 			propertyCountQueryIgnore.Should().Be(1);
 		}
 
+		[TestMethod]
+		public void BuildQueryExpressionsGlobalSearchTermCaseInsensitveOneTest()
+		{
+			// Arrange
+			var propertyValue = "Darkwing Duck";
+			var queryParameter = new QueryParameters
+			{
+				SearchTerm = propertyValue.ToLower()
+			};
+
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var typeString = typeof(string);
+			var properties = typeof(Alpha).GetProperties().Where(p => p.PropertyType == typeString && p.CanWrite).ToList();
+			var propertyCountQueryIgnore = 0;
+
+			var exampleList = new List<Alpha>();
+			foreach (var propertyInfo in properties)
+			{
+				var alpha = new Alpha();
+				propertyInfo.SetValue(alpha, propertyValue);
+				exampleList.Add(alpha);
+
+				if (propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() != null)
+				{
+					propertyCountQueryIgnore++;
+				}
+			}
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).ToList();
+			resultWhere.Should().HaveCount(properties.Count - propertyCountQueryIgnore);
+			propertyCountQueryIgnore.Should().Be(1);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsGlobalSearchTermCaseInsensitveTwoTest()
+		{
+			// Arrange
+			var propertyValue = "Darkwing Duck";
+			var queryParameter = new QueryParameters
+			{
+				SearchTerm = propertyValue
+			};
+
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var typeString = typeof(string);
+			var properties = typeof(Alpha).GetProperties().Where(p => p.PropertyType == typeString && p.CanWrite).ToList();
+			var propertyCountQueryIgnore = 0;
+
+			var exampleList = new List<Alpha>();
+			foreach (var propertyInfo in properties)
+			{
+				var alpha = new Alpha();
+				propertyInfo.SetValue(alpha, propertyValue.ToLower());
+				exampleList.Add(alpha);
+
+				if (propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() != null)
+				{
+					propertyCountQueryIgnore++;
+				}
+			}
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).ToList();
+			resultWhere.Should().HaveCount(properties.Count - propertyCountQueryIgnore);
+			propertyCountQueryIgnore.Should().Be(1);
+		}
+
 		[DataTestMethod]
 		[DataRow(false, DisplayName = "Deactivated split option")]
 		[DataRow(true, DisplayName = "Activated split option")]
@@ -150,26 +238,141 @@ namespace Eshava.Test.Core.Linq
 			propertyCountQueryIgnore.Should().Be(1);
 		}
 
+		[DataTestMethod]
+		[DataRow(false, DisplayName = "Deactivated split option")]
+		[DataRow(true, DisplayName = "Activated split option")]
+		public void BuildQueryExpressionsGlobalSearchTermWithSplitContainsOptionCaseInsensitveOneTest(bool containsSearchSplitBySpace)
+		{
+			// Arrange
+			var classUnderTest = new WhereQueryEngine(new WhereQueryEngineOptions
+			{
+				UseUtcDateTime = true,
+				ContainsSearchSplitBySpace = containsSearchSplitBySpace
+			});
+
+			var propertyContent = "Darkwing Duck";
+			var queryParameter = new QueryParameters
+			{
+				SearchTerm = "Dark Du".ToLower()
+			};
+
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var typeString = typeof(string);
+			var properties = typeof(Alpha).GetProperties().Where(p => p.PropertyType == typeString && p.CanWrite).ToList();
+			var propertyCountQueryIgnore = 0;
+
+			var exampleList = new List<Alpha>();
+			foreach (var propertyInfo in properties)
+			{
+				var alpha = new Alpha();
+				propertyInfo.SetValue(alpha, propertyContent);
+				exampleList.Add(alpha);
+
+				if (propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() != null)
+				{
+					propertyCountQueryIgnore++;
+				}
+			}
+
+			// Act
+			var result = classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			if (containsSearchSplitBySpace)
+			{
+				resultWhere.Should().HaveCount(properties.Count - propertyCountQueryIgnore);
+			}
+			else
+			{
+				resultWhere.Should().HaveCount(0);
+			}
+			propertyCountQueryIgnore.Should().Be(1);
+		}
+
+		[DataTestMethod]
+		[DataRow(false, DisplayName = "Deactivated split option")]
+		[DataRow(true, DisplayName = "Activated split option")]
+		public void BuildQueryExpressionsGlobalSearchTermWithSplitContainsOptionCaseInsensitveTwoTest(bool containsSearchSplitBySpace)
+		{
+			// Arrange
+			var classUnderTest = new WhereQueryEngine(new WhereQueryEngineOptions
+			{
+				UseUtcDateTime = true,
+				ContainsSearchSplitBySpace = containsSearchSplitBySpace
+			});
+
+			var propertyContent = "Darkwing Duck".ToLower();
+			var queryParameter = new QueryParameters
+			{
+				SearchTerm = "Dark Du"
+			};
+
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var typeString = typeof(string);
+			var properties = typeof(Alpha).GetProperties().Where(p => p.PropertyType == typeString && p.CanWrite).ToList();
+			var propertyCountQueryIgnore = 0;
+
+			var exampleList = new List<Alpha>();
+			foreach (var propertyInfo in properties)
+			{
+				var alpha = new Alpha();
+				propertyInfo.SetValue(alpha, propertyContent);
+				exampleList.Add(alpha);
+
+				if (propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() != null)
+				{
+					propertyCountQueryIgnore++;
+				}
+			}
+
+			// Act
+			var result = classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			if (containsSearchSplitBySpace)
+			{
+				resultWhere.Should().HaveCount(properties.Count - propertyCountQueryIgnore);
+			}
+			else
+			{
+				resultWhere.Should().HaveCount(0);
+			}
+			propertyCountQueryIgnore.Should().Be(1);
+		}
+
 		[TestMethod]
 		public void BuildQueryExpressionsStringPropertyTest()
 		{
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Gamma = "DD",
 					Delta = "QuackFu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Gamma = "Darkwing Duck",
 					Delta = "QuackFu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Gamma = "Darkwing Duck",
 					Delta = "KungFu"
@@ -180,14 +383,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Alpha.Gamma),
 						SearchTerm = "Darkwing Duck"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Contains,
 						PropertyName = nameof(Alpha.Delta),
 						SearchTerm = "QuackFu"
@@ -213,31 +414,143 @@ namespace Eshava.Test.Core.Linq
 		}
 
 		[TestMethod]
+		public void BuildQueryExpressionsStringPropertyCaseInsensitveOneTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QuackFu better than KungFu"
+				},
+				new() {
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Delta = "QuackFu better than KungFu"
+				},
+				new() {
+					Beta = 3,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu"
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator =  CompareOperator.Equal,
+						PropertyName = nameof(Alpha.Gamma),
+						SearchTerm = "Darkwing Duck".ToLower()
+					},
+					new() {
+						Operator =  CompareOperator.Contains,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "QuackFu".ToLower()
+					}
+				}
+			};
+
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+			resultWhere.First().Beta.Should().Be(2);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringPropertyCaseInsensitveTwoTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD".ToLower(),
+					Delta = "QuackFu better than KungFu".ToLower()
+				},
+				new() {
+					Beta = 2,
+					Gamma = "Darkwing Duck".ToLower(),
+					Delta = "QuackFu better than KungFu".ToLower()
+				},
+				new() {
+					Beta = 3,
+					Gamma = "Darkwing Duck".ToLower(),
+					Delta = "KungFu".ToLower()
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator =  CompareOperator.Equal,
+						PropertyName = nameof(Alpha.Gamma),
+						SearchTerm = "Darkwing Duck"
+					},
+					new() {
+						Operator =  CompareOperator.Contains,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "QuackFu"
+					}
+				}
+			};
+
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+			resultWhere.First().Beta.Should().Be(2);
+		}
+
+		[TestMethod]
 		public void BuildQueryExpressionsStringContainsNotPropertyTest()
 		{
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Gamma = "DD",
 					Delta = "QuackFu worse than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Gamma = "Darkwing Duck",
 					Delta = "QuackFu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Gamma = "Darkwing Duck",
 					Delta = "KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					Gamma = "Darkwing Duck",
 					Delta = "KungFu is the worst"
@@ -248,14 +561,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.ContainsNot,
 						PropertyName = nameof(Alpha.Delta),
 						SearchTerm = "QuackFu"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.ContainsNot,
 						PropertyName = nameof(Alpha.Delta),
 						SearchTerm = "worst"
@@ -276,25 +587,146 @@ namespace Eshava.Test.Core.Linq
 		}
 
 		[TestMethod]
+		public void BuildQueryExpressionsStringContainsNotPropertyCaseInsensitveOneTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QuackFu worse than KungFu"
+				},
+				new() {
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Delta = "QuackFu better than KungFu"
+				},
+				new() {
+					Beta = 3,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu"
+				},
+				new() {
+					Beta = 4,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu is the worst"
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator =  CompareOperator.ContainsNot,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "QUACKFU"
+					},
+					new() {
+						Operator =  CompareOperator.ContainsNot,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "WORST"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+			resultWhere.First().Beta.Should().Be(3);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringContainsNotPropertyCaseInsensitveTwoTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QUACKFU WORSE THAN KUNGFU"
+				},
+				new() {
+					Beta = 2,
+					Gamma = "DARKWING DUCK",
+					Delta = "QUACKFU BETTER THAN KUNGFU"
+				},
+				new() {
+					Beta = 3,
+					Gamma = "DARKWING DUCK",
+					Delta = "KUNGFU"
+				},
+				new() {
+					Beta = 4,
+					Gamma = "DARKWING DUCK",
+					Delta = "KUNGFU IS THE WORST"
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator =  CompareOperator.ContainsNot,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "QuackFu"
+					},
+					new() {
+						Operator =  CompareOperator.ContainsNot,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "worst"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+			resultWhere.First().Beta.Should().Be(3);
+		}
+
+		[TestMethod]
 		public void BuildQueryExpressionsStringStartsWithPropertyTest()
 		{
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Gamma = "DD",
 					Delta = "QuackFu worse than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Gamma = "Darkwing Duck",
 					Delta = "QuackFu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Gamma = "Darkwing Duck",
 					Delta = "KungFu"
@@ -305,8 +737,7 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.StartsWith,
 						PropertyName = nameof(Alpha.Delta),
 						SearchTerm = "KungFu"
@@ -330,25 +761,126 @@ namespace Eshava.Test.Core.Linq
 		}
 
 		[TestMethod]
+		public void BuildQueryExpressionsStringStartsWithPropertyCaseInsensitveOneTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QuackFu worse than KungFu"
+				},
+				new() {
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Delta = "QuackFu better than KungFu"
+				},
+				new() {
+					Beta = 3,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu"
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator =  CompareOperator.StartsWith,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "KUNGFU"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+			resultWhere.First().Beta.Should().Be(3);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringStartsWithPropertyCaseInsensitveTwoTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QUACKFU WORSE THAN KUNGFU"
+				},
+				new() {
+					Beta = 2,
+					Gamma = "DARKWING DUCK",
+					Delta = "QUACKFU BETTER THAN KUNGFU"
+				},
+				new() {
+					Beta = 3,
+					Gamma = "DARKWING DUCK",
+					Delta = "KUNGFU"
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator =  CompareOperator.StartsWith,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "KungFu"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+			resultWhere.First().Beta.Should().Be(3);
+		}
+
+		[TestMethod]
 		public void BuildQueryExpressionsStringEndsWithPropertyTest()
 		{
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Gamma = "DD",
 					Delta = "QuackFu worse than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Gamma = "Darkwing Duck",
 					Delta = "QuackFu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Gamma = "Darkwing Duck",
 					Delta = "KungFu is the best"
@@ -359,8 +891,7 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.EndsWith,
 						PropertyName = nameof(Alpha.Delta),
 						SearchTerm = "KungFu"
@@ -384,10 +915,116 @@ namespace Eshava.Test.Core.Linq
 			resultWhere.Last().Beta.Should().Be(2);
 		}
 
+		[TestMethod]
+		public void BuildQueryExpressionsStringEndsWithPropertyCaseInsensitveOneTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QuackFu worse than KungFu"
+				},
+				new() {
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Delta = "QuackFu better than KungFu"
+				},
+				new() {
+					Beta = 3,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu is the best"
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator =  CompareOperator.EndsWith,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "KUNGFU"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Beta.Should().Be(1);
+			resultWhere.Last().Beta.Should().Be(2);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringEndsWithPropertyCaseInsensitveTwoTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QUACKFU WORSE THAN KUNGFU"
+				},
+				new() {
+					Beta = 2,
+					Gamma = "DARKWING DUCK",
+					Delta = "QUACKFU BETTER THAN KUNGFU"
+				},
+				new() {
+					Beta = 3,
+					Gamma = "DARKWING DUCK",
+					Delta = "KUNGFU IS THE BEST"
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator =  CompareOperator.EndsWith,
+						PropertyName = nameof(Alpha.Delta),
+						SearchTerm = "KungFu"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Beta.Should().Be(1);
+			resultWhere.Last().Beta.Should().Be(2);
+		}
+
 		[DataTestMethod]
 		[DataRow(false, DisplayName = "Deactivated split option")]
 		[DataRow(true, DisplayName = "Activated split option")]
-		public void BuildQueryExpressionsStringPropertyWithSplitContainsOptionTestTest(bool containsSearchSplitBySpace)
+		public void BuildQueryExpressionsStringPropertyWithSplitContainsOptionTest(bool containsSearchSplitBySpace)
 		{
 			// Arrange
 			var classUnderTest = new WhereQueryEngine(new WhereQueryEngineOptions
@@ -398,20 +1035,17 @@ namespace Eshava.Test.Core.Linq
 
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Gamma = "DD",
 					Delta = "QuackFu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Gamma = "Darkwing Duck",
 					Delta = "QuackFu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Gamma = "Darkwing",
 					Delta = "KungFu"
@@ -422,8 +1056,7 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Contains,
 						PropertyName = nameof(Alpha.Gamma),
 						SearchTerm = "Dark Du"
@@ -452,23 +1085,39 @@ namespace Eshava.Test.Core.Linq
 			}
 		}
 
-		[TestMethod]
-		public void BuildQueryExpressionsStringPropertyQueryIgnoreTest()
+		[DataTestMethod]
+		[DataRow(false, DisplayName = "Deactivated split option")]
+		[DataRow(true, DisplayName = "Activated split option")]
+		public void BuildQueryExpressionsStringPropertyWithSplitContainsOptionCaseInsensitveOneTest(bool containsSearchSplitBySpace)
 		{
 			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var classUnderTest = new WhereQueryEngine(new WhereQueryEngineOptions
+			{
+				UseUtcDateTime = true,
+				ContainsSearchSplitBySpace = containsSearchSplitBySpace
+			});
+
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
-					DeltaTwo = "Darkwing Duck",
-					Delta = "QuackFu"
+					Gamma = "DD",
+					Delta = "QuackFu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
-					DeltaTwo = "MegaVolt",
-					Delta = "QuackFu"
+					Gamma = "Darkwing Duck",
+					Delta = "QuackFu better than KungFu"
+				},
+				new() {
+					Beta = 3,
+					Gamma = "Darkwing",
+					Delta = "KungFu"
 				}
 			};
 
@@ -476,14 +1125,137 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
+						Operator =  CompareOperator.Contains,
+						PropertyName = nameof(Alpha.Gamma),
+						SearchTerm = "DARK DU"
+					}
+				}
+			};
+
+			// Act
+			var result = classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			if (containsSearchSplitBySpace)
+			{
+				result.Data.Should().HaveCount(2);
+
+				var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+				resultWhere.Should().HaveCount(1);
+				resultWhere.First().Beta.Should().Be(2);
+			}
+			else
+			{
+				result.Data.Should().HaveCount(1);
+				var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+				resultWhere.Should().HaveCount(0);
+			}
+		}
+
+		[DataTestMethod]
+		[DataRow(false, DisplayName = "Deactivated split option")]
+		[DataRow(true, DisplayName = "Activated split option")]
+		public void BuildQueryExpressionsStringPropertyWithSplitContainsOptionCaseInsensitveTwoTest(bool containsSearchSplitBySpace)
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var classUnderTest = new WhereQueryEngine(new WhereQueryEngineOptions
+			{
+				UseUtcDateTime = true,
+				ContainsSearchSplitBySpace = containsSearchSplitBySpace
+			});
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QUACKFU BETTER THAN KUNGFU"
+				},
+				new() {
+					Beta = 2,
+					Gamma = "DARKWING DUCK",
+					Delta = "QUACKFU BETTER THAN KUNGFU"
+				},
+				new() {
+					Beta = 3,
+					Gamma = "DARKWING",
+					Delta = "KUNGFU"
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator =  CompareOperator.Contains,
+						PropertyName = nameof(Alpha.Gamma),
+						SearchTerm = "Dark Du"
+					}
+				}
+			};
+
+			// Act
+			var result = classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			if (containsSearchSplitBySpace)
+			{
+				result.Data.Should().HaveCount(2);
+
+				var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+				resultWhere.Should().HaveCount(1);
+				resultWhere.First().Beta.Should().Be(2);
+			}
+			else
+			{
+				result.Data.Should().HaveCount(1);
+				var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+				resultWhere.Should().HaveCount(0);
+			}
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringPropertyQueryIgnoreTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					DeltaTwo = "Darkwing Duck",
+					Delta = "QuackFu"
+				},
+				new() {
+					Beta = 2,
+					DeltaTwo = "MegaVolt",
+					Delta = "QuackFu"
+				},
+				new() {
+					Beta = 3,
+					DeltaTwo = "Darkwing Duck",
+					Delta = "MegaVolt"
+				},
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Alpha.DeltaTwo),
 						SearchTerm = "Darkwing Duck"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Contains,
 						PropertyName = nameof(Alpha.Delta),
 						SearchTerm = "QuackFu"
@@ -491,15 +1263,12 @@ namespace Eshava.Test.Core.Linq
 				}
 			};
 
-			Expression<Func<Alpha, bool>> expectedResultDelta = p => p.Delta != null && p.Delta.Contains("QuackFu");
-
 			// Act
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
 
 			// Assert
 			result.IsFaulty.Should().BeFalse();
 			result.Data.Should().HaveCount(1);
-			result.Data.Single().Should().BeEquivalentTo(expectedResultDelta);
 
 			var resultWhere = exampleList.Where(result.Data.Single().Compile()).ToList();
 			resultWhere.Should().HaveCount(2);
@@ -507,32 +1276,29 @@ namespace Eshava.Test.Core.Linq
 			resultWhere.Last().Beta.Should().Be(2);
 		}
 
+
 		[TestMethod]
 		public void BuildQueryExpressionsIntegerPropertyTest()
 		{
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Lambda = 4,
 					LambdaNullable = 10
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Lambda = 6,
 					LambdaNullable = 11
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Lambda = 6,
 					LambdaNullable = 8
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					Lambda = 6,
 					LambdaNullable = 13
@@ -543,14 +1309,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.GreaterThan,
 						PropertyName = nameof(Alpha.Lambda),
 						SearchTerm = "5"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.LessThan,
 						PropertyName = nameof(Alpha.LambdaNullable),
 						SearchTerm = "12"
@@ -582,26 +1346,22 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					LambdaLong = 4L,
 					LambdaLongNullable = 10L
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					LambdaLong = 6L,
 					LambdaLongNullable = 11L
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					LambdaLong = 6L,
 					LambdaLongNullable = 8L
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					LambdaLong = 6L,
 					LambdaLongNullable = 13L
@@ -612,14 +1372,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.GreaterThan,
 						PropertyName = nameof(Alpha.LambdaLong),
 						SearchTerm = "5"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.LessThan,
 						PropertyName = nameof(Alpha.LambdaLongNullable),
 						SearchTerm = "12"
@@ -651,26 +1409,22 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					My = 4m,
 					MyNullableOne = 10m
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					My = 4.26m,
 					MyNullableOne = 10.49m
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					My = 6.25m,
 					MyNullableOne = 8.1m
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					My = 5m,
 					MyNullableOne = 11m
@@ -681,14 +1435,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.GreaterThan,
 						PropertyName = nameof(Alpha.My),
 						SearchTerm = "4.25"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.LessThan,
 						PropertyName = nameof(Alpha.MyNullableOne),
 						SearchTerm = "10.5"
@@ -721,26 +1473,22 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Ny = 4f,
 					NyNullable = 10f
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Ny = 4.25f,
 					NyNullable = 10.5f
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Ny = 6f,
 					NyNullable = 8f
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					Ny = 5f,
 					NyNullable = 11f
@@ -751,14 +1499,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.GreaterThanOrEqual,
 						PropertyName = nameof(Alpha.Ny),
 						SearchTerm = "4.25"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.LessThanOrEqual,
 						PropertyName = nameof(Alpha.NyNullable),
 						SearchTerm = "10.5"
@@ -790,20 +1536,17 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Xi = 0,
 					XiNullable = 0
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Xi = 4.25,
 					XiNullable = 4.25
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Xi = 4.25,
 					XiNullable = 10.5
@@ -814,14 +1557,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Alpha.Xi),
 						SearchTerm = "4.25"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.NotEqual,
 						PropertyName = nameof(Alpha.XiNullable),
 						SearchTerm = "10.5"
@@ -854,26 +1595,22 @@ namespace Eshava.Test.Core.Linq
 			var dateTimeOmega = DateTime.Today.Add(new TimeSpan(9, 45, 30));
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Psi = null,
 					OmegaDateTime = dateTimeOmega
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Psi = dateTimeOmega,
 					OmegaDateTime = dateTimePsi
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Psi = dateTimePsi,
 					OmegaDateTime = dateTimePsi
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					Psi = DateTime.Today.AddDays(1),
 					OmegaDateTime = dateTimePsi
@@ -884,14 +1621,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.LessThanOrEqual,
 						PropertyName = nameof(Alpha.Psi),
 						SearchTerm = dateTimePsi.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture)
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.NotEqual,
 						PropertyName = nameof(Alpha.OmegaDateTime),
 						SearchTerm = dateTimeOmega.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture)
@@ -925,50 +1660,42 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.GreaterThan,
 						PropertyName = nameof(Alpha.Gamma),
 						SearchTerm =  ""
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.GreaterThan,
 						PropertyName = nameof(Alpha.Lambda),
 						SearchTerm =  "Darkwing Duck"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.GreaterThanOrEqual,
 						PropertyName = nameof(Alpha.My),
 						SearchTerm = "Darkwing Duck"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.GreaterThanOrEqual,
 						PropertyName = nameof(Alpha.Ny),
 						SearchTerm = "Darkwing Duck"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Alpha.Xi),
 						SearchTerm = "Darkwing Duck"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Alpha.Psi),
 						SearchTerm = "Darkwing Duck"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Alpha.StigmaOne),
 						SearchTerm =  ""
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Alpha.Chi),
 						SearchTerm = "Darkwing Duck"
@@ -994,26 +1721,22 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					StigmaOne = true,
 					StigmaTwo = null
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					StigmaOne = true,
 					StigmaTwo = false
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					StigmaOne = true,
 					StigmaTwo = true
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					StigmaOne = false,
 					StigmaTwo = false
@@ -1024,14 +1747,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Alpha.StigmaOne),
 						SearchTerm = "1"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Alpha.StigmaTwo),
 						SearchTerm = "false"
@@ -1062,18 +1783,15 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					StigmaTwo = null
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					StigmaTwo = false
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					StigmaTwo = true
 				}
@@ -1083,14 +1801,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.NotEqual,
 						PropertyName = nameof(Alpha.StigmaTwo),
 						SearchTerm = "true"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.NotEqual,
 						PropertyName = nameof(Alpha.StigmaTwo),
 						SearchTerm = "false"
@@ -1123,24 +1839,20 @@ namespace Eshava.Test.Core.Linq
 
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Chi = null
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Chi = Guid.Empty
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Chi = guidToMatch
 				}
 				,
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					Chi = Guid.Parse("3f93f67c-1345-48c4-bb71-547378e71c6c")
 				}
@@ -1150,8 +1862,7 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Alpha.Chi),
 						SearchTerm = guidToMatch.ToString()
@@ -1180,32 +1891,28 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Kappa = new Omega
 					{
 						Psi = ""
 					}
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Kappa = new Omega
 					{
 						Psi = null
 					}
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Kappa = new Omega
 					{
 						Psi = "Darkwing Duck"
 					}
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					Kappa = new Omega
 					{
@@ -1223,14 +1930,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Alpha.Chi),
 						SearchTerm = "Darkwing Duck"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Contains,
 						PropertyName = nameof(Alpha.Chi),
 						SearchTerm = "QuackFu"
@@ -1267,8 +1972,7 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Alpha.Chi),
 						SearchTerm = "Darkwing Duck"
@@ -1303,8 +2007,7 @@ namespace Eshava.Test.Core.Linq
 
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Kappa = new Omega
 					{
@@ -1312,8 +2015,7 @@ namespace Eshava.Test.Core.Linq
 						Chi = ""
 					}
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Kappa = new Omega
 					{
@@ -1321,8 +2023,7 @@ namespace Eshava.Test.Core.Linq
 						Chi = null
 					}
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Kappa = new Omega
 					{
@@ -1330,8 +2031,7 @@ namespace Eshava.Test.Core.Linq
 						Chi = ""
 					}
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					Kappa = new Omega
 					{
@@ -1350,8 +2050,7 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Alpha.Chi),
 						SearchTerm = "Darkwing Duck"
@@ -1381,23 +2080,19 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Sigma = null
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Sigma = new List<int>()
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Sigma = new List<int> { 7, 5, 3 }
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					Sigma = new List<int> { 1, 2, 3, }
 				}
@@ -1412,8 +2107,7 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Contains,
 						PropertyName = nameof(Alpha.Chi),
 						SearchTerm = "7"
@@ -1442,23 +2136,19 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Sigma = null
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Sigma = new List<int>()
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Sigma = new List<int> { 7, 5, 3 }
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					Sigma = new List<int> { 1, 2, 3, }
 				}
@@ -1468,8 +2158,7 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Contains,
 						PropertyName = nameof(Alpha.Sigma),
 						SearchTerm = "7"
@@ -1498,8 +2187,7 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var queryProperties = new List<WhereQueryProperty>
 			{
-				new WhereQueryProperty
-				{
+				new() {
 					PropertyName = nameof(Alpha.Chi),
 					SearchTerm = Guid.NewGuid().ToString(),
 					Operator = CompareOperator.Contains
@@ -1528,8 +2216,7 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var queryProperties = new List<WhereQueryProperty>
 			{
-				new WhereQueryProperty
-				{
+				new() {
 					PropertyName = nameof(Alpha.Chi),
 					SearchTerm = "Darkwing Duck",
 					Operator = CompareOperator.Equal
@@ -1558,8 +2245,7 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var queryProperties = new List<WhereQueryProperty>
 			{
-				new WhereQueryProperty
-				{
+				new() {
 					PropertyName = nameof(Alpha.Chi),
 					SearchTerm = "Darkwing Duck",
 					Operator = CompareOperator.Equal
@@ -1603,23 +2289,19 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Omega>
 			{
-				new Omega
-				{
+				new() {
 					Sigma = 1,
 					Number = Number.Four
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 2,
 					Number = Number.One
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 3,
 					Number = Number.Three
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 4,
 					Number = Number.One
 				}
@@ -1629,14 +2311,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Omega.Number),
 						SearchTerm = "One"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName = nameof(Omega.Number),
 						SearchTerm = "1"
@@ -1667,8 +2347,7 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Omega>
 			{
-				new Omega
-				{
+				new() {
 					Sigma = 1,
 					Number = Number.One,
 					InnerOmega = new Omega
@@ -1676,8 +2355,7 @@ namespace Eshava.Test.Core.Linq
 						Number = Number.Four
 					}
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 2,
 					Number = Number.One,
 					InnerOmega = new Omega
@@ -1685,8 +2363,7 @@ namespace Eshava.Test.Core.Linq
 						Number = Number.One
 					}
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 3,
 					Number = Number.One,
 					InnerOmega = new Omega
@@ -1694,8 +2371,7 @@ namespace Eshava.Test.Core.Linq
 						Number = Number.Three
 					}
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 4,
 					Number = Number.One,
 					InnerOmega = new Omega
@@ -1714,14 +2390,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName =  "InnerOmegaNumber",
 						SearchTerm = "One"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Equal,
 						PropertyName =  "InnerOmegaNumber",
 						SearchTerm = "1"
@@ -1748,23 +2422,19 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Omega>
 			{
-				new Omega
-				{
+				new() {
 					Sigma = 1,
 					Number = Number.Four
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 2,
 					Number = Number.One
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 3,
 					Number = Number.Three
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 4,
 					Number = Number.One
 				}
@@ -1774,14 +2444,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.GreaterThan,
 						PropertyName = nameof(Omega.Number),
 						SearchTerm = "One"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.LessThan,
 						PropertyName = nameof(Omega.Number),
 						SearchTerm = "4"
@@ -1812,23 +2480,19 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Omega>
 			{
-				new Omega
-				{
+				new() {
 					Sigma = 1,
 					Numbers = new List<Number> { Number.One, Number.Two }
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 2,
 					Numbers = new List<Number> { Number.Four, Number.Two, Number.Three }
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 3,
 					Numbers = new List<Number> { Number.Four }
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 4,
 					Numbers = new List<Number> { Number.Three }
 				}
@@ -1838,14 +2502,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.Contains,
 						PropertyName = nameof(Omega.Numbers),
 						SearchTerm = "Two"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.ContainsNot,
 						PropertyName = nameof(Omega.Numbers),
 						SearchTerm = "4"
@@ -1871,23 +2533,19 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Omega>
 			{
-				new Omega
-				{
+				new() {
 					Sigma = 1,
 					Number = Number.Four
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 2,
 					Number = Number.One
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 3,
 					Number = Number.Three
 				},
-				new Omega
-				{
+				new() {
 					Sigma = 4,
 					Number = Number.Two
 				}
@@ -1897,8 +2555,7 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.ContainedIn,
 						PropertyName = nameof(Omega.Number),
 						SearchTerm = "Two|Four"
@@ -1925,26 +2582,22 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Gamma = "DD",
 					Lambda = 11
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Gamma = "Darkwing Duck",
 					Lambda = 22
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Gamma = "Darkwing",
 					Lambda = 22
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					Gamma = "Darkwing Duck",
 					Lambda = 44
@@ -1955,14 +2608,12 @@ namespace Eshava.Test.Core.Linq
 			{
 				WhereQueryProperties = new List<WhereQueryProperty>
 				{
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.ContainedIn,
 						PropertyName = nameof(Alpha.Gamma),
 						SearchTerm = "Darkwing Duck|DD"
 					},
-					new WhereQueryProperty
-					{
+					new() {
 						Operator =  CompareOperator.ContainedIn,
 						PropertyName = nameof(Alpha.Lambda),
 						SearchTerm = "11|44"
@@ -1972,6 +2623,132 @@ namespace Eshava.Test.Core.Linq
 
 			// Act
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Beta.Should().Be(1);
+			resultWhere.Last().Beta.Should().Be(4);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsContainedInPropertyCaseInsensitiveOneTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD",
+					Lambda = 11
+				},
+				new() {
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Lambda = 22
+				},
+				new() {
+					Beta = 3,
+					Gamma = "Darkwing",
+					Lambda = 22
+				},
+				new() {
+					Beta = 4,
+					Gamma = "Darkwing Duck",
+					Lambda = 44
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator =  CompareOperator.ContainedIn,
+						PropertyName = nameof(Alpha.Gamma),
+						SearchTerm = "DARKWING DUCK|DD"
+					},
+					new() {
+						Operator =  CompareOperator.ContainedIn,
+						PropertyName = nameof(Alpha.Lambda),
+						SearchTerm = "11|44"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Beta.Should().Be(1);
+			resultWhere.Last().Beta.Should().Be(4);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsContainedInPropertyCaseInsensitiveTwoTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD",
+					Lambda = 11
+				},
+				new() {
+					Beta = 2,
+					Gamma = "DARKWING DUCK",
+					Lambda = 22
+				},
+				new() {
+					Beta = 3,
+					Gamma = "DARKWING",
+					Lambda = 22
+				},
+				new() {
+					Beta = 4,
+					Gamma = "DARKWING DUCK",
+					Lambda = 44
+				}
+			};
+
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator =  CompareOperator.ContainedIn,
+						PropertyName = nameof(Alpha.Gamma),
+						SearchTerm = "Darkwing Duck|DD"
+					},
+					new() {
+						Operator =  CompareOperator.ContainedIn,
+						PropertyName = nameof(Alpha.Lambda),
+						SearchTerm = "11|44"
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
 
 			// Assert
 			result.IsFaulty.Should().BeFalse();
@@ -2034,20 +2811,17 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Gamma = "DD",
 					Delta = "QuackFu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Gamma = "Darkwing Duck",
 					Delta = "QuackFu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Gamma = "Darkwing Duck",
 					Delta = "KungFu"
@@ -2068,17 +2842,120 @@ namespace Eshava.Test.Core.Linq
 				}
 			};
 
-			Expression<Func<Alpha, bool>> expectedResultGamma = p => p.Gamma == "Darkwing Duck";
-			Expression<Func<Alpha, bool>> expectedResultDelta = p => p.Delta != null && p.Delta.Contains("QuackFu");
-
 			// Act
 			var result = _classUnderTest.BuildQueryExpressions<Alpha>(filter, null);
 
 			// Assert
 			result.IsFaulty.Should().BeFalse();
 			result.Data.Should().HaveCount(2);
-			result.Data.First().Should().BeEquivalentTo(expectedResultGamma);
-			result.Data.Last().Should().BeEquivalentTo(expectedResultDelta);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+			resultWhere.First().Beta.Should().Be(2);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringPropertyByFilterObjectCaseInsensitiveOneTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QuackFu better than KungFu"
+				},
+				new() {
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Delta = "QuackFu better than KungFu"
+				},
+				new() {
+					Beta = 3,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu"
+				}
+			};
+
+			var filter = new FilterModel
+			{
+				Gamma = new SpecialFilterField
+				{
+					Operator = CompareOperator.Equal,
+					SearchTerm = "DARKWING DUCK"
+				},
+				Delta = new FilterField
+				{
+					Operator = CompareOperator.Contains,
+					SearchTerm = "QUACKFU"
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(filter, null, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+			resultWhere.First().Beta.Should().Be(2);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringPropertyByFilterObjectCaseInsensitiveTwoTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QUACKFU BETTER THAN KUNGFU"
+				},
+				new() {
+					Beta = 2,
+					Gamma = "DARKWING DUCK",
+					Delta = "QUACKFU BETTER THAN KUNGFU"
+				},
+				new() {
+					Beta = 3,
+					Gamma = "DARKWING DUCK",
+					Delta = "KUNGFU"
+				}
+			};
+
+			var filter = new FilterModel
+			{
+				Gamma = new SpecialFilterField
+				{
+					Operator = CompareOperator.Equal,
+					SearchTerm = "Darkwing Duck"
+				},
+				Delta = new FilterField
+				{
+					Operator = CompareOperator.Contains,
+					SearchTerm = "QuackFu"
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(filter, null, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
 
 			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
 			resultWhere.Should().HaveCount(1);
@@ -2091,38 +2968,32 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Gamma = "DD",
 					Delta = "Quack_Fu better than Kung-Fu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Gamma = "Darkwing Duck",
 					Delta = "Quack-Fu better than Kung-Fu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Gamma = "DD",
 					Delta = "Quack_Fu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					Gamma = "Darkwing Duck",
 					Delta = "Quack-Fu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 5,
 					Gamma = "Darkwing Duck",
 					Delta = "QuackFu better than Kung-Fu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 6,
 					Gamma = "Darkwing Duck",
 					Delta = "KungFu"
@@ -2137,28 +3008,24 @@ namespace Eshava.Test.Core.Linq
 					LinkOperator = LinkOperator.And,
 					LinkOperations = new List<ComplexFilterField>
 					{
-						new ComplexFilterField
-						{
+						new() {
 							Operator = CompareOperator.None,
 							LinkOperator = LinkOperator.Or,
 							LinkOperations = new List<ComplexFilterField>
 							{
-								new ComplexFilterField
-								{
+								new() {
 									Field = "Delta",
 									Operator = CompareOperator.Contains,
 									SearchTerm = "Quack_Fu"
 								},
-								new ComplexFilterField
-								{
+								new() {
 									Field = "Delta",
 									Operator = CompareOperator.Contains,
 									SearchTerm = "Quack-Fu"
 								}
 							}
 						},
-						new ComplexFilterField
-						{
+						new() {
 							Field = "Delta",
 							Operator = CompareOperator.ContainsNot,
 							SearchTerm = "KungFu"
@@ -2181,43 +3048,42 @@ namespace Eshava.Test.Core.Linq
 		}
 
 		[TestMethod]
-		public void BuildQueryExpressionsStringPropertyByFilterObjectWithFilterGroupNotAllowedFilterFieldTest()
+		public void BuildQueryExpressionsStringPropertyByFilterObjectWithFilterGroupCaseInsensitiveOneTest()
 		{
 			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Gamma = "DD",
 					Delta = "Quack_Fu better than Kung-Fu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Gamma = "Darkwing Duck",
 					Delta = "Quack-Fu better than Kung-Fu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Gamma = "DD",
 					Delta = "Quack_Fu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					Gamma = "Darkwing Duck",
 					Delta = "Quack-Fu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 5,
 					Gamma = "Darkwing Duck",
 					Delta = "QuackFu better than Kung-Fu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 6,
 					Gamma = "Darkwing Duck",
 					Delta = "KungFu"
@@ -2232,28 +3098,199 @@ namespace Eshava.Test.Core.Linq
 					LinkOperator = LinkOperator.And,
 					LinkOperations = new List<ComplexFilterField>
 					{
-						new ComplexFilterField
-						{
+						new() {
 							Operator = CompareOperator.None,
 							LinkOperator = LinkOperator.Or,
 							LinkOperations = new List<ComplexFilterField>
 							{
-								new ComplexFilterField
-								{
+								new() {
+									Field = "Delta",
+									Operator = CompareOperator.Contains,
+									SearchTerm = "QUACK_FU"
+								},
+								new() {
+									Field = "Delta",
+									Operator = CompareOperator.Contains,
+									SearchTerm = "QUACK-FU"
+								}
+							}
+						},
+						new() {
+							Field = "Delta",
+							Operator = CompareOperator.ContainsNot,
+							SearchTerm = "KUNGFU"
+						}
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(filter, null, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Beta.Should().Be(1);
+			resultWhere.Last().Beta.Should().Be(2);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringPropertyByFilterObjectWithFilterGroupCaseInsensitiveTwoTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "QUACK_FU BETTER THAN KUNG-FU"
+				},
+				new() {
+					Beta = 2,
+					Gamma = "DARKWING DUCK",
+					Delta = "QUACK-FU BETTER THAN KUNG-FU"
+				},
+				new() {
+					Beta = 3,
+					Gamma = "DD",
+					Delta = "QUACK_FU BETTER THAN KUNGFU"
+				},
+				new() {
+					Beta = 4,
+					Gamma = "DARKWING DUCK",
+					Delta = "QUACK-FU BETTER THAN KUNGFU"
+				},
+				new() {
+					Beta = 5,
+					Gamma = "DARKWING DUCK",
+					Delta = "QUACKFU BETTER THAN KUNG-FU"
+				},
+				new() {
+					Beta = 6,
+					Gamma = "DARKWING DUCK",
+					Delta = "KUNGFU"
+				}
+			};
+
+			var filter = new FilterModel
+			{
+				ComplexFilterField = new ComplexFilterField
+				{
+					Operator = CompareOperator.None,
+					LinkOperator = LinkOperator.And,
+					LinkOperations = new List<ComplexFilterField>
+					{
+						new() {
+							Operator = CompareOperator.None,
+							LinkOperator = LinkOperator.Or,
+							LinkOperations = new List<ComplexFilterField>
+							{
+								new() {
 									Field = "Delta",
 									Operator = CompareOperator.Contains,
 									SearchTerm = "Quack_Fu"
 								},
-								new ComplexFilterField
-								{
+								new() {
 									Field = "Delta",
 									Operator = CompareOperator.Contains,
 									SearchTerm = "Quack-Fu"
 								}
 							}
 						},
-						new ComplexFilterField
-						{
+						new() {
+							Field = "Delta",
+							Operator = CompareOperator.ContainsNot,
+							SearchTerm = "KungFu"
+						}
+					}
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(filter, null, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+			resultWhere.First().Beta.Should().Be(1);
+			resultWhere.Last().Beta.Should().Be(2);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsStringPropertyByFilterObjectWithFilterGroupNotAllowedFilterFieldTest()
+		{
+			// Arrange
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Beta = 1,
+					Gamma = "DD",
+					Delta = "Quack_Fu better than Kung-Fu"
+				},
+				new() {
+					Beta = 2,
+					Gamma = "Darkwing Duck",
+					Delta = "Quack-Fu better than Kung-Fu"
+				},
+				new() {
+					Beta = 3,
+					Gamma = "DD",
+					Delta = "Quack_Fu better than KungFu"
+				},
+				new() {
+					Beta = 4,
+					Gamma = "Darkwing Duck",
+					Delta = "Quack-Fu better than KungFu"
+				},
+				new() {
+					Beta = 5,
+					Gamma = "Darkwing Duck",
+					Delta = "QuackFu better than Kung-Fu"
+				},
+				new() {
+					Beta = 6,
+					Gamma = "Darkwing Duck",
+					Delta = "KungFu"
+				}
+			};
+
+			var filter = new FilterModel
+			{
+				ComplexFilterField = new ComplexFilterField
+				{
+					Operator = CompareOperator.None,
+					LinkOperator = LinkOperator.And,
+					LinkOperations = new List<ComplexFilterField>
+					{
+						new() {
+							Operator = CompareOperator.None,
+							LinkOperator = LinkOperator.Or,
+							LinkOperations = new List<ComplexFilterField>
+							{
+								new() {
+									Field = "Delta",
+									Operator = CompareOperator.Contains,
+									SearchTerm = "Quack_Fu"
+								},
+								new() {
+									Field = "Delta",
+									Operator = CompareOperator.Contains,
+									SearchTerm = "Quack-Fu"
+								}
+							}
+						},
+						new() {
 							Field = "Gamma",
 							Operator = CompareOperator.ContainsNot,
 							SearchTerm = "KungFu"
@@ -2280,20 +3317,17 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Gamma = "DD",
 					Delta = "QuackFu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Gamma = "Darkwing Duck",
 					Delta = "QuackFu better than KungFu"
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Gamma = "Darkwing Duck",
 					Delta = "KungFu"
@@ -2373,37 +3407,121 @@ namespace Eshava.Test.Core.Linq
 		}
 
 		[TestMethod]
+		public void BuildQueryExpressionsGlobalSearchTermByFilterObjectCaseInsensitiveOneTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var propertyValue = "Darkwing Duck";
+			var filter = new FilterModel
+			{
+				SearchTerm = propertyValue.ToUpper()
+			};
+
+			var typeString = typeof(string);
+			var properties = typeof(Alpha).GetProperties().Where(p => p.PropertyType == typeString && p.CanWrite).ToList();
+			var propertyCountQueryIgnore = 0;
+
+			var exampleList = new List<Alpha>();
+			foreach (var propertyInfo in properties)
+			{
+				var alpha = new Alpha();
+				propertyInfo.SetValue(alpha, propertyValue);
+				exampleList.Add(alpha);
+
+				if (propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() != null)
+				{
+					propertyCountQueryIgnore++;
+				}
+			}
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(filter, filter.SearchTerm, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).ToList();
+			resultWhere.Should().HaveCount(properties.Count - propertyCountQueryIgnore);
+			propertyCountQueryIgnore.Should().Be(1);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsGlobalSearchTermByFilterObjectCaseInsensitiveTwoTest()
+		{
+			// Arrange
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var propertyValue = "Darkwing Duck";
+			var filter = new FilterModel
+			{
+				SearchTerm = propertyValue
+			};
+
+			var typeString = typeof(string);
+			var properties = typeof(Alpha).GetProperties().Where(p => p.PropertyType == typeString && p.CanWrite).ToList();
+			var propertyCountQueryIgnore = 0;
+
+			var exampleList = new List<Alpha>();
+			foreach (var propertyInfo in properties)
+			{
+				var alpha = new Alpha();
+				propertyInfo.SetValue(alpha, propertyValue.ToUpper());
+				exampleList.Add(alpha);
+
+				if (propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() != null)
+				{
+					propertyCountQueryIgnore++;
+				}
+			}
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(filter, filter.SearchTerm, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).ToList();
+			resultWhere.Should().HaveCount(properties.Count - propertyCountQueryIgnore);
+			propertyCountQueryIgnore.Should().Be(1);
+		}
+
+		[TestMethod]
 		public void BuildQueryExpressionsPropertyMappingByFilterObjectTest()
 		{
 			// Arrange
 			var exampleList = new List<Alpha>
 			{
-				new Alpha
-				{
+				new() {
 					Beta = 1,
 					Kappa = new Omega
 					{
 						Psi = ""
 					}
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 2,
 					Kappa = new Omega
 					{
 						Psi = null
 					}
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 3,
 					Kappa = new Omega
 					{
 						Psi = "Darkwing Duck"
 					}
 				},
-				new Alpha
-				{
+				new() {
 					Beta = 4,
 					Kappa = new Omega
 					{
@@ -2439,5 +3557,498 @@ namespace Eshava.Test.Core.Linq
 			exampleList.Where(result.Data.First().Compile()).Single().Beta.Should().Be(3);
 		}
 
+		[TestMethod]
+		public void BuildQueryExpressionsPropertyContainsStringListTest()
+		{
+			// Arrange
+			var propertyValueOne = "Darkwing Duck";
+			var propertyValueTwo = "QuackFu";
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator = CompareOperator.Contains,
+						PropertyName = nameof(Alpha.San),
+						SearchTerm = propertyValueOne
+					},
+					new() {
+						Operator = CompareOperator.ContainsNot,
+						PropertyName = nameof(Alpha.San),
+						SearchTerm = propertyValueTwo
+					}
+				}
+			};
+
+			var typeString = typeof(string);
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					San = null
+				},
+				new() {
+					San = new List<string> { "MegaVolt" }
+				},
+				new() {
+					San = new List<string> { "MegaVolt", propertyValueOne }
+				},
+				new() {
+					San = new List<string> { "QuackFu", propertyValueOne }
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsPropertyContainsStringListCaseSensitiveOneTest()
+		{
+			// Arrange
+			var propertyValueOne = "Darkwing Duck";
+			var propertyValueTwo = "QuackFu";
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator = CompareOperator.Contains,
+						PropertyName = nameof(Alpha.San),
+						SearchTerm = propertyValueOne.ToUpper()
+					},
+					new() {
+						Operator = CompareOperator.ContainsNot,
+						PropertyName = nameof(Alpha.San),
+						SearchTerm = propertyValueTwo.ToUpper()
+					}
+				}
+			};
+
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var typeString = typeof(string);
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					San = null
+				},
+				new() {
+					San = new List<string> { "MegaVolt" }
+				},
+				new() {
+					San = new List<string> { "MegaVolt", propertyValueOne }
+				},
+				new() {
+					San = new List<string> { "QuackFu", propertyValueOne }
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsPropertyContainsStringListCaseSensitiveTwoTest()
+		{
+			// Arrange
+			var propertyValueOne = "Darkwing Duck";
+			var propertyValueTwo = "QuackFu";
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator = CompareOperator.Contains,
+						PropertyName = nameof(Alpha.San),
+						SearchTerm = propertyValueOne
+					},
+					new() {
+						Operator = CompareOperator.ContainsNot,
+						PropertyName = nameof(Alpha.San),
+						SearchTerm = propertyValueTwo
+					}
+				}
+			};
+
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var typeString = typeof(string);
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					San = null
+				},
+				new() {
+					San = new List<string> { "MEGAVOLT" }
+				},
+				new() {
+					San = new List<string> { "MEGAVOLT", propertyValueOne.ToUpper() }
+				},
+				new() {
+					San = new List<string> { "QUACKFU", propertyValueOne.ToUpper() }
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsPropertyContainsStringIEnumerableTest()
+		{
+			// Arrange
+			var propertyValueOne = "Darkwing Duck";
+			var propertyValueTwo = "QuackFu";
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator = CompareOperator.Contains,
+						PropertyName = nameof(Alpha.Heta),
+						SearchTerm = propertyValueOne
+					},
+					new() {
+						Operator = CompareOperator.ContainsNot,
+						PropertyName = nameof(Alpha.Heta),
+						SearchTerm = propertyValueTwo
+					}
+				}
+			};
+
+			var typeString = typeof(string);
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Heta = null
+				},
+				new() {
+					Heta = Array.Empty<string>()
+				},
+				new() {
+					Heta = new List<string> { "MegaVolt" }
+				},
+				new() {
+					Heta = new List<string> { "MegaVolt", propertyValueOne }
+				},
+				new() {
+					Heta = new List<string> { "QuackFu", propertyValueOne }
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsPropertyContainsStringIEnumerableCaseSensitiveOneTest()
+		{
+			// Arrange
+			var propertyValueOne = "Darkwing Duck";
+			var propertyValueTwo = "QuackFu";
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator = CompareOperator.Contains,
+						PropertyName = nameof(Alpha.Heta),
+						SearchTerm = propertyValueOne.ToUpper()
+					},
+					new() {
+						Operator = CompareOperator.ContainsNot,
+						PropertyName = nameof(Alpha.Heta),
+						SearchTerm = propertyValueTwo.ToUpper()
+					}
+				}
+			};
+
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var typeString = typeof(string);
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Heta = null
+				},
+				new() {
+					Heta = Array.Empty<string>()
+				},
+				new() {
+					Heta = new List<string> { "MegaVolt" }
+				},
+				new() {
+					Heta = new List<string> { "MegaVolt", propertyValueOne }
+				},
+				new() {
+					Heta = new List<string> { "QuackFu", propertyValueOne }
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsPropertyContainsStringIEnumerableCaseSensitiveTwoTest()
+		{
+			// Arrange
+			var propertyValueOne = "Darkwing Duck";
+			var propertyValueTwo = "QuackFu";
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator = CompareOperator.Contains,
+						PropertyName = nameof(Alpha.Heta),
+						SearchTerm = propertyValueOne
+					},
+					new() {
+						Operator = CompareOperator.ContainsNot,
+						PropertyName = nameof(Alpha.Heta),
+						SearchTerm = propertyValueTwo
+					}
+				}
+			};
+
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var typeString = typeof(string);
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Heta = null
+				},
+				new() {
+					Heta = Array.Empty<string>()
+				},
+				new() {
+					Heta = new List<string> { "MEGAVOLT" }
+				},
+				new() {
+					Heta = new List<string> { "MEGAVOLT", propertyValueOne.ToUpper() }
+				},
+				new() {
+					Heta = new List<string> { "QUACKFU", propertyValueOne.ToUpper() }
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(2);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).Where(result.Data.Last().Compile()).ToList();
+			resultWhere.Should().HaveCount(1);
+		}
+
+		[TestMethod]
+		public void BuildQueryExpressionsPropertyStringContainedInTest()
+		{
+			// Arrange
+			var propertyValueOne = "Darkwing Duck";
+			var propertyValueTwo = "QuackFu";
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator = CompareOperator.ContainedIn,
+						PropertyName = nameof(Alpha.Gamma),
+						SearchTerm = $"{propertyValueOne}|{propertyValueTwo}"
+					}
+				}
+			};
+
+			var typeString = typeof(string);
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Gamma = null
+				},
+				new() {
+					Gamma = "MegaVolt"
+				},
+				new() {
+					Gamma = propertyValueOne
+				},
+				new() {
+					Gamma = propertyValueTwo
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+		}
+
+
+		[TestMethod]
+		public void BuildQueryExpressionsPropertyStringContainedInCaseSensitiveOneTest()
+		{
+			// Arrange
+			var propertyValueOne = "Darkwing Duck";
+			var propertyValueTwo = "QuackFu";
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator = CompareOperator.ContainedIn,
+						PropertyName = nameof(Alpha.Gamma),
+						SearchTerm = $"{propertyValueOne.ToUpper()}|{propertyValueTwo.ToUpper()}"
+					}
+				}
+			};
+
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var typeString = typeof(string);
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Gamma = null
+				},
+				new() {
+					Gamma = "MegaVolt"
+				},
+				new() {
+					Gamma = propertyValueOne
+				},
+				new() {
+					Gamma = propertyValueTwo
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+		}
+
+
+		[TestMethod]
+		public void BuildQueryExpressionsPropertyStringContainedInCaseSensitiveTwoTest()
+		{
+			// Arrange
+			var propertyValueOne = "Darkwing Duck";
+			var propertyValueTwo = "QuackFu";
+			var queryParameter = new QueryParameters
+			{
+				WhereQueryProperties = new List<WhereQueryProperty>
+				{
+					new() {
+						Operator = CompareOperator.ContainedIn,
+						PropertyName = nameof(Alpha.Gamma),
+						SearchTerm = $"{propertyValueOne}|{propertyValueTwo}"
+					}
+				}
+			};
+
+			var options = new WhereQueryEngineOptions
+			{
+				CaseInsensitive = true
+			};
+
+			var typeString = typeof(string);
+
+			var exampleList = new List<Alpha>
+			{
+				new() {
+					Gamma = null
+				},
+				new() {
+					Gamma = "MegaVolt"
+				},
+				new() {
+					Gamma = propertyValueOne.ToUpper()
+				},
+				new() {
+					Gamma = propertyValueTwo.ToUpper()
+				}
+			};
+
+			// Act
+			var result = _classUnderTest.BuildQueryExpressions<Alpha>(queryParameter, options: options);
+
+			// Assert
+			result.IsFaulty.Should().BeFalse();
+			result.Data.Should().HaveCount(1);
+
+			var resultWhere = exampleList.Where(result.Data.First().Compile()).ToList();
+			resultWhere.Should().HaveCount(2);
+		}
 	}
 }
