@@ -49,6 +49,32 @@ namespace Eshava.Test.Core.Linq
 		}
 
 		[TestMethod]
+		public void TransformDomainModelToDataModelWithToLowerTest()
+		{
+			// Arrange
+			var today = DateTime.Today;
+			Guid? guid = Guid.Parse("3806b952-52ed-45e0-ba7c-ae09dae982ad");
+			Expression<Func<DomainModel, bool>> sourcExpression = s => s.Id == 5 && s.Name.ToLower() == "test" && today == s.Date && s.UniqueIdentifer == guid;
+
+			var list = new List<DataModel>
+			{
+				new DataModel { Id = 1, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { Id = 5, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { Id = 5, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.Parse("3806b952-52ed-45e0-ba7c-ae09dae982ad") },
+				new DataModel { Id = 5, Name = "Test A", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { Id = 5, Name = "Test", Date = DateTime.Today.AddDays(1), UniqueIdentifer = Guid.NewGuid() }
+			};
+
+			// Act
+			var targetExpression = _classUnderTest.Transform<DomainModel, DataModel>(sourcExpression, true);
+
+			// Assert
+			var result = list.Where(targetExpression.Compile()).ToList();
+
+			result.Should().HaveCount(1);
+		}
+
+		[TestMethod]
 		public void TransformDataModelToDomainModelTest()
 		{
 			// Arrange
@@ -123,6 +149,31 @@ namespace Eshava.Test.Core.Linq
 			// Arrange
 			var today = DateTime.Today;
 			Expression<Func<DomainModel, bool>> sourcExpression = s => s.Sub.SubId == 8 || s.Sub.SubName == "Demo A" || s.Sub.Sub.SubId == 45;
+
+			var list = new List<DataModel>
+			{
+				new DataModel { Id = 1, Name = "Test", Date = DateTime.Today, Sub = new SubDataModel { SubId = 8, SubName = "Demo A", Sub = new SubSubDataModel { SubId = 44, SubName = "Nav" } } },
+				new DataModel { Id = 5, Name = "Test", Date = DateTime.Today, Sub = new SubDataModel { SubId = 9, SubName = "Demo B", Sub = new SubSubDataModel { SubId = 45, SubName = "Nav" } } },
+				new DataModel { Id = 5, Name = "Test A", Date = DateTime.Today, Sub = new SubDataModel { SubId = 7, SubName = "Demo A", Sub = new SubSubDataModel { SubId = 46, SubName = "Nav" } } },
+				new DataModel { Id = 5, Name = "Test", Date = DateTime.Today.AddDays(1), Sub = new SubDataModel { SubId = 6, SubName = "Demo B", Sub = new SubSubDataModel { SubId = 74, SubName = "Nav" } } }
+			};
+
+			// Act
+			var targetExpression = _classUnderTest.Transform<DomainModel, DataModel>(sourcExpression, true);
+
+			// Assert
+			var result = list.Where(targetExpression.Compile()).ToList();
+
+			result.Should().HaveCount(3);
+		}
+
+		
+		[TestMethod]
+		public void TransformDomainModelToDataModelWithSubNavigationWithToLowerTest()
+		{
+			// Arrange
+			var today = DateTime.Today;
+			Expression<Func<DomainModel, bool>> sourcExpression = s => s.Sub.SubId == 8 || s.Sub.SubName.ToLower() == "demo a" || s.Sub.Sub.SubId == 45;
 
 			var list = new List<DataModel>
 			{
@@ -456,10 +507,85 @@ namespace Eshava.Test.Core.Linq
 		}
 
 		[TestMethod]
+		public void TransformDomainModelToDataModelWithContainedForStringInAsAnyTest()
+		{
+			// Arrange
+			var names = new string[] { "Test A", "Test B" };
+
+			Expression<Func<DomainModel, bool>> sourcExpression = s => names.Any(n => n == s.Name);
+
+			var list = new List<DataModel>
+			{
+				new DataModel { Id = 1, Name = "Test", Date = DateTime.Today },
+				new DataModel { Id = 2, Name = "Test B", Date = DateTime.Today },
+				new DataModel { Id = 3, Name = "Test A", Date = DateTime.Today },
+				new DataModel { Id = 4, Name = "Test", Date = DateTime.Today.AddDays(1) }
+			};
+
+			// Act
+			var targetExpression = _classUnderTest.Transform<DomainModel, DataModel>(sourcExpression, true);
+
+			// Assert
+			var result = list.Where(targetExpression.Compile()).ToList();
+
+			result.Should().HaveCount(2);
+		}
+
+		[TestMethod]
+		public void TransformDomainModelToDataModelWithContainedInForStringAsAnyAndToLowerTest()
+		{
+			// Arrange
+			var names = new string[] { "test a", "test b" };
+
+			Expression<Func<DomainModel, bool>> sourcExpression = s => names.Any(n => n == s.Name.ToLower());
+
+			var list = new List<DataModel>
+			{
+				new DataModel { Id = 1, Name = "Test", Date = DateTime.Today },
+				new DataModel { Id = 2, Name = "Test B", Date = DateTime.Today },
+				new DataModel { Id = 3, Name = "Test A", Date = DateTime.Today },
+				new DataModel { Id = 4, Name = "Test", Date = DateTime.Today.AddDays(1) }
+			};
+
+			// Act
+			var targetExpression = _classUnderTest.Transform<DomainModel, DataModel>(sourcExpression, true);
+
+			// Assert
+			var result = list.Where(targetExpression.Compile()).ToList();
+
+			result.Should().HaveCount(2);
+		}
+
+		[TestMethod]
+		public void TransformDomainModelToDataModelWithContainedInForStringAsAnyAndToUpperTest()
+		{
+			// Arrange
+			var names = new string[] { "TEST A", "TEST B" };
+
+			Expression<Func<DomainModel, bool>> sourcExpression = s => names.Any(n => n == s.Name.ToUpper());
+
+			var list = new List<DataModel>
+			{
+				new DataModel { Id = 1, Name = "Test", Date = DateTime.Today },
+				new DataModel { Id = 2, Name = "Test B", Date = DateTime.Today },
+				new DataModel { Id = 3, Name = "Test A", Date = DateTime.Today },
+				new DataModel { Id = 4, Name = "Test", Date = DateTime.Today.AddDays(1) }
+			};
+
+			// Act
+			var targetExpression = _classUnderTest.Transform<DomainModel, DataModel>(sourcExpression, true);
+
+			// Assert
+			var result = list.Where(targetExpression.Compile()).ToList();
+
+			result.Should().HaveCount(2);
+		}
+
+		[TestMethod]
 		public void TransformDataModelToDomainModelWithStartsWithForStringTest()
 		{
 			// Arrange
-			Expression<Func<DataModel, bool>> sourcExpression = s => s.Name.StartsWith("A") || (s.Sub != null && s.Sub.SubName.StartsWith("De"));
+			Expression<Func<DataModel, bool>> sourcExpression = s => s.Name.ToLower().StartsWith("a") || (s.Sub != null && s.Sub.SubName.StartsWith("De"));
 
 			var list = new List<DomainModel>
 			{

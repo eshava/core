@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Eshava.Core.Linq.Constants;
 using Eshava.Core.Linq.Enums;
 using Eshava.Core.Linq.Interfaces;
 using Eshava.Core.Linq.Models;
@@ -12,8 +13,6 @@ namespace Eshava.Core.Linq
 {
 	public class SortingQueryEngine : AbstractQueryEngine, ISortingQueryEngine
 	{
-		private static readonly Type _sortField = typeof(SortField);
-
 		public ResponseData<OrderByCondition> BuildSortCondition<T>(SortOrder sortOrder, Expression<Func<T, object>> expression) where T : class
 		{
 			var member = GetMemberExpressionAndParameter(expression);
@@ -31,20 +30,20 @@ namespace Eshava.Core.Linq
 				};
 			}
 
-			return ResponseData<OrderByCondition>.CreateFaultyResponse("InvalidInput");
+			return ResponseData<OrderByCondition>.CreateFaultyResponse(MessageConstants.INVALIDINPUT);
 		}
 
 		public ResponseData<IEnumerable<OrderByCondition>> BuildSortConditions<T>(object sortings, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
 		{
 			if (sortings == null)
 			{
-				return ResponseData<IEnumerable<OrderByCondition>>.CreateFaultyResponse("InvalidInput");
+				return ResponseData<IEnumerable<OrderByCondition>>.CreateFaultyResponse(MessageConstants.INVALIDINPUT);
 			}
 
 			var sortFields = new List<(string Property, SortField field)>();
 			foreach (var sortField in sortings.GetType().GetProperties())
 			{
-				if (sortField.PropertyType != _sortField && !sortField.PropertyType.IsSubclassOf(_sortField))
+				if (sortField.PropertyType != TypeConstants.SortField && !sortField.PropertyType.IsSubclassOf(TypeConstants.SortField))
 				{
 					continue;
 				}
@@ -74,7 +73,7 @@ namespace Eshava.Core.Linq
 		{
 			if (queryParameters == null)
 			{
-				return ResponseData<IEnumerable<OrderByCondition>>.CreateFaultyResponse("InvalidInput");
+				return ResponseData<IEnumerable<OrderByCondition>>.CreateFaultyResponse(MessageConstants.INVALIDINPUT);
 			}
 
 			if (!(queryParameters.SortingQueryProperties?.Any() ?? false))
@@ -89,7 +88,7 @@ namespace Eshava.Core.Linq
 		{
 			if (sortingQueryProperties == null)
 			{
-				return ResponseData<IEnumerable<OrderByCondition>>.CreateFaultyResponse("InvalidInput");
+				return ResponseData<IEnumerable<OrderByCondition>>.CreateFaultyResponse(MessageConstants.INVALIDINPUT);
 			}
 
 			var sortingConditions = new List<OrderByCondition>();

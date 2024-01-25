@@ -18,6 +18,7 @@ namespace Eshava.Core.Linq.Constants
 		public static readonly Type Int = typeof(int);
 		public static readonly Type Long = typeof(long);
 		public static readonly Type Object = typeof(object);
+		public static readonly Type SortField = typeof(SortField);
 		public static readonly Type String = typeof(string);
 	}
 }
