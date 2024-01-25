@@ -8,9 +8,9 @@ namespace Eshava.Test.Core.Linq.Models
 	{
 		public Alpha()
 		{
-			
+
 		}
-		
+
 		public int Beta { get; set; }
 		public string Gamma { get; set; }
 		public string Delta { get; set; }
@@ -39,5 +39,7 @@ namespace Eshava.Test.Core.Linq.Models
 		public DateTime OmegaDateTime { get; set; }
 		public bool StigmaOne { get; set; }
 		public bool? StigmaTwo { get; set; }
+		public IEnumerable<string> Heta { get; set; }
+		public List<string> San { get; set; }
 	}
 }

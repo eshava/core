@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using Eshava.Core.Linq.Enums;
 
 namespace Eshava.Core.Linq.Models
@@ -14,5 +11,6 @@ namespace Eshava.Core.Linq.Models
 		public ConstantExpression ConstantValue { get; set; }
 		public ParameterExpression Parameter { get; set; }
 		public CompareOperator Operator { get; set; }
+		public WhereQueryEngineOptions Options{ get; set; }
 	}
 }

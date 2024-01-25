@@ -12,5 +12,6 @@ namespace Eshava.Core.Linq.Models
 		public PropertyInfo[] PropertyInfos { get; set; }
 		public Dictionary<string, List<Expression<Func<T, object>>>> Mappings { get; set; }
 		public ParameterExpression Parameter { get; set; }
+		public WhereQueryEngineOptions Options { get; set; }
 	}
 }

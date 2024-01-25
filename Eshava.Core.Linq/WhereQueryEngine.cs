@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Eshava.Core.Extensions;
 using Eshava.Core.Linq.Attributes;
+using Eshava.Core.Linq.Constants;
 using Eshava.Core.Linq.Enums;
+using Eshava.Core.Linq.Extensions;
 using Eshava.Core.Linq.Interfaces;
 using Eshava.Core.Linq.Models;
 using Eshava.Core.Models;
@@ -16,60 +16,11 @@ namespace Eshava.Core.Linq
 {
 	public class WhereQueryEngine : AbstractQueryEngine, IWhereQueryEngine
 	{
-		private static readonly Type _typeString = typeof(string);
-		private static readonly Type _typeObject = typeof(object);
-		private static readonly Type _typeEnum = typeof(Enum);
-		private static readonly Type _typeIList = typeof(IList);
-		private static readonly Type _filterField = typeof(FilterField);
-		private static readonly ConstantExpression _constantExpressionStringNull = Expression.Constant(null, _typeString);
-		private static readonly ConstantExpression _constantExpressionObjectNull = Expression.Constant(null, _typeObject);
-		private static readonly MethodInfo _methodInfoStringContains = _typeString.GetMethod("Contains", new[] { _typeString });
-		private static readonly MethodInfo _methodInfoStringStartsWith = _typeString.GetMethod("StartsWith", new[] { _typeString });
-		private static readonly MethodInfo _methodInfoStringEndsWith = _typeString.GetMethod("EndsWith", new[] { _typeString });
-		private static readonly ConstantExpression _constantExpressionCompareTo = Expression.Constant(0, typeof(int));
-
-		private static readonly Dictionary<Type, Func<string, Type, CompareOperator, WhereQueryEngineOptions, ConstantExpression>> _constantExpressions = new Dictionary<Type, Func<string, Type, CompareOperator, WhereQueryEngineOptions, ConstantExpression>>
-		{
-			{ typeof(Guid), GetConstantGuid },
-			{ typeof(string), GetConstantString },
-			{ typeof(bool), GetConstantBoolean },
-			{ typeof(int), GetConstantInteger },
-			{ typeof(long), GetConstantLong },
-			{ typeof(decimal), GetConstantDecimal },
-			{ typeof(double), GetConstantDouble },
-			{ typeof(float), GetConstantFloat },
-			{ typeof(DateTime), GetConstantDateTime },
-			{ typeof(Enum), GetConstantEnum }
-		};
-
-		private static readonly Dictionary<CompareOperator, Func<MemberExpression, ConstantExpression, Expression>> _compareOperatorExpressions = new Dictionary<CompareOperator, Func<MemberExpression, ConstantExpression, Expression>>
-		{
-			{ CompareOperator.Equal, Expression.Equal },
-			{ CompareOperator.NotEqual, Expression.NotEqual },
-			{ CompareOperator.GreaterThan, Expression.GreaterThan },
-			{ CompareOperator.GreaterThanOrEqual, Expression.GreaterThanOrEqual },
-			{ CompareOperator.LessThan, Expression.LessThan },
-			{ CompareOperator.LessThanOrEqual, Expression.LessThanOrEqual },
-			{ CompareOperator.Contains, GetContainsExpression },
-			{ CompareOperator.ContainsNot, GetContainsNotExpression },
-			{ CompareOperator.StartsWith, GetStartsWithExpression },
-			{ CompareOperator.EndsWith, GetEndsWithExpression },
-			{ CompareOperator.ContainedIn, GetContainedInExpression },
-		};
-
-		private static readonly Dictionary<CompareOperator, ExpressionType> _compareOperatorExpressionType = new Dictionary<CompareOperator, ExpressionType>
-		{
-			{ CompareOperator.GreaterThan, ExpressionType.GreaterThan },
-			{ CompareOperator.GreaterThanOrEqual, ExpressionType.GreaterThanOrEqual },
-			{ CompareOperator.LessThan, ExpressionType.LessThan },
-			{ CompareOperator.LessThanOrEqual, ExpressionType.LessThanOrEqual }
-		};
-
-		private readonly WhereQueryEngineOptions _options;
+		private readonly WhereQueryEngineOptions _globalOptions;
 
 		public WhereQueryEngine(WhereQueryEngineOptions options)
 		{
-			_options = options;
+			_globalOptions = options;
 		}
 
 		/// <summary>
@@ -81,11 +32,13 @@ namespace Eshava.Core.Linq
 		/// <param name="globalSearchTerm">Search termn, will apply on all string properties</param>
 		/// <param name="mappings">Mappings for foreign key properties</param>
 		/// <returns></returns>
-		public ResponseData<IEnumerable<Expression<Func<T, bool>>>> BuildQueryExpressions<T>(object filter, string globalSearchTerm, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
+		public ResponseData<IEnumerable<Expression<Func<T, bool>>>> BuildQueryExpressions<T>(object filter, string globalSearchTerm, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null, WhereQueryEngineOptions options = null) where T : class
 		{
+			options = PrepareOptions(options, _globalOptions);
+
 			if (filter == null)
 			{
-				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidInput");
+				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse(MessageConstants.INVALIDINPUT);
 			}
 
 			var whereQueryProperties = new List<WhereQueryProperty>();
@@ -93,7 +46,7 @@ namespace Eshava.Core.Linq
 
 			foreach (var filterField in filter.GetType().GetProperties())
 			{
-				if (filterField.PropertyType != _filterField && !filterField.PropertyType.IsSubclassOf(_filterField))
+				if (filterField.PropertyType != TypeConstants.FilterField && !filterField.PropertyType.IsSubclassOf(TypeConstants.FilterField))
 				{
 					continue;
 				}
@@ -129,7 +82,7 @@ namespace Eshava.Core.Linq
 					allowedFitlerFieldsHashSet.Add(filterField.Name);
 				}
 
-				var whereQueryProperty = ConvertFilterFieldToWhereQueryProperty(completeField, invalidFilterFields, allowedCompareOperatorsHashSet, allowedFitlerFieldsHashSet);
+				var whereQueryProperty = ConvertFilterFieldToWhereQueryProperty(completeField, invalidFilterFields, allowedCompareOperatorsHashSet, allowedFitlerFieldsHashSet, options);
 				if (whereQueryProperty == null)
 				{
 					continue;
@@ -140,10 +93,10 @@ namespace Eshava.Core.Linq
 
 			if (invalidFilterFields.Count > 0)
 			{
-				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidFilter", validationErrors: invalidFilterFields);
+				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse(MessageConstants.INVALIDFILTER, validationErrors: invalidFilterFields);
 			}
 
-			return BuildQueryExpressions(whereQueryProperties, globalSearchTerm, mappings);
+			return BuildQueryExpressions(whereQueryProperties, globalSearchTerm, mappings, options);
 		}
 
 		/// <summary>
@@ -158,11 +111,11 @@ namespace Eshava.Core.Linq
 		/// <param name="mappings">Mappings for foreign key properties</param>
 		/// <exception cref="ArgumentNullException">Thrown if <see cref="QueryParameters">queryParameters</see> is null.</exception>
 		/// <returns> where expressions</returns>
-		public ResponseData<IEnumerable<Expression<Func<T, bool>>>> BuildQueryExpressions<T>(QueryParameters queryParameters, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
+		public ResponseData<IEnumerable<Expression<Func<T, bool>>>> BuildQueryExpressions<T>(QueryParameters queryParameters, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null, WhereQueryEngineOptions options = null) where T : class
 		{
 			if (queryParameters == null)
 			{
-				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidInput");
+				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse(MessageConstants.INVALIDINPUT);
 			}
 
 			var where = new List<Expression<Func<T, bool>>>();
@@ -174,8 +127,10 @@ namespace Eshava.Core.Linq
 				return new ResponseData<IEnumerable<Expression<Func<T, bool>>>>(where);
 			}
 
-			return BuildQueryExpressions(queryParameters.WhereQueryProperties, queryParameters.SearchTerm, mappings);
+			return BuildQueryExpressions(queryParameters.WhereQueryProperties, queryParameters.SearchTerm, mappings, options);
 		}
+
+
 
 		/// <summary>
 		/// Creates a list of where expression based on passed where query properties and search term
@@ -185,8 +140,10 @@ namespace Eshava.Core.Linq
 		/// <param name="globalSearchTerm">Search termn, will apply on all string properties</param>
 		/// <param name="mappings"></param>
 		/// <returns></returns>
-		public ResponseData<IEnumerable<Expression<Func<T, bool>>>> BuildQueryExpressions<T>(IEnumerable<WhereQueryProperty> whereQueryProperties, string globalSearchTerm, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null) where T : class
+		public ResponseData<IEnumerable<Expression<Func<T, bool>>>> BuildQueryExpressions<T>(IEnumerable<WhereQueryProperty> whereQueryProperties, string globalSearchTerm, Dictionary<string, List<Expression<Func<T, object>>>> mappings = null, WhereQueryEngineOptions options = null) where T : class
 		{
+			options = PrepareOptions(options, _globalOptions);
+
 			var where = new List<Expression<Func<T, bool>>>();
 			var hasPropertyQueries = whereQueryProperties?.Any() ?? false;
 			var hasGlobalSearchTerm = !globalSearchTerm.IsNullOrEmpty();
@@ -208,7 +165,8 @@ namespace Eshava.Core.Linq
 				Parameter = Expression.Parameter(type, "p"),
 				PropertyInfos = type.GetProperties(),
 				GlobalSearchTerm = globalSearchTerm,
-				WhereQueryProperties = whereQueryProperties ?? new List<WhereQueryProperty>()
+				WhereQueryProperties = whereQueryProperties ?? new List<WhereQueryProperty>(),
+				Options = options
 			};
 
 			if (hasPropertyQueries)
@@ -312,22 +270,22 @@ namespace Eshava.Core.Linq
 			else if (property.LinkOperator == LinkOperator.None)
 			{
 				// invalid property 
-				if (_options.SkipInvalidWhereQueries)
+				if (queryContainer.Options.SkipInvalidWhereQueries ?? false)
 				{
 					return new ResponseData<IEnumerable<Expression<Func<T, bool>>>>(new List<Expression<Func<T, bool>>>());
 				}
 
-				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidLinkOperator");
+				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse(MessageConstants.INVALIDLINKOPERATOR);
 			}
 			else if (!(property.LinkOperations?.Any() ?? false))
 			{
 				// invalid property 
-				if (_options.SkipInvalidWhereQueries)
+				if (queryContainer.Options.SkipInvalidWhereQueries ?? false)
 				{
 					return new ResponseData<IEnumerable<Expression<Func<T, bool>>>>(new List<Expression<Func<T, bool>>>());
 				}
 
-				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("LinkOperationsRequired");
+				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse(MessageConstants.LINKOPERATIONSREQUIRED);
 			}
 			else
 			{
@@ -373,7 +331,7 @@ namespace Eshava.Core.Linq
 			var validationErrors = new List<ValidationError>();
 
 			var searchTermParts = new[] { queryContainer.GlobalSearchTerm };
-			if (_options.ContainsSearchSplitBySpace)
+			if (queryContainer.Options.ContainsSearchSplitBySpace ?? false)
 			{
 				searchTermParts = queryContainer.GlobalSearchTerm.Split(' ').Where(t => !t.IsNullOrEmpty()).ToArray();
 			}
@@ -393,7 +351,7 @@ namespace Eshava.Core.Linq
 
 						foreach (var mapping in queryContainer.Mappings[propertyInfo.Name])
 						{
-							var mappingResult = GetMappingCondition(property, mapping, _typeString);
+							var mappingResult = GetMappingCondition(property, mapping, queryContainer.Options, TypeConstants.String);
 							if (mappingResult.IsFaulty)
 							{
 								return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse(mappingResult);
@@ -402,9 +360,9 @@ namespace Eshava.Core.Linq
 							orExpressions.AddRange(mappingResult.Data);
 						}
 					}
-					else if (propertyInfo.PropertyType == _typeString && propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() == null)
+					else if (propertyInfo.PropertyType == TypeConstants.String && propertyInfo.GetCustomAttribute<QueryIgnoreAttribute>() == null)
 					{
-						var conditionsResult = GetPropertyCondition<T>(property, queryContainer.PropertyInfos, queryContainer.Parameter);
+						var conditionsResult = GetPropertyCondition<T>(property, queryContainer.PropertyInfos, queryContainer.Parameter, queryContainer.Options);
 						if (conditionsResult.IsFaulty)
 						{
 							return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse(conditionsResult);
@@ -426,7 +384,7 @@ namespace Eshava.Core.Linq
 
 					foreach (var mapping in mappings.Value)
 					{
-						var mappingResult = GetMappingCondition(property, mapping, _typeString);
+						var mappingResult = GetMappingCondition(property, mapping, queryContainer.Options, TypeConstants.String);
 						if (mappingResult.IsFaulty)
 						{
 							return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse(mappingResult);
@@ -448,29 +406,29 @@ namespace Eshava.Core.Linq
 			};
 		}
 
-		private ResponseData<IList<Expression<Func<T, bool>>>> GetMappingCondition<T>(WhereQueryProperty property, Expression<Func<T, object>> mappingExpression, Type expectedDataType = null) where T : class
+		private ResponseData<IList<Expression<Func<T, bool>>>> GetMappingCondition<T>(WhereQueryProperty property, Expression<Func<T, object>> mappingExpression, WhereQueryEngineOptions options, Type expectedDataType = null) where T : class
 		{
 			var memberExpression = GetMemberExpression(mappingExpression);
 			if (memberExpression == null)
 			{
-				if (_options.SkipInvalidWhereQueries)
+				if (options.SkipInvalidWhereQueries ?? false)
 				{
 					return new ResponseData<IList<Expression<Func<T, bool>>>>(new List<Expression<Func<T, bool>>>());
 				}
 
-				return ResponseData<IList<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData")
-					.AddValidationError(property.PropertyName, "InvalidPropertyMapping");
+				return ResponseData<IList<Expression<Func<T, bool>>>>.CreateFaultyResponse(MessageConstants.INVALIDDATA)
+					.AddValidationError(property.PropertyName, MessageConstants.INVALIDPROPERTYMAPPING);
 			}
 
 			if (expectedDataType != null && memberExpression.Type != expectedDataType)
 			{
-				if (_options.SkipInvalidWhereQueries)
+				if (options.SkipInvalidWhereQueries ?? false)
 				{
 					return new ResponseData<IList<Expression<Func<T, bool>>>>(new List<Expression<Func<T, bool>>>());
 				}
 
-				return ResponseData<IList<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData")
-					.AddValidationError(property.PropertyName, "InvalidPropertyMappingType");
+				return ResponseData<IList<Expression<Func<T, bool>>>>.CreateFaultyResponse(MessageConstants.INVALIDDATA)
+					.AddValidationError(property.PropertyName, MessageConstants.INVALIDPROPERTYMAPPINGTYPE);
 			}
 
 			var memberType = memberExpression.Type;
@@ -481,7 +439,7 @@ namespace Eshava.Core.Linq
 
 			var expressions = new List<Expression<Func<T, bool>>>();
 			var searchTermParts = new[] { property.SearchTerm };
-			if (_options.ContainsSearchSplitBySpace && memberType == _typeString && property.Operator == CompareOperator.Contains)
+			if ((options.ContainsSearchSplitBySpace ?? false) && memberType == TypeConstants.String && property.Operator == CompareOperator.Contains)
 			{
 				searchTermParts = property.SearchTerm.Split(' ').Where(t => !t.IsNullOrEmpty()).ToArray();
 			}
@@ -492,7 +450,7 @@ namespace Eshava.Core.Linq
 				var dataType = memberType.GetDataType();
 				if (dataType.IsEnum)
 				{
-					dataType = _typeEnum;
+					dataType = TypeConstants.Enum;
 				}
 
 				var data = new ExpressionDataContainer
@@ -500,13 +458,14 @@ namespace Eshava.Core.Linq
 					Member = memberExpression,
 					Parameter = mappingExpression.Parameters.First(),
 					Operator = property.Operator,
-					ConstantValue = _constantExpressions[dataType](searchTermPart, memberType, property.Operator, _options)
+					ConstantValue = dataType.GetConstantExpression(searchTermPart, memberType, property.Operator, options),
+					Options = options
 				};
 
 				var expressionResult = GetConditionComparableByMemberExpression<T>(data);
 				if (expressionResult.IsFaulty)
 				{
-					if (!_options.SkipInvalidWhereQueries)
+					if (!(options.SkipInvalidWhereQueries ?? false))
 					{
 						validationErrors.AddRange(expressionResult.ValidationErrors);
 					}
@@ -519,28 +478,28 @@ namespace Eshava.Core.Linq
 
 			if (validationErrors.Count > 0)
 			{
-				return ResponseData<IList<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData", validationErrors: validationErrors);
+				return ResponseData<IList<Expression<Func<T, bool>>>>.CreateFaultyResponse(MessageConstants.INVALIDDATA, validationErrors: validationErrors);
 			}
 
 			return new ResponseData<IList<Expression<Func<T, bool>>>>(expressions);
 		}
 
-		private ResponseData<IEnumerable<Expression<Func<T, bool>>>> GetPropertyCondition<T>(WhereQueryProperty property, IEnumerable<PropertyInfo> propertyInfos, ParameterExpression parameterExpression) where T : class
+		private ResponseData<IEnumerable<Expression<Func<T, bool>>>> GetPropertyCondition<T>(WhereQueryProperty property, IEnumerable<PropertyInfo> propertyInfos, ParameterExpression parameterExpression, WhereQueryEngineOptions options) where T : class
 		{
 			var propertyInfo = propertyInfos.SingleOrDefault(p => p.Name.Equals(property.PropertyName));
 			if (propertyInfo == null)
 			{
-				if (_options.SkipInvalidWhereQueries)
+				if (options.SkipInvalidWhereQueries ?? false)
 				{
 					return new ResponseData<IEnumerable<Expression<Func<T, bool>>>>(new List<Expression<Func<T, bool>>>());
 				}
 
-				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData", validationErrors: new List<ValidationError>
+				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse(MessageConstants.INVALIDDATA, validationErrors: new List<ValidationError>
 				{
 					new ValidationError
 					{
 						PropertyName = property.PropertyName,
-						ErrorType = "InvalidProperty"
+						ErrorType = MessageConstants.INVALIDPROPERTY
 					}
 				});
 			}
@@ -558,7 +517,7 @@ namespace Eshava.Core.Linq
 
 			var expressions = new List<Expression<Func<T, bool>>>();
 			var searchTermParts = new[] { property.SearchTerm };
-			if (_options.ContainsSearchSplitBySpace && propertyType == _typeString && property.Operator == CompareOperator.Contains)
+			if ((options.ContainsSearchSplitBySpace ?? false) && propertyType == TypeConstants.String && property.Operator == CompareOperator.Contains)
 			{
 				searchTermParts = property.SearchTerm.Split(' ').Where(t => !t.IsNullOrEmpty()).ToArray();
 			}
@@ -569,7 +528,7 @@ namespace Eshava.Core.Linq
 				var dataType = propertyType.GetDataType();
 				if (dataType.IsEnum)
 				{
-					dataType = _typeEnum;
+					dataType = TypeConstants.Enum;
 				}
 
 				var data = new ExpressionDataContainer
@@ -577,13 +536,14 @@ namespace Eshava.Core.Linq
 					PropertyInfo = propertyInfo,
 					Parameter = parameterExpression,
 					Operator = property.Operator,
-					ConstantValue = _constantExpressions[dataType](searchTermPart, propertyType, property.Operator, _options)
+					ConstantValue = dataType.GetConstantExpression(searchTermPart, propertyType, property.Operator, options),
+					Options = options
 				};
 
 				var conditionResult = GetConditionComparableByProperty<T>(data);
 				if (conditionResult.IsFaulty)
 				{
-					if (!_options.SkipInvalidWhereQueries)
+					if (!(options.SkipInvalidWhereQueries ?? false))
 					{
 						validationErrors.AddRange(conditionResult.ValidationErrors);
 					}
@@ -596,294 +556,11 @@ namespace Eshava.Core.Linq
 
 			if (validationErrors.Count > 0)
 			{
-				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse("InvalidData", validationErrors: validationErrors);
+				return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse(MessageConstants.INVALIDDATA, validationErrors: validationErrors);
 			}
 
 			return new ResponseData<IEnumerable<Expression<Func<T, bool>>>>(expressions);
 		}
-
-		private static ConstantExpression GetConstantGuid(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
-		{
-			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
-			{
-				return null;
-			}
-
-			if (compareOperator == CompareOperator.ContainedIn)
-			{
-				var values = new List<Guid>();
-				foreach (var item in value.Split('|'))
-				{
-					if (Guid.TryParse(item, out var valueItemGuid))
-					{
-						values.Add(valueItemGuid);
-					}
-				}
-
-				return Expression.Constant(values, values.GetType());
-			}
-
-			if (!Guid.TryParse(value, out var valueGuid))
-			{
-				return null;
-			}
-
-			return Expression.Constant(valueGuid, dataType);
-		}
-
-		private static ConstantExpression GetConstantString(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
-		{
-			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
-			{
-				return null;
-			}
-
-			if (compareOperator == CompareOperator.ContainedIn)
-			{
-				var values = value.Split('|').ToList();
-
-				return Expression.Constant(values, values.GetType());
-			}
-
-			return Expression.Constant(value, dataType);
-		}
-
-		private static ConstantExpression GetConstantBoolean(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
-		{
-			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
-			{
-				return null;
-			}
-
-			var boolean = value.ToBoolean();
-
-			return Expression.Constant(boolean, dataType);
-		}
-
-		private static ConstantExpression GetConstantDecimal(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
-		{
-			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
-			{
-				return null;
-			}
-
-			if (compareOperator == CompareOperator.ContainedIn)
-			{
-				var values = new List<decimal>();
-				foreach (var item in value.Split('|'))
-				{
-					if (Decimal.TryParse(item, NumberStyles.Number, CultureInfo.InvariantCulture, out var valueItemDecimal))
-					{
-						values.Add(valueItemDecimal);
-					}
-				}
-
-				return Expression.Constant(values, values.GetType());
-			}
-
-			if (!Decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var valueDecimal))
-			{
-				return null;
-			}
-
-			return Expression.Constant(valueDecimal, dataType);
-		}
-
-		private static ConstantExpression GetConstantDouble(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
-		{
-			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
-			{
-				return null;
-			}
-
-			if (compareOperator == CompareOperator.ContainedIn)
-			{
-				var values = new List<double>();
-				foreach (var item in value.Split('|'))
-				{
-					if (Double.TryParse(item, NumberStyles.Number, CultureInfo.InvariantCulture, out var valueItemDouble))
-					{
-						values.Add(valueItemDouble);
-					}
-				}
-
-				return Expression.Constant(values, values.GetType());
-			}
-
-			if (!Double.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var valueDouble))
-			{
-				return null;
-			}
-
-			return Expression.Constant(valueDouble, dataType);
-		}
-
-		private static ConstantExpression GetConstantFloat(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
-		{
-			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
-			{
-				return null;
-			}
-
-			if (compareOperator == CompareOperator.ContainedIn)
-			{
-				var values = new List<float>();
-				foreach (var item in value.Split('|'))
-				{
-					if (Single.TryParse(item, NumberStyles.Float, CultureInfo.InvariantCulture, out var valueItemFloat))
-					{
-						values.Add(valueItemFloat);
-					}
-				}
-
-				return Expression.Constant(values, values.GetType());
-			}
-
-			if (!Single.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var valueFloat))
-			{
-				return null;
-			}
-
-			return Expression.Constant(valueFloat, dataType);
-		}
-
-		private static ConstantExpression GetConstantInteger(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
-		{
-			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
-			{
-				return null;
-			}
-
-			if (compareOperator == CompareOperator.ContainedIn)
-			{
-				var values = new List<int>();
-				foreach (var item in value.Split('|'))
-				{
-					if (Int32.TryParse(item, NumberStyles.Integer, CultureInfo.InvariantCulture, out var valueItemInteger))
-					{
-						values.Add(valueItemInteger);
-					}
-				}
-
-				return Expression.Constant(values, values.GetType());
-			}
-
-			if (!Int32.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var valueInt))
-			{
-				return null;
-			}
-
-			return Expression.Constant(valueInt, dataType);
-		}
-
-		private static ConstantExpression GetConstantLong(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
-		{
-			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
-			{
-				return null;
-			}
-
-			if (compareOperator == CompareOperator.ContainedIn)
-			{
-				var values = new List<long>();
-				foreach (var item in value.Split('|'))
-				{
-					if (Int64.TryParse(item, NumberStyles.Integer, CultureInfo.InvariantCulture, out var valueItemLong))
-					{
-						values.Add(valueItemLong);
-					}
-				}
-
-				return Expression.Constant(values, values.GetType());
-			}
-
-			if (!Int64.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var valueLong))
-			{
-				return null;
-			}
-
-			return Expression.Constant(valueLong, dataType);
-		}
-
-		private static ConstantExpression GetConstantEnum(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
-		{
-			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
-			{
-				return null;
-			}
-
-			if (compareOperator == CompareOperator.ContainedIn)
-			{
-				var values = value.Split('|').Select(v => Enum.Parse(dataType, v)).ToList();
-				try
-				{
-					return Expression.Constant(values, values.GetType());
-				}
-				catch
-				{
-					return null;
-				}
-			}
-
-			try
-			{
-				return Expression.Constant(Enum.Parse(dataType, value), dataType);
-			}
-			catch
-			{
-				return null;
-			}
-		}
-
-		private static ConstantExpression GetConstantDateTime(string value, Type dataType, CompareOperator compareOperator, WhereQueryEngineOptions options)
-		{
-			if (value.IsNullOrEmpty() || compareOperator == CompareOperator.None)
-			{
-				return null;
-			}
-
-			if (compareOperator == CompareOperator.ContainedIn)
-			{
-				var values = new List<DateTime>();
-				foreach (var item in value.Split('|'))
-				{
-					if (TryParseDateTime(item, options, out var valueItemDateTime))
-					{
-						values.Add(valueItemDateTime);
-					}
-				}
-
-				return Expression.Constant(values, values.GetType());
-			}
-
-			if (!TryParseDateTime(value, options, out var valueDateTime))
-			{
-				return null;
-			}
-
-			return Expression.Constant(valueDateTime, dataType);
-		}
-
-		private static bool TryParseDateTime(string value, WhereQueryEngineOptions options, out DateTime result)
-		{
-			if (DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss.fffK", CultureInfo.InvariantCulture, DateTimeStyles.None, out result)
-				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out result)
-				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out result)
-				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ssK", CultureInfo.InvariantCulture, DateTimeStyles.None, out result)
-				|| DateTime.TryParseExact(value, "yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out result))
-			{
-
-				if (options.UseUtcDateTime)
-				{
-					result = result.ToUniversalTime();
-				}
-
-				return true;
-			}
-
-			return false;
-		}
-
 
 		private ResponseData<Expression<Func<T, bool>>> GetConditionComparableByProperty<T>(ExpressionDataContainer data) where T : class
 		{
@@ -894,35 +571,35 @@ namespace Eshava.Core.Linq
 
 		private ResponseData<Expression<Func<T, bool>>> GetConditionComparableByMemberExpression<T>(ExpressionDataContainer data) where T : class
 		{
-			if (data.ConstantValue == null && !(data.Member.Type == _typeString || data.Member.Type.IsDataTypeNullable()))
+			if (data.ConstantValue == null && !(data.Member.Type == TypeConstants.String || data.Member.Type.IsDataTypeNullable()))
 			{
-				return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse("InvalidData", validationErrors: new List<ValidationError>
+				return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse(MessageConstants.INVALIDDATA, validationErrors: new List<ValidationError>
 				{
 					new ValidationError
 					{
 						PropertyName = data.Member.Member.Name,
-						ErrorType = "InvalidFilterValue"
+						ErrorType = MessageConstants.INVALIDFILTERVALUE
 					}
 				});
 			}
 
-			if (!_compareOperatorExpressions.ContainsKey(data.Operator))
+			if (!data.Operator.ExistsOperation())
 			{
-				return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse("InvalidData", validationErrors: new List<ValidationError>
+				return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse(MessageConstants.INVALIDDATA, validationErrors: new List<ValidationError>
 				{
 					new ValidationError
 					{
 						PropertyName = data.Member.Member.Name,
 						Value = data.Operator.ToString(),
-						ErrorType = "InvalidOperator"
+						ErrorType = MessageConstants.INVALIDOPERATOR
 					}
 				});
 			}
 
-			if (data.Member.Type.IsEnum && _compareOperatorExpressionType.ContainsKey(data.Operator))
+			if (data.Member.Type.IsEnum && data.Operator.ExistsExpressionType())
 			{
-				var enumCompareToExpression = Expression.Call(data.Member, data.Member.Type.GetMethod("CompareTo", new[] { data.Member.Type }), Expression.Convert(data.ConstantValue, _typeObject));
-				var binaryExpression = Expression.MakeBinary(_compareOperatorExpressionType[data.Operator], enumCompareToExpression, _constantExpressionCompareTo);
+				var enumCompareToExpression = Expression.Call(data.Member, data.Member.Type.GetMethod("CompareTo", [data.Member.Type]), Expression.Convert(data.ConstantValue, TypeConstants.Object));
+				var binaryExpression = Expression.MakeBinary(data.Operator.GetExpressionType(), enumCompareToExpression, ExpressionConstants.CompareTo);
 
 				return new ResponseData<Expression<Func<T, bool>>>
 				{
@@ -933,17 +610,17 @@ namespace Eshava.Core.Linq
 			var expression = default(Expression);
 			try
 			{
-				expression = _compareOperatorExpressions[data.Operator](data.Member, data.ConstantValue);
+				expression = data.Operator.BuildExpression(data.Member, data.ConstantValue, data.Options);
 			}
 			catch (Exception ex)
 			{
-				return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse("InvalidData", rawMessage: ex.Message, validationErrors: new List<ValidationError>
+				return ResponseData<Expression<Func<T, bool>>>.CreateFaultyResponse(MessageConstants.INVALIDDATA, rawMessage: ex.Message, validationErrors: new List<ValidationError>
 				{
 					new ValidationError
 					{
 						PropertyName = data.Member.Member.Name,
 						Value = data.Operator.ToString(),
-						ErrorType = "InvalidFilterValue"
+						ErrorType = MessageConstants.INVALIDFILTERVALUE
 					}
 				});
 			}
@@ -1017,91 +694,16 @@ namespace Eshava.Core.Linq
 			return previousVisitor.Visit(condition.Body);
 		}
 
-		private static Expression GetContainsExpression(MemberExpression member, ConstantExpression constant)
-		{
-			if (member.Type == _typeString)
-			{
-				return Expression.AndAlso(Expression.NotEqual(member, _constantExpressionStringNull), Expression.Call(member, _methodInfoStringContains, constant));
-			}
-
-			if (member.Type.ImplementsIEnumerable() && member.Type.ImplementsInterface(_typeIList))
-			{
-				var genericType = member.Type.GetDataTypeFromIEnumerable();
-				var nullCheckExpression = Expression.NotEqual(member, _constantExpressionObjectNull);
-				var enumerableContainsExpression = Expression.Call(member, member.Type.GetMethod("Contains", new[] { genericType }), constant);
-
-				return Expression.AndAlso(nullCheckExpression, enumerableContainsExpression);
-			}
-
-			throw new NotSupportedException("The data type of the property has to be of type string or must implement 'IList'");
-		}
-
-		private static Expression GetContainsNotExpression(MemberExpression member, ConstantExpression constant)
-		{
-			if (member.Type == _typeString)
-			{
-				return Expression.OrElse(Expression.Equal(member, _constantExpressionStringNull), Expression.Not(Expression.Call(member, _methodInfoStringContains, constant)));
-			}
-
-			if (member.Type.ImplementsIEnumerable() && member.Type.ImplementsInterface(_typeIList))
-			{
-				var genericType = member.Type.GetDataTypeFromIEnumerable();
-				var nullCheckExpression = Expression.Equal(member, _constantExpressionObjectNull);
-				var enumerableContainsExpression = Expression.Call(member, member.Type.GetMethod("Contains", new[] { genericType }), constant);
-
-				return Expression.OrElse(nullCheckExpression, Expression.Not(enumerableContainsExpression));
-			}
-
-			throw new NotSupportedException("The data type of the property has to be of type string or must implement 'IList'");
-		}
-
-		private static Expression GetStartsWithExpression(MemberExpression member, ConstantExpression constant)
-		{
-			if (member.Type == _typeString)
-			{
-				return Expression.AndAlso(Expression.NotEqual(member, _constantExpressionStringNull), Expression.Call(member, _methodInfoStringStartsWith, constant));
-			}
-
-			throw new NotSupportedException("The data type of the property has to be of type string");
-		}
-
-		private static Expression GetEndsWithExpression(MemberExpression member, ConstantExpression constant)
-		{
-			if (member.Type == _typeString)
-			{
-				return Expression.AndAlso(Expression.NotEqual(member, _constantExpressionStringNull), Expression.Call(member, _methodInfoStringEndsWith, constant));
-			}
-
-			throw new NotSupportedException("The data type of the property has to be of type string");
-		}
-
-		private static Expression GetContainedInExpression(MemberExpression member, ConstantExpression constant)
-		{
-			var enumerableMemberMethod = constant.Type.GetMethod("Contains", new[] { member.Type });
-			Expression memberExpression;
-
-			if (member.Type.IsEnum)
-			{
-				memberExpression = Expression.Convert(member, _typeObject);
-			}
-			else
-			{
-				memberExpression = member;
-			}
-
-			return Expression.Call(constant, enumerableMemberMethod, memberExpression);
-		}
-
-		private WhereQueryProperty ConvertFilterFieldToWhereQueryProperty(ComplexFilterField filterField, IList<ValidationError> invalidFilterFields, HashSet<CompareOperator> allowedCompareOperators, HashSet<string> allowedFields)
+		private WhereQueryProperty ConvertFilterFieldToWhereQueryProperty(ComplexFilterField filterField, IList<ValidationError> invalidFilterFields, HashSet<CompareOperator> allowedCompareOperators, HashSet<string> allowedFields, WhereQueryEngineOptions options)
 		{
 			if (filterField == null)
 			{
-				if (!_options.SkipInvalidWhereQueries)
+				if (!(options.SkipInvalidWhereQueries ?? false))
 				{
 					invalidFilterFields.Add(new ValidationError
 					{
 						PropertyName = nameof(FilterField),
-						ErrorType = "IsNull"
+						ErrorType = MessageConstants.ISNULL
 					});
 				}
 
@@ -1113,12 +715,12 @@ namespace Eshava.Core.Linq
 			{
 				if (allowedFields.Count > 0 && !allowedFields.Contains(filterField.Field))
 				{
-					if (!_options.SkipInvalidWhereQueries)
+					if (!(options.SkipInvalidWhereQueries ?? false))
 					{
 						invalidFilterFields.Add(new ValidationError
 						{
 							PropertyName = filterField.Field,
-							ErrorType = "NotAllowed"
+							ErrorType = MessageConstants.NOTALLOWED
 						});
 					}
 
@@ -1127,13 +729,13 @@ namespace Eshava.Core.Linq
 
 				if (allowedCompareOperators.Count > 0 && !allowedCompareOperators.Contains(filterField.Operator))
 				{
-					if (!_options.SkipInvalidWhereQueries)
+					if (!(options.SkipInvalidWhereQueries ?? false))
 					{
 						invalidFilterFields.Add(new ValidationError
 						{
 							PropertyName = filterField.Field,
 							Value = filterField.Operator.ToString(),
-							ErrorType = "InvalidOperator"
+							ErrorType = MessageConstants.INVALIDOPERATOR
 						});
 					}
 
@@ -1150,12 +752,12 @@ namespace Eshava.Core.Linq
 
 			if (filterField.LinkOperator == LinkOperator.None)
 			{
-				if (!_options.SkipInvalidWhereQueries)
+				if (!(options.SkipInvalidWhereQueries ?? false))
 				{
 					invalidFilterFields.Add(new ValidationError
 					{
 						PropertyName = filterField.Field,
-						ErrorType = "InvalidLinkOperator"
+						ErrorType = MessageConstants.INVALIDLINKOPERATOR
 					});
 				}
 
@@ -1164,12 +766,12 @@ namespace Eshava.Core.Linq
 
 			if (!(filterField.LinkOperations?.Any() ?? false))
 			{
-				if (!_options.SkipInvalidWhereQueries)
+				if (!(options.SkipInvalidWhereQueries ?? false))
 				{
 					invalidFilterFields.Add(new ValidationError
 					{
 						PropertyName = filterField.Field,
-						ErrorType = "LinkOperationsRequired"
+						ErrorType = MessageConstants.LINKOPERATIONSREQUIRED
 					});
 				}
 
@@ -1185,7 +787,7 @@ namespace Eshava.Core.Linq
 
 			foreach (var linkOperationFilterField in filterField.LinkOperations)
 			{
-				var whereQueryProperty = ConvertFilterFieldToWhereQueryProperty(linkOperationFilterField, invalidFilterFields, allowedCompareOperators, allowedFields);
+				var whereQueryProperty = ConvertFilterFieldToWhereQueryProperty(linkOperationFilterField, invalidFilterFields, allowedCompareOperators, allowedFields, options);
 				if (whereQueryProperty != null)
 				{
 					whereQueryPropertyGroup.LinkOperations.Add(whereQueryProperty);
@@ -1197,12 +799,12 @@ namespace Eshava.Core.Linq
 				return whereQueryPropertyGroup;
 			}
 
-			if (!_options.SkipInvalidWhereQueries)
+			if (!(options.SkipInvalidWhereQueries ?? false))
 			{
 				invalidFilterFields.Add(new ValidationError
 				{
 					PropertyName = filterField.Field,
-					ErrorType = "NoValidLinkOperations"
+					ErrorType = MessageConstants.NOVALIDLINKOPERATIONS
 				});
 			}
 
@@ -1218,7 +820,7 @@ namespace Eshava.Core.Linq
 				var members = new List<Expression<Func<T, bool>>>();
 				foreach (var mapping in queryContainer.Mappings[property.PropertyName])
 				{
-					var mappingResult = GetMappingCondition(property, mapping);
+					var mappingResult = GetMappingCondition(property, mapping, queryContainer.Options);
 					if (mappingResult.IsFaulty)
 					{
 						return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse(mappingResult);
@@ -1246,7 +848,7 @@ namespace Eshava.Core.Linq
 			}
 			else
 			{
-				var conditionResult = GetPropertyCondition<T>(property, queryContainer.PropertyInfos, queryContainer.Parameter);
+				var conditionResult = GetPropertyCondition<T>(property, queryContainer.PropertyInfos, queryContainer.Parameter, queryContainer.Options);
 				if (conditionResult.IsFaulty)
 				{
 					return ResponseData<IEnumerable<Expression<Func<T, bool>>>>.CreateFaultyResponse(conditionResult);
@@ -1256,6 +858,36 @@ namespace Eshava.Core.Linq
 			}
 
 			return new ResponseData<IEnumerable<Expression<Func<T, bool>>>>(conditions);
+		}
+
+		private static WhereQueryEngineOptions PrepareOptions(WhereQueryEngineOptions local, WhereQueryEngineOptions global)
+		{
+			if (local is null)
+			{
+				local = new WhereQueryEngineOptions();
+			}
+
+			if (!local.UseUtcDateTime.HasValue)
+			{
+				local.UseUtcDateTime = global.UseUtcDateTime;
+			}
+
+			if (!local.ContainsSearchSplitBySpace.HasValue)
+			{
+				local.ContainsSearchSplitBySpace = global.ContainsSearchSplitBySpace;
+			}
+
+			if (!local.SkipInvalidWhereQueries.HasValue)
+			{
+				local.SkipInvalidWhereQueries = global.SkipInvalidWhereQueries;
+			}
+
+			if (!local.CaseInsensitive.HasValue)
+			{
+				local.CaseInsensitive = global.CaseInsensitive;
+			}
+
+			return local;
 		}
 	}
 }

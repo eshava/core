@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Eshava.Core.Extensions;
+using Eshava.Core.Linq.Constants;
 using Eshava.Core.Linq.Extensions;
 using Eshava.Core.Linq.Interfaces;
 using Eshava.Core.Linq.Models;
@@ -14,16 +15,6 @@ namespace Eshava.Core.Linq
 {
 	public class TransformQueryEngine : ITransformQueryEngine
 	{
-		private static readonly Type _dateTimeType = typeof(DateTime);
-		private static readonly Type _typeObject = typeof(object);
-		private static readonly Type _typeGuid = typeof(Guid);
-		private static readonly Type _typeInt32 = typeof(int);
-
-		private const string METHOD_CONTAINS = "contains";
-		private const string METHOD_ANY = "any";
-		private const string METHOD_COMPARETO = "compareto";
-		private const string METHOD_PARSE = "parse";
-
 		/// <summary>
 		/// Transforms an expression from source to target data type
 		/// </summary>
@@ -71,7 +62,7 @@ namespace Eshava.Core.Linq
 			var sourceType = typeof(Source);
 
 			var mappings = ignoreMappings
-				? default(IMappingExpression)
+				? default
 				: MappingStore.Mappings.FirstOrDefault(m => m.SourceType == sourceType && m.TargetType == targetType);
 
 			var parameterExpression = Expression.Parameter(targetType, "p");
@@ -210,7 +201,7 @@ namespace Eshava.Core.Linq
 
 		private Expression ProcessExpressionlessMemberExpression<Target>(MemberExpression memberExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
-			if (memberExpression.Type == _dateTimeType)
+			if (memberExpression.Type == TypeConstants.DateTime)
 			{
 				var value = GetValueFromDisplayClass(memberExpression.Member, null);
 				var newConstantExpression = Expression.Constant(value, memberExpression.Type);
@@ -283,24 +274,34 @@ namespace Eshava.Core.Linq
 		private Expression ProcessMethodCallExpression<Target>(MethodCallExpression methodCallExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
 			var method = methodCallExpression.Method.Name.ToLower();
-			if (method == METHOD_ANY)
+			if (method == MethodInfoConstants.ANY)
 			{
 				return ProcessMethodCallExpressionAny<Target>(methodCallExpression, mappingExpression, parameterExpression);
 			}
 
-			if (method == METHOD_CONTAINS && methodCallExpression.Arguments.Count == 2)
+			if (method == MethodInfoConstants.CONTAINS && methodCallExpression.Arguments.Count == 2)
 			{
 				return ProcessMethodCallExpressionContainedIn<Target>(methodCallExpression, mappingExpression, parameterExpression);
 			}
 
-			if (method == METHOD_COMPARETO)
+			if (method == MethodInfoConstants.COMPARETO)
 			{
 				return ProcessMethodCallExpressionCompareTo<Target>(methodCallExpression, mappingExpression, parameterExpression);
 			}
 
-			if (method == METHOD_PARSE)
+			if (method == MethodInfoConstants.PARSE)
 			{
 				return ProcessMethodCallExpressionParse<Target>(methodCallExpression, mappingExpression, parameterExpression);
+			}
+
+			if (method == MethodInfoConstants.TOLOWER)
+			{
+				return ProcessMethodCallExpressionToLower<Target>(methodCallExpression, mappingExpression, parameterExpression);
+			}
+
+			if (method == MethodInfoConstants.TOUPPER)
+			{
+				return ProcessMethodCallExpressionToUpper<Target>(methodCallExpression, mappingExpression, parameterExpression);
 			}
 
 			var memberExpression = ProcessExpression<Target>(methodCallExpression.Object, mappingExpression, parameterExpression);
@@ -321,18 +322,7 @@ namespace Eshava.Core.Linq
 				valueExpression = ConvertArrayValuesToTargetDataType(valueExpression, memberExpression.Type);
 			}
 
-			var enumerableMemberMethod = typeof(Enumerable)
-				.GetMethods()
-				.FirstOrDefault(m => m.Name == "Contains"
-					&& m.GetParameters().Length == 2
-					&& m.GetParameters()[0].ParameterType.IsGenericType
-					&& m.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>)
-					&& !m.GetParameters()[1].ParameterType.IsGenericType
-				)
-				.MakeGenericMethod(memberExpression.Type)
-				;
-
-			return Expression.Call(enumerableMemberMethod, valueExpression, memberExpression);
+			return Expression.Call(MethodInfoConstants.GetGenericContains(memberExpression.Type), valueExpression, memberExpression);
 		}
 
 		private Expression ProcessMethodCallExpressionCompareTo<Target>(MethodCallExpression methodCallExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
@@ -341,19 +331,26 @@ namespace Eshava.Core.Linq
 			var valueExpression = ProcessExpression<Target>(methodCallExpression.Arguments.First(), mappingExpression, parameterExpression);
 			var memberExpression = ProcessExpression<Target>(methodCallExpression.Object, mappingExpression, parameterExpression);
 
-			var compareToMethod = memberExpression.Type.GetDataType()
-				.GetMethods()
-				.FirstOrDefault(m => m.Name == "CompareTo"
-					&& m.GetParameters().Length == 1
-					&& !m.GetParameters()[0].ParameterType.IsGenericType
-					&& m.GetParameters()[0].ParameterType != _typeObject
-				)
-				;
-
 			valueExpression = AddValueAccessToNullableProperty(valueExpression);
 			memberExpression = AddValueAccessToNullableProperty(memberExpression);
 
-			return Expression.Call(valueExpression, compareToMethod, memberExpression);
+			return Expression.Call(valueExpression, MethodInfoConstants.GetCompareTo(memberExpression.Type), memberExpression);
+		}
+
+		private Expression ProcessMethodCallExpressionToLower<Target>(MethodCallExpression methodCallExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
+		{
+			var memberExpression = ProcessExpression<Target>(methodCallExpression.Object, mappingExpression, parameterExpression);
+			memberExpression = AddValueAccessToNullableProperty(memberExpression);
+
+			return Expression.Call(memberExpression, MethodInfoConstants.StringToLower);
+		}
+
+		private Expression ProcessMethodCallExpressionToUpper<Target>(MethodCallExpression methodCallExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
+		{
+			var memberExpression = ProcessExpression<Target>(methodCallExpression.Object, mappingExpression, parameterExpression);
+			memberExpression = AddValueAccessToNullableProperty(memberExpression);
+
+			return Expression.Call(memberExpression, MethodInfoConstants.StringToUpper);
 		}
 
 		private Expression ProcessMethodCallExpressionParse<Target>(MethodCallExpression methodCallExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
@@ -362,7 +359,7 @@ namespace Eshava.Core.Linq
 			var valueExpression = ProcessExpression<Target>(methodCallExpression.Arguments.First(), mappingExpression, parameterExpression) as ConstantExpression;
 			object parsedValue;
 
-			if (methodCallExpression.Type == _typeGuid)
+			if (methodCallExpression.Type == TypeConstants.Guid)
 			{
 				parsedValue = Guid.Parse(valueExpression.Value as string);
 			}
@@ -396,17 +393,7 @@ namespace Eshava.Core.Linq
 			var valueArray = GetValueFromDisplayClass(memberExpression.Member, constantExpression);
 			constantExpression = Expression.Constant(valueArray, valueArray.GetType());
 
-			var method = typeof(Enumerable)
-				.GetMethods()
-				.FirstOrDefault(m => m.Name == "Any"
-					&& m.GetParameters().Length == 2
-					&& m.GetParameters()[0].ParameterType.IsGenericType
-					&& m.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>)
-					&& m.GetParameters()[1].ParameterType.IsGenericType
-					&& m.GetParameters()[1].ParameterType.GetGenericTypeDefinition() == typeof(Func<,>)
-				)
-				.MakeGenericMethod(innerType)
-				;
+			var method = MethodInfoConstants.GetGenericAny(innerType);
 
 			return Expression.Call(method, constantExpression, lambdaExpression);
 		}
@@ -431,7 +418,7 @@ namespace Eshava.Core.Linq
 				if (expression.Type.GetDataType() != memberExpression.Type.GetDataType())
 				{
 					object convertedValue;
-					if (memberExpression.Type.GetDataType().IsEnum && expression.Type.GetDataType() == _typeInt32)
+					if (memberExpression.Type.GetDataType().IsEnum && expression.Type.GetDataType() == TypeConstants.Int)
 					{
 						convertedValue = Enum.Parse(memberExpression.Type.GetDataType(), c.Value?.ToString() ?? "");
 					}
