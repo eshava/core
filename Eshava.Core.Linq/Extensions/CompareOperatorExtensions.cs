@@ -175,7 +175,7 @@ namespace Eshava.Core.Linq.Extensions
 				return Expression.OrElse(nullCheckExpression, allMethodCallExpression);
 			}
 
-			throw new NotSupportedException("The data type of the property has to be of type string or must implement 'IList'");
+			throw new NotSupportedException("The data type of the property has to be of type string or must implement 'IEnumerable'");
 		}
 
 		private static Expression GetStartsWithExpression(MemberExpression member, ConstantExpression constant, WhereQueryEngineOptions options)
