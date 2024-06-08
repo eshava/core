@@ -307,7 +307,7 @@ namespace Eshava.Test.Core.Communication.Http
 
 			// Assert
 			task.Result.Successful.Should().BeTrue();
-			task.Result.Result.Should().BeNull();
+			task.Result.Result.Should().BeEmpty();
 		}
 
 		[TestMethod]

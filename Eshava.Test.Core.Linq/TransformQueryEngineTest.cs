@@ -21,7 +21,7 @@ namespace Eshava.Test.Core.Linq
 		{
 			_classUnderTest = new TransformQueryEngine();
 		}
-		
+
 		[TestMethod]
 		public void TransformDomainModelToDataModelTest()
 		{
@@ -167,7 +167,7 @@ namespace Eshava.Test.Core.Linq
 			result.Should().HaveCount(3);
 		}
 
-		
+
 		[TestMethod]
 		public void TransformDomainModelToDataModelWithSubNavigationWithToLowerTest()
 		{
@@ -743,6 +743,31 @@ namespace Eshava.Test.Core.Linq
 
 			result.First().Sub.SubId.Should().Be(0);
 			result.Last().Sub.SubId.Should().Be(5);
+		}
+
+		[TestMethod]
+		public void TransformDomainModelToDataModelWithCompareToNullablePropertyTest()
+		{
+			// Arrange
+			var nullableStuff = 8;
+
+			Expression<Func<DomainModel, bool>> sourcExpression = s => s.NullableStuff == nullableStuff && s.Name == "Test";
+			
+			var list = new List<DataModel>
+			{
+				new DataModel { Id = 1, Name = "Test", NullableStuff = 8 },
+				new DataModel { Id = 2, Name = "Test", NullableStuff = 8 },
+				new DataModel { Id = 3, Name = "Test A", NullableStuff = 9 },
+				new DataModel { Id = 4, Name = "Test", NullableStuff = null }
+			};
+
+			// Act
+			var targetExpression = _classUnderTest.Transform<DomainModel, DataModel>(sourcExpression, true);
+
+			// Assert
+			var result = list.Where(targetExpression.Compile()).ToList();
+
+			result.Should().HaveCount(2);
 		}
 
 		public class TestTransformProfile : TransformProfile
