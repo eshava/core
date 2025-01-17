@@ -22,7 +22,7 @@ namespace Eshava.Test.Core.Logging
 		public void Setup()
 		{
 			_logWriterFake = A.Fake<ILogWriter>();
-			_classUnderTest = new LogEngine("DarkwingDuck", LogLevel.Error, _logWriterFake, ReferenceLoopHandling.Ignore);
+			_classUnderTest = new LogEngine("DarkwingDuck", "1.0.0", LogLevel.Error, _logWriterFake, ReferenceLoopHandling.Ignore);
 		}
 
 		[DataTestMethod]
@@ -52,20 +52,22 @@ namespace Eshava.Test.Core.Logging
 				Beta = 123,
 				Gamma = "Super Hero",
 			};
-			var additionalInformation = new AdditionalInformation
+
+			var additionalInformation = new LogInformationDto
 			{
 				Class = "Villain",
 				Method = "Attack",
+				LineNumber = 666,
 				Message = "DarkwingDuck is late",
 				Information = alpha
 			};
 			var exception = new Exception("MegaVolt is here!", new NotSupportedException("Overload"));
 
 
-			var logEntry = default(LogEntry);
-			A.CallTo(() => _logWriterFake.Write(A<LogEntry>.Ignored)).Invokes(fakeCallObject =>
+			var logEntry = default(LogEntryDto);
+			A.CallTo(() => _logWriterFake.Write(A<LogEntryDto>.Ignored)).Invokes(fakeCallObject =>
 			{
-				logEntry = fakeCallObject.Arguments[0] as LogEntry;
+				logEntry = fakeCallObject.Arguments[0] as LogEntryDto;
 			});
 
 			// Act
@@ -84,14 +86,10 @@ namespace Eshava.Test.Core.Logging
 			logEntry.Process.MemoryUsage.Should().EndWith("MB");
 
 			logEntry.LogLevel.Should().Be(LogLevel.Error.ToString().ToLower());
-			logEntry.ApplicationId.Should().Be("MegaVolt");
 			logEntry.Category.Should().Be("DarkwingDuck");
-			logEntry.Version.Should().BeNull();
+			logEntry.Version.Should().Be("1.0.0");
 
-			logEntry.Message.Message.Should().Be(additionalInformation.Message);
-			logEntry.Message.Class.Should().Be(additionalInformation.Class);
-			logEntry.Message.Method.Should().Be(additionalInformation.Method);
-			logEntry.Additional.Should().BeEquivalentTo(JsonConvert.DeserializeObject<JToken>(JsonConvert.SerializeObject(alpha)));
+			logEntry.Details.Should().BeEquivalentTo(JsonConvert.DeserializeObject<JToken>(JsonConvert.SerializeObject(additionalInformation)));
 
 			logEntry.Exception.Message.Should().Be(exception.Message);
 			logEntry.Exception.StackTrace.Should().Be(exception.StackTrace);
@@ -108,49 +106,17 @@ namespace Eshava.Test.Core.Logging
 			// Arrange
 			var eventId = new EventId(0, "MegaVolt");
 
-			var logEntry = default(LogEntry);
-			A.CallTo(() => _logWriterFake.Write(A<LogEntry>.Ignored)).Invokes(fakeCallObject =>
+			var logEntry = default(LogEntryDto);
+			A.CallTo(() => _logWriterFake.Write(A<LogEntryDto>.Ignored)).Invokes(fakeCallObject =>
 			{
-				logEntry = fakeCallObject.Arguments[0] as LogEntry;
+				logEntry = fakeCallObject.Arguments[0] as LogEntryDto;
 			});
 
 			// Act
-			_classUnderTest.Log(LogLevel.Error, eventId, null, null, null);
+			_classUnderTest.Log<LogInformationDto>(LogLevel.Error, eventId, null, null, null);
 
 			// Assert
-			logEntry.Message.Message.Should().Be("No message");
-			logEntry.Message.Class.Should().BeNull();
-			logEntry.Message.Method.Should().BeNull();
-			logEntry.Additional.Should().BeNull();
-		}
-
-		[TestMethod]
-		public void LogNoAdditionalInformationInformationTest()
-		{
-			// Arrange
-			var eventId = new EventId(0, "MegaVolt");
-			var additionalInformation = new AdditionalInformation
-			{
-				Class = "Villain",
-				Method = "Attack",
-				Message = "DarkwingDuck is late",
-				Information = null
-			};
-
-			var logEntry = default(LogEntry);
-			A.CallTo(() => _logWriterFake.Write(A<LogEntry>.Ignored)).Invokes(fakeCallObject =>
-			{
-				logEntry = fakeCallObject.Arguments[0] as LogEntry;
-			});
-
-			// Act
-			_classUnderTest.Log(LogLevel.Error, eventId, additionalInformation, null, null);
-
-			// Assert
-			logEntry.Message.Message.Should().Be(additionalInformation.Message);
-			logEntry.Message.Class.Should().Be(additionalInformation.Class);
-			logEntry.Message.Method.Should().Be(additionalInformation.Method);
-			logEntry.Additional.Should().BeNull();
+			logEntry.Details.Should().BeNull();
 		}
 
 		[TestMethod]
@@ -163,7 +129,7 @@ namespace Eshava.Test.Core.Logging
 				Beta = 123,
 				Gamma = "Super Hero",
 			};
-			var additionalInformation = new AdditionalInformation
+			var additionalInformation = new LogInformationDto
 			{
 				Class = "Villain",
 				Method = "Attack",
@@ -171,10 +137,10 @@ namespace Eshava.Test.Core.Logging
 				Information = alpha
 			};
 
-			var logEntry = default(LogEntry);
-			A.CallTo(() => _logWriterFake.Write(A<LogEntry>.Ignored)).Invokes(fakeCallObject =>
+			var logEntry = default(LogEntryDto);
+			A.CallTo(() => _logWriterFake.Write(A<LogEntryDto>.Ignored)).Invokes(fakeCallObject =>
 			{
-				logEntry = fakeCallObject.Arguments[0] as LogEntry;
+				logEntry = fakeCallObject.Arguments[0] as LogEntryDto;
 			});
 
 			// Act

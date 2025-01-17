@@ -67,8 +67,8 @@ namespace Eshava.Test.Core.Logging
 					Action = DataRecordAction.Update,
 					DataRecordId = 2,
 					DataRecordParentId = 22,
-					PropertyName = nameof(AdditionalInformation.Message),
-					DataRecordName = nameof(AdditionalInformation),
+					PropertyName = nameof(LogInformationDto.Message),
+					DataRecordName = nameof(LogInformationDto),
 					DataType = typeof(string),
 					LogEntryGroupId = 777,
 					UserId = 919,
@@ -80,8 +80,8 @@ namespace Eshava.Test.Core.Logging
 					Action = DataRecordAction.Update,
 					DataRecordId = 2,
 					DataRecordParentId = 22,
-					PropertyName = nameof(AdditionalInformation.Class),
-					DataRecordName = nameof(AdditionalInformation),
+					PropertyName = nameof(LogInformationDto.Class),
+					DataRecordName = nameof(LogInformationDto),
 					DataType = typeof(string),
 					LogEntryGroupId = 777,
 					UserId = 919,
@@ -113,14 +113,14 @@ namespace Eshava.Test.Core.Logging
 			logForUpdate.Action.Should().Be(DataRecordAction.Update);
 			logForUpdate.DataRecordId.Should().Be(2);
 			logForUpdate.DataRecordParentId.Should().Be(22);
-			logForUpdate.DataRecordName.Should().Be(nameof(AdditionalInformation));
+			logForUpdate.DataRecordName.Should().Be(nameof(LogInformationDto));
 			logForUpdate.LogEntryGroupId.Should().Be(777);
 			logForUpdate.UserId.Should().Be(919);
 			logForUpdate.TimestampUtc.Should().Be(DateTime.Today.AddDays(-1));
-			logForUpdate.Properties[nameof(AdditionalInformation.Message)].Value.Should().Be("222");
-			logForUpdate.Properties[nameof(AdditionalInformation.Message)].Type.Should().Be(FieldValueType.String);
-			logForUpdate.Properties[nameof(AdditionalInformation.Class)].Value.Should().Be("MegaVolt");
-			logForUpdate.Properties[nameof(AdditionalInformation.Class)].Type.Should().Be(FieldValueType.String);
+			logForUpdate.Properties[nameof(LogInformationDto.Message)].Value.Should().Be("222");
+			logForUpdate.Properties[nameof(LogInformationDto.Message)].Type.Should().Be(FieldValueType.String);
+			logForUpdate.Properties[nameof(LogInformationDto.Class)].Value.Should().Be("MegaVolt");
+			logForUpdate.Properties[nameof(LogInformationDto.Class)].Type.Should().Be(FieldValueType.String);
 		}
 
 		[TestMethod]
@@ -160,8 +160,8 @@ namespace Eshava.Test.Core.Logging
 					Action = DataRecordAction.Update,
 					DataRecordId = 2,
 					DataRecordParentId = 22,
-					PropertyName = nameof(AdditionalInformation.Message),
-					DataRecordName = nameof(AdditionalInformation),
+					PropertyName = nameof(LogInformationDto.Message),
+					DataRecordName = nameof(LogInformationDto),
 					DataType = typeof(string),
 					LogEntryGroupId = 777,
 					UserId = 919,
@@ -173,8 +173,8 @@ namespace Eshava.Test.Core.Logging
 					Action = DataRecordAction.Update,
 					DataRecordId = 2,
 					DataRecordParentId = 22,
-					PropertyName = nameof(AdditionalInformation.Class),
-					DataRecordName = nameof(AdditionalInformation),
+					PropertyName = nameof(LogInformationDto.Class),
+					DataRecordName = nameof(LogInformationDto),
 					DataType = typeof(string),
 					LogEntryGroupId = 777,
 					UserId = 919,
@@ -206,14 +206,14 @@ namespace Eshava.Test.Core.Logging
 			logForUpdate.Action.Should().Be(DataRecordAction.Update);
 			logForUpdate.DataRecordId.Should().Be(2);
 			logForUpdate.DataRecordParentId.Should().Be(22);
-			logForUpdate.DataRecordName.Should().Be(nameof(AdditionalInformation));
+			logForUpdate.DataRecordName.Should().Be(nameof(LogInformationDto));
 			logForUpdate.LogEntryGroupId.Should().Be(777);
 			logForUpdate.UserId.Should().Be(919);
 			logForUpdate.TimestampUtc.Should().Be(DateTime.Today.AddDays(-1));
-			logForUpdate.Properties[nameof(AdditionalInformation.Message)].Value.Should().BeNull();
-			logForUpdate.Properties[nameof(AdditionalInformation.Message)].Type.Should().Be(FieldValueType.String);
-			logForUpdate.Properties[nameof(AdditionalInformation.Class)].Value.Should().Be("MegaVolt");
-			logForUpdate.Properties[nameof(AdditionalInformation.Class)].Type.Should().Be(FieldValueType.String);
+			logForUpdate.Properties[nameof(LogInformationDto.Message)].Value.Should().BeNull();
+			logForUpdate.Properties[nameof(LogInformationDto.Message)].Type.Should().Be(FieldValueType.String);
+			logForUpdate.Properties[nameof(LogInformationDto.Class)].Value.Should().Be("MegaVolt");
+			logForUpdate.Properties[nameof(LogInformationDto.Class)].Type.Should().Be(FieldValueType.String);
 		}
 
 		[TestMethod]
@@ -281,10 +281,10 @@ namespace Eshava.Test.Core.Logging
 					DataRecordParentId = 11,
 					PropertyName = nameof(Alpha.Epsilon),
 					DataRecordName = nameof(Alpha),
-					DataType = typeof(AdditionalInformation),
+					DataType = typeof(LogInformationDto),
 					LogEntryGroupId = 888,
 					UserId = 999,
-					Value = new AdditionalInformation { Message = "MegaVolt" },
+					Value = new LogInformationDto { Message = "MegaVolt" },
 					TimestampUtc = DateTime.Today
 				},
 				new DataRecordLogProperty<int>
@@ -335,10 +335,10 @@ namespace Eshava.Test.Core.Logging
 					DataRecordParentId = 11,
 					PropertyName = nameof(Alpha.Epsilon),
 					DataRecordName = nameof(Alpha),
-					DataType = typeof(AdditionalInformation),
+					DataType = typeof(LogInformationDto),
 					LogEntryGroupId = 888,
 					UserId = 999,
-					Value = new AdditionalInformation { Message = "MegaVolt" },
+					Value = new LogInformationDto { Message = "MegaVolt" },
 					TimestampUtc = DateTime.Today
 				}
 			};

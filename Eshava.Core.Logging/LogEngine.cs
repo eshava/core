@@ -11,12 +11,14 @@ namespace Eshava.Core.Logging
 	{
 		private JsonSerializerSettings _jsonSerializerSettings;
 		private readonly string _categoryName;
+		private readonly string _version;
 		private readonly ILogWriter _logWriter;
 		private readonly LogLevel _logLevel;
 
-		public LogEngine(string categoryName, LogLevel logLevel, ILogWriter logWriter, ReferenceLoopHandling referenceLoopHandling)
+		public LogEngine(string categoryName, string version, LogLevel logLevel, ILogWriter logWriter, ReferenceLoopHandling referenceLoopHandling)
 		{
 			_categoryName = categoryName;
+			_version = version;
 			_logWriter = logWriter;
 			_logLevel = logLevel;
 			_jsonSerializerSettings = new() { ReferenceLoopHandling = referenceLoopHandling };
@@ -35,10 +37,10 @@ namespace Eshava.Core.Logging
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <typeparam name="TState"><see cref="AdditionalInformation"/></typeparam>
+		/// <typeparam name="TState"><see cref="LogInformationDto"/></typeparam>
 		/// <param name="logLevel"></param>
-		/// <param name="eventId">Name: <see cref="LogEntry.ApplicationId"/></param>
-		/// <param name="state"><see cref="LogEntry.Additional"/></param>
+		/// <param name="eventId">Name: <see cref="LogEntryDto.ApplicationId"/></param>
+		/// <param name="state"><see cref="LogEntryDto.Additional"/></param>
 		/// <param name="exception"></param>
 		/// <param name="formatter">Not used</param>
 		public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
@@ -48,17 +50,7 @@ namespace Eshava.Core.Logging
 				return;
 			}
 
-			var additionalInformation = state as AdditionalInformation;
-			var logMessage = new LogMessage
-			{
-				Message = additionalInformation?.Message ?? "No message",
-				Class = additionalInformation?.Class,
-				Method = additionalInformation?.Method
-			};
-
-
-
-			var log = new LogEntry
+			var logEntry = new LogEntryDto
 			{
 				Host = new Maschine
 				{
@@ -76,27 +68,26 @@ namespace Eshava.Core.Logging
 					MemoryUsage = $"{Environment.WorkingSet / 1024 / 1024}MB"
 				},
 				LogLevel = logLevel.ToString().ToLower(),
-				ApplicationId = eventId.Name,
 				Category = _categoryName,
-				Message = logMessage,
-				Additional = additionalInformation?.Information == null
+				Details = state == null
 					? null
-					: JsonConvert.DeserializeObject<JToken>(JsonConvert.SerializeObject(additionalInformation?.Information, _jsonSerializerSettings)),
+					: JsonConvert.DeserializeObject<JToken>(JsonConvert.SerializeObject(state, _jsonSerializerSettings)),
 				Exception = ConvertException(exception),
-				TimestampUtc = DateTime.UtcNow
+				TimestampUtc = DateTime.UtcNow,
+				Version = _version
 			};
 
-			_logWriter.Write(log);
+			_logWriter.Write(logEntry);
 		}
 
-		private LogEntryException ConvertException(Exception exception)
+		private LogEntryExceptionDto ConvertException(Exception exception)
 		{
 			if (exception == null)
 			{
 				return null;
 			}
 
-			return new LogEntryException
+			return new LogEntryExceptionDto
 			{
 				Message = exception.Message,
 				StackTrace = exception.StackTrace,

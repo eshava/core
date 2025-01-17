@@ -4,6 +4,6 @@ namespace Eshava.Core.Logging.Interfaces
 {
 	public interface ILogWriter
 	{
-		void Write(LogEntry logEntry);
+		void Write(LogEntryDto logEntry);
 	}
 }

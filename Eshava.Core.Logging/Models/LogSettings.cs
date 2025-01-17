@@ -18,5 +18,7 @@ namespace Eshava.Core.Logging.Models
 		public Dictionary<string, LogLevel> LogLevel { get; set; }
 		public List<string> IgnoredCategories { get; set; }
 		public ReferenceLoopHandling ReferenceLoopHandling{ get; set; }
+
+		public string Version { get; set; }
 	}
 }

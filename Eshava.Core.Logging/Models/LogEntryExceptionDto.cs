@@ -1,9 +1,9 @@
 ﻿namespace Eshava.Core.Logging.Models
 {
-	public class LogEntryException
+	public class LogEntryExceptionDto
 	{
 		public string Message { get; set; }
 		public string StackTrace { get; set; }
-		public LogEntryException InnerException { get; set; }
+		public LogEntryExceptionDto InnerException { get; set; }
 	}
 }

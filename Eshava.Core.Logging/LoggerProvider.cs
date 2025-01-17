@@ -49,7 +49,7 @@ namespace Eshava.Core.Logging
 
 		private LogEngine GenerateLogEngine(string categoryName, LogLevel logLevel)
 		{
-			return new LogEngine(categoryName, logLevel, _logWriter, _logSettings.ReferenceLoopHandling);
+			return new LogEngine(categoryName, _logSettings.Version, logLevel, _logWriter, _logSettings.ReferenceLoopHandling);
 		}
 
 		private LogLevel GetLogLevel(string categoryName)

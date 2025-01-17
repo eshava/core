@@ -10,7 +10,7 @@ namespace Eshava.Test.Core.Logging.Models
 		public int Beta { get; set; }
 		public string Gamma { get; set; }
 		public LogLevel Delta { get; set; }
-		public AdditionalInformation Epsilon { get; set; }
+		public LogInformationDto Epsilon { get; set; }
 		public long Zeta { get; set; }
 		public decimal Eta { get; set; }
 		public float Theta { get; set; }
