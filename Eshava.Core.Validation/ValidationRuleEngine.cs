@@ -16,7 +16,7 @@ namespace Eshava.Core.Validation
 {
 	public class ValidationRuleEngine : IValidationRuleEngine
 	{
-		private static List<(Func<Type, bool> Check, Action<PropertyInfo, ValidationPropertyInfo> SetDataType)> _dataTypeRules =
+		private static readonly List<(Func<Type, bool> Check, Action<PropertyInfo, ValidationPropertyInfo> SetDataType)> _dataTypeRules =
 			new List<(Func<Type, bool> Check, Action<PropertyInfo, ValidationPropertyInfo> SetDataType)>
 		{
 				(type => type.IsNumber(), SetNumberDataType),
@@ -26,7 +26,7 @@ namespace Eshava.Core.Validation
 				(type => type.IsBoolean(), (propertyInfo, validationProperty) => { SetDataTypeAndRule(validationProperty,"boolean");  })
 		};
 
-		private static List<(Func<PropertyInfo, bool> Check, Action<ValidationPropertyInfo> SetDataType)> _dataTypeAttributeRules =
+		private static readonly List<(Func<PropertyInfo, bool> Check, Action<ValidationPropertyInfo> SetDataType)> _dataTypeAttributeRules =
 			new List<(Func<PropertyInfo, bool> Check, Action<ValidationPropertyInfo> SetDataType)>
 		{
 				(propertyInfo => propertyInfo.HasAttribute<TagsAttribute>(), validationProperty => { SetDataTypeAndRule(validationProperty,"tag"); }),
@@ -35,12 +35,12 @@ namespace Eshava.Core.Validation
 		};
 
 
-		public IEnumerable<ValidationPropertyInfo> CalculateValidationRules<T>() where T : class
+		public IEnumerable<ValidationPropertyInfo> CalculateValidationRules<T>(bool produceTreeStructure = false) where T : class
 		{
-			return CalculateValidationRules(typeof(T));
+			return CalculateValidationRules(typeof(T), produceTreeStructure);
 		}
 
-		private IEnumerable<ValidationPropertyInfo> CalculateValidationRules(Type type)
+		private IEnumerable<ValidationPropertyInfo> CalculateValidationRules(Type type, bool produceTreeStructure)
 		{
 			var validationProperties = new List<ValidationPropertyInfo>();
 
@@ -56,7 +56,9 @@ namespace Eshava.Core.Validation
 					var e = propertyInfo.PropertyType.GetDataTypeFromIEnumerable();
 					if (e.IsComplexDataType())
 					{
-						TryAddValidationProperties(validationProperties, CalculateValidationRules(e));
+						var validationRules = MapRules(propertyInfo, CalculateValidationRules(e, produceTreeStructure), produceTreeStructure);
+
+						TryAddValidationProperties(validationProperties, validationRules);
 					}
 					else
 					{
@@ -65,7 +67,9 @@ namespace Eshava.Core.Validation
 				}
 				else if (propertyInfo.PropertyType.IsComplexDataType())
 				{
-					TryAddValidationProperties(validationProperties, CalculateValidationRules(propertyInfo.PropertyType));
+					var validationRules = MapRules(propertyInfo, CalculateValidationRules(propertyInfo.PropertyType, produceTreeStructure), produceTreeStructure);
+
+					TryAddValidationProperties(validationProperties, validationRules);
 				}
 				else
 				{
@@ -74,6 +78,24 @@ namespace Eshava.Core.Validation
 			}
 
 			return validationProperties;
+		}
+
+		private IEnumerable<ValidationPropertyInfo> MapRules(PropertyInfo propertyInfo, IEnumerable<ValidationPropertyInfo> validationRules, bool produceTreeStructure)
+		{
+			if (!produceTreeStructure)
+			{
+				return validationRules;
+			}
+
+			return new List<ValidationPropertyInfo>
+			{
+				new ValidationPropertyInfo
+				{
+					PropertyName = propertyInfo.Name,
+					IsClassContainer = true,
+					Properties = validationRules.ToList()
+				}
+			};
 		}
 
 		private void TryAddValidationProperties(List<ValidationPropertyInfo> validationProperties, IEnumerable<ValidationPropertyInfo> validationPropertiesToAdd)
@@ -144,30 +166,39 @@ namespace Eshava.Core.Validation
 				{
 					case DataType.Password:
 						SetDataTypeAndRule(validationProperty, "string", "Password");
+						
 						break;
 					case DataType.DateTime:
 						SetDataTypeAndRule(validationProperty, "dateTime");
+						
 						break;
 					case DataType.Date:
 						SetDataTypeAndRule(validationProperty, "date");
+						
 						break;
 					case DataType.Time:
 						SetDataTypeAndRule(validationProperty, "time");
+						
 						break;
 					case DataType.MultilineText:
 						SetDataTypeAndRule(validationProperty, "multiline");
+						
 						break;
 					case DataType.EmailAddress:
 						SetDataTypeAndRule(validationProperty, "string", "Email");
+						
 						break;
 					case DataType.Url:
 						SetDataTypeAndRule(validationProperty, "string", "Url");
+						
 						break;
 					case DataType.Custom when propertyInfo.PropertyType.IsGuid():
 						SetDataTypeAndRule(validationProperty, "string", "Guid");
+						
 						break;
 					default:
 						exit = false;
+						
 						break;
 				}
 

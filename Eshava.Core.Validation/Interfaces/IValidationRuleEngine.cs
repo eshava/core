@@ -5,6 +5,6 @@ namespace Eshava.Core.Validation.Interfaces
 {
 	public interface IValidationRuleEngine
 	{
-		IEnumerable<ValidationPropertyInfo> CalculateValidationRules<T>() where T : class;
+		IEnumerable<ValidationPropertyInfo> CalculateValidationRules<T>(bool produceTreeStructure = false) where T : class;
 	}
 }

@@ -8,6 +8,8 @@ namespace Eshava.Core.Validation.Models
 		public string JsonName { get; set; }
 		public string DataType { get; set; }
 		public bool IsDynamicField { get; set; }
+		public bool IsClassContainer { get; set; }
+		public IList<ValidationPropertyInfo> Properties { get; set; }
 		public IList<ValidationRule> Rules { get; set; }
 	}
 }

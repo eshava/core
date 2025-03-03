@@ -206,11 +206,11 @@ namespace Eshava.Test.Core.Validation
 			epsilon.Rules.Should().HaveCount(2);
 			epsilon.Rules.Single(r => r.Rule == "DecimalPlaces").Value.Should().Be(3);
 			epsilon.Rules.SingleOrDefault(r => r.Rule == "Number").Should().NotBeNull();
-			
+
 			var zeta = rules.Single(r => r.PropertyName == nameof(DataTypeProperties.Zeta));
 			zeta.DataType.Should().Be("dateTime");
 			zeta.Rules.Should().HaveCount(0);
-			
+
 			var eta = rules.Single(r => r.PropertyName == nameof(DataTypeProperties.Eta));
 			eta.DataType.Should().Be("select");
 			eta.Rules.Should().HaveCount(1);
@@ -219,7 +219,7 @@ namespace Eshava.Test.Core.Validation
 			var theta = rules.Single(r => r.PropertyName == nameof(DataTypeProperties.Theta));
 			theta.DataType.Should().Be("boolean");
 			theta.Rules.Should().HaveCount(0);
-			
+
 			var iota = rules.Single(r => r.PropertyName == nameof(DataTypeProperties.Iota));
 			iota.DataType.Should().Be("select");
 			iota.Rules.Should().HaveCount(1);
@@ -264,7 +264,7 @@ namespace Eshava.Test.Core.Validation
 			var alpha = rules.Single(r => r.PropertyName == nameof(ComplexData.Alpha));
 			alpha.DataType.Should().Be("string");
 			alpha.Rules.Should().HaveCount(0);
-			
+
 			var beta = rules.Single(r => r.PropertyName == nameof(ComplexData.Beta));
 			beta.DataType.Should().Be("number");
 			beta.Rules.Should().HaveCount(1);
@@ -272,16 +272,92 @@ namespace Eshava.Test.Core.Validation
 
 			var camelCaseNameProperties = rules.Where(r => r.PropertyName == nameof(BasicRules.CamelCaseName));
 			var justAnotherPropertyProperties = rules.Where(r => r.PropertyName == nameof(BasicRules.JustAnotherProperty));
-			
+
 			camelCaseNameProperties.Should().HaveCount(1);
 			camelCaseNameProperties.Single().DataType.Should().Be("string");
 			camelCaseNameProperties.Single().Rules.Should().HaveCount(1);
 			camelCaseNameProperties.Single().Rules.Single().Rule.Should().Be("Required");
-			
+
 			justAnotherPropertyProperties.Should().HaveCount(1);
 			justAnotherPropertyProperties.Single().DataType.Should().Be("string");
 			justAnotherPropertyProperties.Single().Rules.Should().HaveCount(1);
 			justAnotherPropertyProperties.Single().Rules.Single().Rule.Should().Be("Custom");
+
+			var epsilon = rules.Single(r => r.PropertyName == nameof(ComplexData.Epsilon));
+			epsilon.DataType.Should().Be("string");
+			epsilon.Rules.Should().HaveCount(1);
+			epsilon.Rules.SingleOrDefault(r => r.Rule == "RegularExpression").Should().NotBeNull();
+			epsilon.Rules.SingleOrDefault(r => r.RegEx == ComplexData.EPSILONFORMAT).Should().NotBeNull();
+
+			var zeta = rules.Single(r => r.PropertyName == nameof(ComplexData.Zeta));
+			zeta.DataType.Should().Be("string");
+			zeta.Rules.Should().HaveCount(1);
+			zeta.Rules.SingleOrDefault(r => r.Rule == "ReadOnly").Should().NotBeNull();
+
+			var eta = rules.Single(r => r.PropertyName == nameof(ComplexData.Eta));
+			eta.DataType.Should().Be("string");
+			eta.Rules.Should().HaveCount(0);
+
+			var primaryColor = rules.Single(r => r.PropertyName == nameof(ComplexData.PrimaryColor));
+			primaryColor.DataType.Should().Be("select");
+			primaryColor.Rules.Should().HaveCount(1);
+			primaryColor.Rules.SingleOrDefault(r => r.Rule == "Number").Should().NotBeNull();
+
+			var secondaryColor = rules.Single(r => r.PropertyName == nameof(ComplexData.SecondaryColor));
+			secondaryColor.DataType.Should().Be("select");
+			secondaryColor.Rules.Should().HaveCount(1);
+			secondaryColor.Rules.SingleOrDefault(r => r.Rule == "Number").Should().NotBeNull();
+
+			var baseColor = rules.Single(r => r.PropertyName == nameof(ComplexData.BaseColor));
+			baseColor.DataType.Should().Be("select");
+			baseColor.Rules.Should().HaveCount(2);
+			baseColor.Rules.SingleOrDefault(r => r.Rule == "Number").Should().NotBeNull();
+			baseColor.Rules.SingleOrDefault(r => r.Rule == "Required").Should().NotBeNull();
+		}
+
+		[TestMethod]
+		public void CalculateValidationRulesComplexDataAsTreeStructureTest()
+		{
+			// Act
+			var rules = _classUnderTest.CalculateValidationRules<ComplexData>(true);
+
+			// Assert
+			rules.Should().HaveCount(10);
+
+			var alpha = rules.Single(r => r.PropertyName == nameof(ComplexData.Alpha));
+			alpha.DataType.Should().Be("string");
+			alpha.Rules.Should().HaveCount(0);
+
+			var beta = rules.Single(r => r.PropertyName == nameof(ComplexData.Beta));
+			beta.DataType.Should().Be("number");
+			beta.Rules.Should().HaveCount(1);
+			beta.Rules.SingleOrDefault(r => r.Rule == "Number").Should().NotBeNull();
+
+			var gammeRules = rules.First(r => r.IsClassContainer && r.PropertyName == nameof(ComplexData.Gamma));
+			var gammaCamelCaseNameProperties = gammeRules.Properties.Where(r => r.PropertyName == nameof(BasicRules.CamelCaseName));
+			var gammaJustAnotherPropertyProperties = gammeRules.Properties.Where(r => r.PropertyName == nameof(BasicRules.JustAnotherProperty));
+			gammaCamelCaseNameProperties.Should().HaveCount(1);
+			gammaCamelCaseNameProperties.Single().DataType.Should().Be("string");
+			gammaCamelCaseNameProperties.Single().Rules.Should().HaveCount(1);
+			gammaCamelCaseNameProperties.Single().Rules.Single().Rule.Should().Be("Required");
+
+			gammaJustAnotherPropertyProperties.Should().HaveCount(1);
+			gammaJustAnotherPropertyProperties.Single().DataType.Should().Be("string");
+			gammaJustAnotherPropertyProperties.Single().Rules.Should().HaveCount(1);
+			gammaJustAnotherPropertyProperties.Single().Rules.Single().Rule.Should().Be("Custom");
+
+			var deltaRules = rules.First(r => r.IsClassContainer && r.PropertyName == nameof(ComplexData.Delta));
+			var deltaCamelCaseNameProperties = deltaRules.Properties.Where(r => r.PropertyName == nameof(BasicRules.CamelCaseName));
+			var deltaJustAnotherPropertyProperties = deltaRules.Properties.Where(r => r.PropertyName == nameof(BasicRules.JustAnotherProperty));
+			deltaCamelCaseNameProperties.Should().HaveCount(1);
+			deltaCamelCaseNameProperties.Single().DataType.Should().Be("string");
+			deltaCamelCaseNameProperties.Single().Rules.Should().HaveCount(1);
+			deltaCamelCaseNameProperties.Single().Rules.Single().Rule.Should().Be("Required");
+
+			deltaJustAnotherPropertyProperties.Should().HaveCount(1);
+			deltaJustAnotherPropertyProperties.Single().DataType.Should().Be("string");
+			deltaJustAnotherPropertyProperties.Single().Rules.Should().HaveCount(1);
+			deltaJustAnotherPropertyProperties.Single().Rules.Single().Rule.Should().Be("Custom");
 
 			var epsilon = rules.Single(r => r.PropertyName == nameof(ComplexData.Epsilon));
 			epsilon.DataType.Should().Be("string");
