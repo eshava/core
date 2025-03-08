@@ -98,9 +98,10 @@ namespace Eshava.Core.Linq
 				{
 					return ProcessExpressionlessMemberExpression<Target>(memberExpression, mappingExpression, parameterExpression);
 				}
-				else if (memberExpression.Expression.NodeType == ExpressionType.Constant)
+
+				if (EndAsDisplayClassConstantExpression<Target>(memberExpression, new List<string>(), out var constantValue, mappingExpression, parameterExpression))
 				{
-					return ProcessDisplayClassConstantExpression<Target>(memberExpression, mappingExpression, parameterExpression);
+					return constantValue;
 				}
 
 				return ProcessMemberExpression<Target>(memberExpression, mappingExpression, parameterExpression);
@@ -124,6 +125,28 @@ namespace Eshava.Core.Linq
 			}
 
 			return expression;
+		}
+
+		private bool EndAsDisplayClassConstantExpression<Target>(Expression expression, List<string> nestedProperties, out Expression constantExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
+		{
+			var memberExpression = expression as MemberExpression;
+			if (memberExpression != default && expression.NodeType == ExpressionType.MemberAccess)
+			{
+				nestedProperties.Add(memberExpression.Member.Name);
+
+				if (memberExpression.Expression.NodeType == ExpressionType.Constant)
+				{
+					constantExpression = ProcessDisplayClassConstantExpression<Target>(memberExpression, nestedProperties, mappingExpression, parameterExpression);
+
+					return true;
+				}
+
+				return EndAsDisplayClassConstantExpression<Target>(memberExpression.Expression, nestedProperties, out constantExpression, mappingExpression, parameterExpression);
+			}
+
+			constantExpression = null;
+
+			return false;
 		}
 
 		private UnaryExpression ProcessUnaryExpressionNot<Target>(UnaryExpression unaryExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
@@ -203,8 +226,8 @@ namespace Eshava.Core.Linq
 		{
 			if (memberExpression.Type == TypeConstants.DateTime)
 			{
-				var value = GetValueFromDisplayClass(memberExpression.Member, null);
-				var newConstantExpression = Expression.Constant(value, memberExpression.Type);
+				(var value, var type) = GetValueFromDisplayClass(memberExpression.Member, null, null);
+				var newConstantExpression = Expression.Constant(value, type);
 
 				return ProcessExpression<Target>(newConstantExpression, mappingExpression, parameterExpression);
 			}
@@ -212,7 +235,7 @@ namespace Eshava.Core.Linq
 			return memberExpression;
 		}
 
-		private Expression ProcessDisplayClassConstantExpression<Target>(MemberExpression memberExpression, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
+		private Expression ProcessDisplayClassConstantExpression<Target>(MemberExpression memberExpression, List<string> nestedProperties, IMappingExpression mappingExpression, params ParameterExpression[] parameterExpression)
 		{
 			var constantExpression = memberExpression.Expression as ConstantExpression;
 			if (constantExpression.Value == default)
@@ -220,8 +243,8 @@ namespace Eshava.Core.Linq
 				return constantExpression;
 			}
 
-			var value = GetValueFromDisplayClass(memberExpression.Member, constantExpression);
-			constantExpression = Expression.Constant(value, memberExpression.Type);
+			(var value, var type) = GetValueFromDisplayClass(memberExpression.Member, nestedProperties, constantExpression);
+			constantExpression = Expression.Constant(value, type);
 
 			return ProcessExpression<Target>(constantExpression, mappingExpression, parameterExpression);
 		}
@@ -390,8 +413,8 @@ namespace Eshava.Core.Linq
 			var lambdaAsQuery = ProcessExpression<Target>(lambdaExpression.Body, mappingExpression, parameterExpressions.ToArray());
 			lambdaExpression = Expression.Lambda(lambdaAsQuery, innerParameterExpression);
 
-			var valueArray = GetValueFromDisplayClass(memberExpression.Member, constantExpression);
-			constantExpression = Expression.Constant(valueArray, valueArray.GetType());
+			(var valueArray, var typeArray) = GetValueFromDisplayClass(memberExpression.Member, null, constantExpression);
+			constantExpression = Expression.Constant(valueArray, typeArray);
 
 			var method = MethodInfoConstants.GetGenericAny(innerType);
 
@@ -500,19 +523,44 @@ namespace Eshava.Core.Linq
 			return targetArray;
 		}
 
-		private object GetValueFromDisplayClass(MemberInfo memberInfo, ConstantExpression constantExpression)
+		private (object Value, Type Type) GetValueFromDisplayClass(MemberInfo memberInfo, List<string> nestedProperties, ConstantExpression constantExpression)
 		{
 			var value = default(object);
+			var type = default(Type);
+
 			if (memberInfo.MemberType == MemberTypes.Field)
 			{
 				value = ((FieldInfo)memberInfo).GetValue(constantExpression?.Value);
+				type = ((FieldInfo)memberInfo).FieldType;
 			}
 			else if (memberInfo.MemberType == MemberTypes.Property)
 			{
 				value = ((PropertyInfo)memberInfo).GetValue(constantExpression?.Value);
+				type = ((PropertyInfo)memberInfo).PropertyType;
 			}
 
-			return value;
+			return GetValueFromObject(value, type, nestedProperties);
+		}
+
+		private (object Value, Type Type) GetValueFromObject(object value, Type type, List<string> nestedProperties)
+		{
+			if ((nestedProperties?.Count ?? 0) == 0)
+			{
+				return (value, type);
+			}
+
+			for (var i = (nestedProperties.Count - 2); i >= 0; i--)
+			{
+				var propertyInfo = type.GetProperty(nestedProperties[i]);
+				type = propertyInfo.PropertyType;
+
+				if (value is not null)
+				{
+					value = propertyInfo.GetValue(value);
+				}
+			}
+
+			return (value, type);
 		}
 	}
 }

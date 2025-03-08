@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Eshava.Core.Extensions;
 using Eshava.Core.Linq;
 using Eshava.Test.Core.Linq.Enums;
 using Eshava.Test.Core.Linq.Models;
@@ -20,6 +19,90 @@ namespace Eshava.Test.Core.Linq
 		public void Setup()
 		{
 			_classUnderTest = new TransformQueryEngine();
+		}
+
+		[TestMethod]
+		public void TransformDomainModelToDataModelWithNullableIntTest()
+		{
+			// Arrange
+			var nullableInt = (int?)5;
+
+			var today = DateTime.Today;
+			Guid? guid = Guid.Parse("3806b952-52ed-45e0-ba7c-ae09dae982ad");
+			Expression<Func<DomainModel, bool>> sourcExpression = s => s.IAmAnInteger == nullableInt;
+
+			var list = new List<DataModel>
+			{
+				new DataModel { IAmAnInteger = 1, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { IAmAnInteger = 5, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { IAmAnInteger = 5, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.Parse("3806b952-52ed-45e0-ba7c-ae09dae982ad") },
+				new DataModel { IAmAnInteger = 5, Name = "Test A", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { IAmAnInteger = 5, Name = "Test", Date = DateTime.Today.AddDays(1), UniqueIdentifer = Guid.NewGuid() }
+			};
+
+			// Act
+			var targetExpression = _classUnderTest.Transform<DomainModel, DataModel>(sourcExpression, true);
+
+			// Assert
+			var result = list.Where(targetExpression.Compile()).ToList();
+
+			result.Should().HaveCount(4);
+		}
+
+		[TestMethod]
+		public void TransformDomainModelToDataModelWithNullableIntWithinAWrapperClassTest()
+		{
+			// Arrange
+			var wrapper = new ContainerWrapper { Wrapper = new Wrapper { IAmAnInteger = 5 } };
+
+			var today = DateTime.Today;
+			Guid? guid = Guid.Parse("3806b952-52ed-45e0-ba7c-ae09dae982ad");
+			Expression<Func<DomainModel, bool>> sourcExpression = s => s.IAmAnInteger == wrapper.Wrapper.IAmAnInteger;
+
+			var list = new List<DataModel>
+			{
+				new DataModel { IAmAnInteger = 1, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { IAmAnInteger = 5, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { IAmAnInteger = 5, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.Parse("3806b952-52ed-45e0-ba7c-ae09dae982ad") },
+				new DataModel { IAmAnInteger = 5, Name = "Test A", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { IAmAnInteger = 5, Name = "Test", Date = DateTime.Today.AddDays(1), UniqueIdentifer = Guid.NewGuid() }
+			};
+
+			// Act
+			var targetExpression = _classUnderTest.Transform<DomainModel, DataModel>(sourcExpression, true);
+
+			// Assert
+			var result = list.Where(targetExpression.Compile()).ToList();
+
+			result.Should().HaveCount(4);
+		}
+
+		[TestMethod]
+		public void TransformDomainModelToDataModelWithNullableIntWithinAWrapperClassWithValueNullTest()
+		{
+			// Arrange
+			var wrapper = new ContainerWrapper { Wrapper = new Wrapper { IAmAnInteger = null } };
+
+			var today = DateTime.Today;
+			Guid? guid = Guid.Parse("3806b952-52ed-45e0-ba7c-ae09dae982ad");
+			Expression<Func<DomainModel, bool>> sourcExpression = s => s.Id == wrapper.Wrapper.IAmAnInteger;
+
+			var list = new List<DataModel>
+			{
+				new DataModel { Id = 1, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { Id = 5, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { Id = 5, Name = "Test", Date = DateTime.Today, UniqueIdentifer = Guid.Parse("3806b952-52ed-45e0-ba7c-ae09dae982ad") },
+				new DataModel { Id = null, Name = "Test A", Date = DateTime.Today, UniqueIdentifer = Guid.NewGuid() },
+				new DataModel { Id = null, Name = "Test", Date = DateTime.Today.AddDays(1), UniqueIdentifer = Guid.NewGuid() }
+			};
+
+			// Act
+			var targetExpression = _classUnderTest.Transform<DomainModel, DataModel>(sourcExpression, true);
+
+			// Assert
+			var result = list.Where(targetExpression.Compile()).ToList();
+
+			result.Should().HaveCount(2);
 		}
 
 		[TestMethod]
@@ -752,7 +835,7 @@ namespace Eshava.Test.Core.Linq
 			var nullableStuff = 8;
 
 			Expression<Func<DomainModel, bool>> sourcExpression = s => s.NullableStuff == nullableStuff && s.Name == "Test";
-			
+
 			var list = new List<DataModel>
 			{
 				new DataModel { Id = 1, Name = "Test", NullableStuff = 8 },
@@ -782,6 +865,18 @@ namespace Eshava.Test.Core.Linq
 					.ForPath(s => s.Sub.Sub, t => t.Sub)
 					;
 			}
+		}
+
+		private class ContainerWrapper
+		{
+			public Wrapper Wrapper { get; set; }
+			public int SomeNumber { get; set; }
+		}
+
+		private class Wrapper
+		{
+			public int? IAmAnInteger { get; set; }
+			public string SomeName { get; set; }
 		}
 	}
 }
