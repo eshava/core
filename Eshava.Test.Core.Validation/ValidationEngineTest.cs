@@ -240,6 +240,44 @@ namespace Eshava.Test.Core.Validation
 		}
 
 		[TestMethod]
+		public void ValidateFlagEnumerationWithDefinedCombinationTest()
+		{
+			// Arrange
+			var source = new FlagEnumerationData
+			{
+				Permission = Permission.Read | Permission.Write
+			};
+
+			// Act
+			var result = _classUnderTest.Validate(source);
+
+			// Assert
+			result.IsValid.Should().BeTrue();
+			result.ValidationErrors.Should().HaveCount(0);
+		}
+
+		[TestMethod]
+		public void ValidateFlagEnumerationWithUndefinedFlagTest()
+		{
+			// Arrange
+			var source = new FlagEnumerationData
+			{
+				Permission = (Permission)9
+			};
+
+			// Act
+			var result = _classUnderTest.Validate(source);
+
+			// Assert
+			result.IsValid.Should().BeFalse();
+			result.ValidationErrors.Should().HaveCount(1);
+			result.ValidationErrors[0].MethodType.Should().Be(ValidationMethodType.Enumeration.ToString());
+			result.ValidationErrors[0].ErrorType.Should().Be(ValidationErrorType.Invalid.ToString());
+			result.ValidationErrors[0].PropertyName.Should().Be(nameof(FlagEnumerationData.Permission));
+			result.ValidationErrors[0].Value.Should().Be("9");
+		}
+
+		[TestMethod]
 		public void ValidationFailsBasedOnCustomValidationMethodTest()
 		{
 			// Arrange
